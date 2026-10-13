@@ -445,7 +445,7 @@ function update(dt){
  else if(IN.amag>.3&&AM==='off'){p.ang=Math.atan2(IN.ay,IN.ax);firing=true;}
  else if(IN.amag>.3&&AM==='full'){const a=Math.atan2(IN.ay,IN.ax);let best=null,bs=1e9;for(const e of G.en){if(e.dead||e.spawn>0)continue;const ea=Math.atan2(e.y-p.y,e.x-p.x),df=Math.abs(((ea-a+9.42)%6.283)-3.14),dd=Math.hypot(e.x-p.x,e.y-p.y);if(dd>560||df>.5||!los(p.x,p.y,e.x,e.y))continue;const sc=df/.5+dd/560;if(sc<bs){bs=sc;best=ea;}}p.ang=best!=null?best:a;firing=true;}
  else if(IN.amag>.3){let a=Math.atan2(IN.ay,IN.ax);let best=null,bs=1e9;for(const e of G.en){if(e.dead||e.spawn>0)continue;const ea=Math.atan2(e.y-p.y,e.x-p.x),df=Math.abs(((ea-a+9.42)%6.283)-3.14);const dd=Math.hypot(e.x-p.x,e.y-p.y);if(dd>520||df>.2||!los(p.x,p.y,e.x,e.y))continue;const sc=df/.2+dd/520;if(sc<bs){bs=sc;best=ea;}}
-  p.ang=best!=null?a+((((best-a)+9.42)%6.283)-3.14)*.6:a;firing=true;}
+  p.ang=best!=null?a+((((best-a)+9.42)%6.283)-3.14)*(S.hero==='heavy'?.612:.6):a;firing=true;}
  else if(IN.fire){firing=true;}
  else if(p.moving>0)p.ang=p.face;
  const rp=G.pw.rapid>0?1.6:1;
@@ -898,7 +898,7 @@ function isBossWave(w){return w===12;}
 function isSwarm(w){return w>0&&w%8===0;}
 function newRun(hero){const H=HEROES[hero];S.hero=hero;S.lvl=1;S.xp=0;S.inv=[];S.nid=0;
  S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):H.shield?makeItem('arm',1,0,H.shield):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
- S.eq.neural=makeBot('medic');const L=H.look();S.look=L;RUN={cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
+ S.eq.neural=makeBot('medic');if(hero==='heavy')S.eq.main.dmg=92;const L=H.look();S.look=L;RUN={cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
 function pstats(){const H=HEROES[S.hero]||HEROES.agile,B=RUN.b,E=S.eq,A={};for(const k of AFF)A[k]=0;let hp=0,armor=0,dmgB=0,crit=0,spd=0,dash=0,slow=0;
  for(const sl of SLOTS){const it=E[sl];if(!it)continue;for(const k in it.aff)A[k]+=it.aff[k];hp+=it.hp||0;armor+=it.armor||0;dmgB+=it.dmgB||0;crit+=it.critB||0;spd+=it.spdB||0;dash+=it.dashB||0;
   if(it.slot==='arm'&&WEAP[it.type].k==='shield'){armor+=WEAP[it.type].armor;slow+=WEAP[it.type].slow||0;}}
