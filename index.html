@@ -450,8 +450,8 @@ function update(dt){
  else if(IN.amag>.3){let a=Math.atan2(IN.ay,IN.ax);let best=null,bs=1e9;for(const e of G.en){if(e.dead||e.spawn>0)continue;const ea=Math.atan2(e.y-p.y,e.x-p.x),df=Math.abs(((ea-a+9.42)%6.283)-3.14);const dd=Math.hypot(e.x-p.x,e.y-p.y);if(dd>520||df>.2||!los(p.x,p.y,e.x,e.y))continue;const sc=df/.2+dd/520;if(sc<bs){bs=sc;best=ea;}}
   p.ang=best!=null?a+((((best-a)+9.42)%6.283)-3.14)*(S.hero==='heavy'?.612:.6):a;firing=true;}
  else if(IN.fire){firing=true;}
- if(IN.noFire)firing=false;
  else if(p.moving>0)p.ang=p.face;
+ if(IN.noFire)firing=false;
  const rp=G.pw.rapid>0?1.6:1;
  for(const [a,key,side] of [[ps.main,'fcd',0],[ps.off,'ocd',ps.main&&ps.main.k==='gun'?-1:0]]){if(!a||a.k!=='gun')continue;p[key]=(p[key]||0)-dt;const su=a.w.spinup?(p[key+'S']=firing?Math.min(1,(p[key+'S']||0)+dt/a.w.spinup):Math.max(0,(p[key+'S']||0)-dt*2),.35+.65*p[key+'S']):1;if(firing&&p[key]<=0){fire(a,side);p[key]+=1/(a.rate*rp*su);if(p[key]<0)p[key]=0;}if(!firing&&p[key]<0)p[key]=0;}
  p.mcd=(p.mcd||0)-dt;p.swing=(p.swing||0)-dt;if(IN.melee){IN.melee=false;doMelee();}
@@ -779,7 +779,7 @@ function pdown(e){auStart();dlog('pdown '+e.pointerId+' '+e.pointerType+' '+Math
  for(const s of[ui.L,ui.R]){const d=Math.hypot(x-s.x,y-s.y);if(s.id==null&&d<ui.grab){s.id=e.pointerId;s.t0=now;s.lm=now;s.sx=x;s.sy=y;s.md=0;s.cen=d<=ui.ring*.4;s.far=d>ui.ring?1:0;stickSet(s,x,y,now);applyIn();try{cv.setPointerCapture(e.pointerId);}catch(_){ }return;}}}
 function pmove(e){if(ui.scr!=='play')return;const now=performance.now();for(const s of[ui.L,ui.R])if(s.id===e.pointerId){s.lm=now;s.md=Math.max(s.md||0,Math.hypot(e.clientX-s.sx,e.clientY-s.sy));stickSet(s,e.clientX,e.clientY,now);applyIn();}}
 function pup(e){dlog(e.type+' '+e.pointerId);for(const s of[ui.L,ui.R])if(s.id===e.pointerId){const tap=e.type==='pointerup'&&isTap(s,performance.now());s.id=null;s.kx=s.ky=0;applyIn();if(tap&&ui.scr==='play'&&G&&G.state==='play'){if(s===ui.L)IN.dash=true;else IN.melee=true;}}}
-const TAP_MS=160,TAP_PX=8;function isTap(s,now){return !!s.cen&&now-s.t0<=TAP_MS&&(s.md||0)<TAP_PX;}
+const TAP_MS=200,TAP_PX=10;function isTap(s,now){return !!s.cen&&now-s.t0<=TAP_MS&&(s.md||0)<TAP_PX;}
 cv.addEventListener('pointerdown',pdown,{passive:false});cv.addEventListener('pointermove',pmove,{passive:true});cv.addEventListener('pointerup',pup);cv.addEventListener('pointercancel',pup);cv.addEventListener('lostpointercapture',pup);
 function resetSticks(){dlog('resetSticks');for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}ui.D.id=null;IN.mx=IN.my=0;IN.amag=0;}
 const ACT=new Set();cv.addEventListener('pointerdown',e=>ACT.add(e.pointerId),{capture:true});for(const ev of['pointerup','pointercancel'])addEventListener(ev,e=>ACT.delete(e.pointerId),{capture:true});let nTouch=0;
