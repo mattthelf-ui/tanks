@@ -40,11 +40,11 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 #hangar .btn.sm,.dbox .btn{min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center}
 @media (orientation:landscape) and (max-height:500px){.det{padding:6px}.dbox{max-height:calc(100vh - 12px);display:flex;flex-direction:column}.dbox .cmp{font-size:11px}.dbox .cmp td,.dbox .cmp th{padding:1px 4px}.dbox .row{position:sticky;bottom:0;background:#0e1430;flex-wrap:nowrap;padding-top:2px}.dbox .btn{margin:3px;font-size:14px;padding:5px 10px}}
 .tt{font-size:min(26vw,150px);letter-spacing:6px}#title{justify-content:center;text-align:center;overflow:hidden}#select,#shop{background:rgba(6,8,20,.94)}#select{justify-content:center}
-.hs{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:820px}.hc{flex:1 1 260px;max-width:340px;border:4px solid #888;border-radius:10px;background:linear-gradient(135deg,#17213f,#0e1430);padding:10px;cursor:pointer;box-sizing:border-box;text-align:center}.hc canvas{width:130px;height:130px}.hc .nm{font-weight:900;font-style:italic;font-size:22px}
+.hs{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:820px}.hc{flex:1 1 230px;max-width:320px;border:4px solid #888;border-radius:10px;background:linear-gradient(135deg,#17213f,#0e1430);padding:10px;cursor:pointer;box-sizing:border-box;text-align:center}.hc canvas{width:130px;height:130px}.hc .nm{font-weight:900;font-style:italic;font-size:22px}
 .sb{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#b9c9e6;margin:3px 0}.sb span{width:66px;text-align:left}.sb i{flex:1;height:8px;background:#05060a;border-radius:4px;overflow:hidden}.sb b{display:block;height:100%}
 .cash{font-weight:900;font-style:italic;font-size:26px;color:#ffd23f;text-shadow:2px 2px 0 #05060a}.sh{width:100%;max-width:980px;font-weight:900;color:#ff7ab8;font-size:12px;letter-spacing:2px;margin:6px 0 2px}
 .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;width:100%;max-width:980px}.sc{border:3px solid #888;border-radius:8px;background:#121a36;padding:8px;cursor:pointer;min-height:44px;position:relative}.sc .nm{font-weight:900;font-size:13px}.sc .ds{font-size:11px;color:#aab8d6}.sc .pr{font-weight:900;color:#ffd23f;font-size:15px;margin-top:3px}.sc.dis{opacity:.42}
-@media (orientation:landscape) and (max-height:500px){#select{justify-content:flex-start}.hc canvas{width:80px;height:80px}.hc{padding:6px}.tt{font-size:min(18vh,120px)}}
+@media (orientation:landscape) and (max-height:500px){#select{justify-content:flex-start}.hc{flex-basis:240px}.hc .ds{font-size:10px}.sb{margin:1px 0}.hc canvas{width:80px;height:80px}.hc{padding:6px}.tt{font-size:min(18vh,120px)}}
 
 @keyframes scrIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}@keyframes glow{0%,100%{box-shadow:0 0 10px var(--rc),inset 0 0 12px rgba(255,255,255,.04)}50%{box-shadow:0 0 22px var(--rc),inset 0 0 18px rgba(255,255,255,.08)}}
 .scr.on>*{animation:scrIn .28s ease-out both}
@@ -384,23 +384,23 @@ function fire(a,side){const p=G.p,ps=G.ps,W=a.w;p.recoil=1;sfx(W.snd,side?.6:1);
 function splash(b,skip){part({k:'ring',x:b.x,y:b.y,life:.3,col:b.col,sz:b.splash});part({k:'star',x:b.x,y:b.y,life:.18,col:b.col,sz:b.splash,a:R()*6});sfx('boom',.5);
  for(const e of G.en){if(e.dead||e.spawn>0||e===skip)continue;if(Math.hypot(e.x-b.x,e.y-b.y)<b.splash+e.r)hitEnemy(e,{dmg:b.dmg*.7,vx:e.x-b.x,vy:e.y-b.y,x:e.x,y:e.y,col:b.col});}}
 // MELEE button: swing equipped melee toward aim (or move dir); no melee -> shield bash; nothing -> basic bash
-function meleeDir(){const p=G.p;return IN.amag>.3?Math.atan2(IN.ay,IN.ax):p.face;}
+function meleeDir(){const p=G.p;if(G.mDir!=null)return G.mDir;return IN.amag>.3?Math.atan2(IN.ay,IN.ax):p.face;}
 function doMelee(){const p=G.p,ps=G.ps;if(p.mcd>0)return;const arms=[ps.main,ps.off].filter(a=>a&&a.k==='melee');let a,o;
  if(!arms.length)arms.push({k:'melee',dmg:BASIC_SWORD.dmg*ps.dm,rate:BASIC_SWORD.rate*ps.rm,w:BASIC_SWORD});
  G.mAlt=(G.mAlt||0)+1;a=arms[G.mAlt%arms.length];o={dmg:a.dmg,range:a.w.range,arc:a.w.arc,kb:a.w.kb,col:a.w.col,cd:1/(a.rate*(G.pw.rapid>0?1.4:1))/(arms.length>1?1.6:1)};
  const dir=meleeDir();p.ang=dir;p.mcd=o.cd;p.swing=.16;p.swingA=dir;p.swingO=o;swing(dir,o);}
 function swing(dir,o){const p=G.p;sfx('saber');part({k:'slash',x:p.x,y:p.y,a:dir,arc:o.arc,r:o.range,life:.18,col:o.col});let hit=0;
  for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d>o.range+e.r)continue;const df=Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-dir+9.42)%6.283)-3.14);if(df>o.arc/2&&d>e.r+p.r)continue;
-  const crit=R()<G.ps.crit;hitEnemy(e,{dmg:o.dmg*(G.pw.dmg>0?1.35:1)*(crit?2:1),crit,vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:o.kb});hit++;}
- for(const b of G.bul){if(b.pl||b.dead)continue;const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>o.range+8)continue;const df=Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-dir+9.42)%6.283)-3.14);if(df<o.arc/2){b.dead=true;burst(b.x,b.y,o.col,4,200,2);}}
+  const crit=R()<G.ps.crit;const md=o.dmg*(G.pw.dmg>0?1.35:1)*(crit?2:1);if(S.hero==='melee')p.hp=Math.min(G.ps.hp,p.hp+md*.05);hitEnemy(e,{dmg:md,crit,vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:o.kb});hit++;}
+ for(const b of G.bul){if(b.pl||b.dead)continue;const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>o.range+8)continue;const df=Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-dir+9.42)%6.283)-3.14);if(df<o.arc/2){if(S.hero==='melee'){b.pl=1;b.vx=Math.cos(dir)*520;b.vy=Math.sin(dir)*520;b.dmg=o.dmg*.5;b.hit=[];b.pierce=0;b.col=o.col;b.life=1;b.lob=0;b.eflame=0;}else b.dead=true;burst(b.x,b.y,o.col,4,200,2);}}
  if(hit){G.hitstop=Math.max(G.hitstop,.04);G.shake=Math.max(G.shake,5);}}
 function shieldArm(){const ps=G.ps;return [ps.main,ps.off].find(a=>a&&a.k==='shield');}
 function ebul(e,a,sp,big){G.bul.push(nb({x:e.x+Math.cos(a)*e.r,y:e.y+Math.sin(a)*e.r,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,dmg:e.dmg,r:big?8:6,life:3,pl:0,col:'#ff3d6e'}));}
-function dash(){const p=G.p;if(p.dcd>0||p.dashT>0)return;let dx=IN.mx,dy=IN.my,m=Math.hypot(dx,dy);if(m<.2){dx=Math.cos(p.face);dy=Math.sin(p.face);m=1;}
+function dash(){const p=G.p;if(p.dcd>0||p.dashT>0)return;let dx=IN.mx,dy=IN.my,m=Math.hypot(dx,dy);if(S.hero==='melee'){let be=null,bd=300;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);const ok=m<.2||Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-Math.atan2(dy,dx)+9.42)%6.283)-3.14)<.7;if(ok&&d<bd){bd=d;be=e;}}if(be){dx=be.x-p.x;dy=be.y-p.y;m=Math.hypot(dx,dy);}p.bash=[];}if(m<.2){dx=Math.cos(p.face);dy=Math.sin(p.face);m=1;}
  p.dx=dx/m;p.dy=dy/m;p.dashT=.17;p.dcd=(G.pw.speed>0?.8:1.3)*(1-G.ps.dash);p.inv=.3;sfx('dash');G.speedT=.25;}
 function hurtPlayer(dmg,x,y){const p=G.p;if(p.inv>0||p.dashT>0||G.state!=='play')return;if(window.__RC&&__RC.god)dmg=0;
  if(G.pw.shield>0&&G.shHits>0){G.shHits--;p.inv=.2;sfx('ehit');part({k:'ring',x:p.x,y:p.y,life:.3,col:'#7affd6',sz:60});addTxt(p.x,p.y-24,'BLOCK','#7affd6',16);if(G.shHits<=0)G.pw.shield=0;return;}
- dmg*=1-G.ps.armor;p.hp-=dmg;p.inv=.45;p.slowT=.25;p.flash=.12;G.shake=Math.max(G.shake,7);G.flashT=.12;sfx('hurt');addTxt(p.x,p.y-20,'-'+Math.round(dmg),'#ff4d6d',18);
+ dmg*=1-G.ps.armor;if(S.hero==='melee'&&(p.swing>0||(p.mcd||0)>0))dmg*=.7;p.hp-=dmg;p.inv=.45;p.slowT=.25;p.flash=.12;G.shake=Math.max(G.shake,7);G.flashT=.12;sfx('hurt');addTxt(p.x,p.y-20,'-'+Math.round(dmg),'#ff4d6d',18);
  if(p.hp<=0){p.hp=0;G.state='dead';G.stT=0;sfx('boom',1.4);burst(p.x,p.y,'#19e3ff',40,420,4);part({k:'ring',x:p.x,y:p.y,life:.6,col:'#fff',sz:120});endRun(false);}}
 function gainXP(n){n=Math.max(1,Math.round(n*(1+G.ps.xp)));S.xp+=n;G.xp+=n;while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;G.lvls++;const old=G.ps.hp;G.ps=pstats();G.p.hp=G.ps.hp;sfx('level');
  G.banner={t:1.6,txt:'LEVEL UP!',sub:'LV '+S.lvl+' · max HP '+old+' → '+G.ps.hp,lv:1};part({k:'ring',x:G.p.x,y:G.p.y,life:.6,col:'#7affd6',sz:140});}}
@@ -434,7 +434,7 @@ function update(dt){
  // movement: velocity set straight from stick (no smoothing)
  if(IN.dash){IN.dash=false;dash();}
  p.dcd-=dt;p.inv-=dt;p.flash-=dt;p.recoil=Math.max(0,p.recoil-dt*10);
- if(p.dashT>0){p.dashT-=dt;moveC(p,p.dx*780*dt,p.dy*780*dt);if(R()<.9)part({k:'ghost',x:p.x,y:p.y,a:p.ang,f:p.face,life:.18});}
+ if(p.dashT>0){p.dashT-=dt;moveC(p,p.dx*780*dt,p.dy*780*dt);if(S.hero==='melee'&&p.bash){for(const e of G.en){if(e.dead||e.spawn>0||p.bash.includes(e))continue;if(Math.hypot(e.x-p.x,e.y-p.y)<e.r+p.r+10){p.bash.push(e);hitEnemy(e,{dmg:20*ps.dm,vx:p.dx,vy:p.dy,x:e.x,y:e.y,col:'#7affd6',melee:1,kb:420});}}if(p.dashT<=0){p.mcd=0;}}if(R()<.9)part({k:'ghost',x:p.x,y:p.y,a:p.ang,f:p.face,life:.18});}
  else{const m=Math.hypot(IN.mx,IN.my);p.moving=m;if(m>0){const sp=ps.spd*(G.pw.speed>0?1.35:1);moveC(p,IN.mx*sp*dt*(p.slowT>0?.45:1),IN.my*sp*dt*(p.slowT>0?.45:1));p.face=Math.atan2(IN.my,IN.mx);}}
  p.slowT=(p.slowT||0)-dt;if(hs)return;
  // aim + fire
@@ -450,6 +450,7 @@ function update(dt){
  const rp=G.pw.rapid>0?1.6:1;
  for(const [a,key,side] of [[ps.main,'fcd',0],[ps.off,'ocd',ps.main&&ps.main.k==='gun'?-1:0]]){if(!a||a.k!=='gun')continue;p[key]=(p[key]||0)-dt;const su=a.w.spinup?(p[key+'S']=firing?Math.min(1,(p[key+'S']||0)+dt/a.w.spinup):Math.max(0,(p[key+'S']||0)-dt*2),.35+.65*p[key+'S']):1;if(firing&&p[key]<=0){fire(a,side);p[key]+=1/(a.rate*rp*su);if(p[key]<0)p[key]=0;}if(!firing&&p[key]<0)p[key]=0;}
  p.mcd=(p.mcd||0)-dt;p.swing=(p.swing||0)-dt;if(IN.melee){IN.melee=false;doMelee();}
+ if(S.hero==='melee'&&p.mcd<=0){let dir=null;if(IN.amag>.3)dir=Math.atan2(IN.ay,IN.ax);else if((S.aim||'soft')!=='off'){const rr=(ps.main&&ps.main.k==='melee'?ps.main.w.range:70)+30;let be=null,bd=rr;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y)-e.r;if(d<bd){bd=d;be=e;}}if(be)dir=Math.atan2(be.y-p.y,be.x-p.x);}if(dir!=null){G.mDir=dir;doMelee();G.mDir=null;}}
  botTick(dt);if(ps.regen&&p.hp<ps.hp)p.hp=Math.min(ps.hp,p.hp+ps.regen*dt);
  // rooms
  // waves -> boss
@@ -468,7 +469,7 @@ function update(dt){
   const st=Math.max(1,Math.ceil(Math.hypot(nx-b.x,ny-b.y)/12)),sx=(nx-b.x)/st,sy=(ny-b.y)/st;
   for(let s=0;s<st&&!b.dead;s++){b.x+=sx;b.y+=sy;if(solidT(Math.floor(b.x/TILE),Math.floor(b.y/TILE))){if(b.bounce>0){b.bounce--;const hx=solidT(Math.floor(b.x/TILE),Math.floor((b.y-sy)/TILE)),hy=solidT(Math.floor((b.x-sx)/TILE),Math.floor(b.y/TILE));b.x-=sx;b.y-=sy;if(hx||!hy)b.vx=-b.vx;if(hy||!hx)b.vy=-b.vy;b.hit.length=0;sfx('disc',.4);break;}b.dead=true;burst(b.x-sx,b.y-sy,b.col,4,160,2);if(b.splash){b.x-=sx;b.y-=sy;splash(b);}break;}
    if(b.pl){for(const e of G.en){if(e.dead||e.spawn>0||b.hit.includes(e))continue;if(Math.hypot(e.x-b.x,e.y-b.y)<e.r+b.r){hitEnemy(e,b);b.hit.push(e);if(b.splash){splash(b,e);b.dead=true;break;}if(b.pierce--<=0){b.dead=true;break;}}}}
-   else if(Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+6&&(G.shA=shieldArm())&&Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-p.ang+9.42)%6.283)-3.14)<G.shA.w.arc/2){b.dead=true;sfx('ehit');burst(b.x,b.y,G.shA.w.col,6,200,2);p.blockT=.12;}
+   else if(Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+6&&(G.shA=shieldArm())&&Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-p.ang+9.42)%6.283)-3.14)<G.shA.w.arc*(S.hero==='melee'?.68:.5)){b.dead=true;sfx('ehit');burst(b.x,b.y,G.shA.w.col,6,200,2);p.blockT=.12;}
    else if(Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r-2&&p.inv<=0&&p.dashT<=0){b.dead=true;hurtPlayer(b.dmg);burst(b.x,b.y,'#ff3d6e',8,220,3);}}
   if(b.life<=0)b.dead=true;}
  {let k=0;for(const b of G.bul){if(b.dead){if(G.bp.length<300)G.bp.push(b);}else G.bul[k++]=b;}G.bul.length=k;}G.en=G.en.filter(e=>!e.dead);
@@ -705,7 +706,7 @@ function drawHUD(t){const c=cx,p=G.p,L=SAFE.l+10,T=SAFE.t+8;
  // HP / XP panel
  c.save();c.transform(1,0,-.2,1,0,0);c.fillStyle='rgba(5,6,10,.75)';c.fillRect(L+8,T,190,36);c.fillStyle='#3dff7a';const hk=p.hp/G.ps.hp;c.fillStyle=hk>.5?'#3dff7a':hk>.25?'#ffd23f':'#ff3d6e';c.fillRect(L+46,T+5,146*hk,13);
  c.strokeStyle=INK;c.lineWidth=2;c.strokeRect(L+46,T+5,146,13);c.restore();
- bigText(S.hero==='heavy'?'HVY':'AGL',L+28,T+17,13,'#fff');c.font='italic 900 12px system-ui';c.fillStyle='#ffd23f';c.textAlign='left';c.fillText('$'+RUN.cash,L+48,T+31);c.font='bold 10px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(p.hp)+'/'+G.ps.hp,L+48,T+12);
+ bigText(({heavy:'HVY',agile:'AGL',melee:'MEL'})[S.hero],L+28,T+17,13,'#fff');c.font='italic 900 12px system-ui';c.fillStyle='#ffd23f';c.textAlign='left';c.fillText('$'+RUN.cash,L+48,T+31);c.font='bold 10px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(p.hp)+'/'+G.ps.hp,L+48,T+12);
  c.textAlign='left';bigText('',0,0,1,'#fff');c.font='italic 900 13px system-ui';c.fillStyle='#ff7ab8';c.textAlign='left';const bw=(S.bestW&&S.bestW[G.d])||0;c.fillText('ROUND '+Math.max(1,G.wave)+(isSwarm(G.wave)?'  ·  SWARM':'')+(S.best?'  ·  BEST '+S.best:''),L+8,T+50);c.fillStyle='#ffd23f';const l2=G.wActive?(G.wLeft>0?'SURVIVE '+Math.ceil(G.wLeft)+'s':'DESTROY THE TITAN'):(G.wave?'':'Wave 1 in '+Math.ceil(G.waveT)+'s');c.fillText(l2,L+8,T+66);
  // power-up timers
  {let px=L+8;const py=T+76;for(const k in PW){const v=G.pw[k];if(!(v>0))continue;const P=PW[k],f=v/P.d;c.fillStyle='rgba(5,6,10,.75)';c.fillRect(px,py,46,30);c.fillStyle=P.c;c.fillRect(px+2,py+24,42*f,4);bigText(P.ic,px+12,py+12,14,P.c);c.font='bold 11px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(v)+'s',px+22,py+16);if(v<3&&Math.floor(t*6)%2){c.strokeStyle=P.c;c.lineWidth=2;c.strokeRect(px,py,46,30);}px+=50;}}
@@ -839,7 +840,7 @@ function showDetail(it,eqSlot){if(it.bt==='medic'&&S.medicNew){S.medicNew=0;save
  const scrXp=Math.round((6+10*it.rar*it.rar)*(1+.3*(it.lv-1)));
  det.innerHTML=`<div class="pn dbox"><div class="nm" style="color:${RAR[it.rar].c};font-size:18px;font-weight:900">${it.name}</div><div class="ds">${ITYPE[it.slot]} · ${RAR[it.rar].n} · Lv${it.lv}${isEq?' · equipped in '+SLOTN[eqSlot]:''}</div><div class="ds" style="margin:4px 0">${itemDesc(it)}</div>
  ${isEq?'':cmpTable(it,eq)}${!isEq&&arm&&S.eq.off?'<div class="ds">vs Off Arm:</div>'+cmpTable(it,S.eq.off):''}
- <div class="row">${isEq?(eqSlot!=='main'?'<span class="btn sm gh" id="dun">UNEQUIP</span>':''):arm?'<span class="btn" id="dem">EQUIP MAIN</span><span class="btn" id="deo">EQUIP OFF</span>':'<span class="btn" id="de">EQUIP</span>'}
+ <div class="row">${isEq?(eqSlot!=='main'?'<span class="btn sm gh" id="dun">UNEQUIP</span>':''):arm&&S.hero==='melee'&&armKind(it)==='gun'?'<span class="st" style="color:#ff3d6e;font-weight:900">GUNS LOCKED · melee bot</span>':arm?'<span class="btn" id="dem">EQUIP MAIN</span><span class="btn" id="deo">EQUIP OFF</span>':'<span class="btn" id="de">EQUIP</span>'}
  ${isEq?'':`<span class="btn sm ${it.lock?'yl':'gh'}" id="dl">${it.lock?'🔒 LOCKED':'🔓 LOCK'}</span><span class="btn sm pk" id="ds" style="${it.lock?'opacity:.35':''}">SCRAP +${scrXp} XP</span>`}<span class="btn sm gh" id="dx">CLOSE</span></div></div>`;
  det.classList.add('on');const eqp=s=>{const i=S.inv.indexOf(it);if(i<0)return;S.inv.splice(i,1);if(S.eq[s])S.inv.push(S.eq[s]);S.eq[s]=it;saveGame();sfx('item');showHangar();};
  $('dx').onclick=()=>{det.classList.remove('on');};
@@ -879,10 +880,13 @@ const HEROES={
  agile:{n:'VOLT RUNNER',sub:'Agile striker',hp:95,armor:.04,spd:285,dash:.45,wpn:'blaster',twin:1,col:'#19e3ff',
   look:()=>({main:null,off:null,chip:{rar:1},neural:null,chest:{rar:1,name:'a'},legs:{rar:1,name:'b'},thrust:{rar:3,name:'c'}}),
   bars:{HP:.35,Armor:.15,Speed:.95,Dash:.95,Firepower:.5},desc:'Fast, short dash cooldown, rapid twin blasters. Fragile.'},
+ melee:{n:'KAGEROU BLADE',sub:'Melee duelist',hp:165,armor:.14,spd:245,dash:.35,wpn:'lsword',shield:'buckler',col:'#c45cff',
+  look:()=>({main:null,off:null,chip:{rar:2},neural:{rar:2},chest:{rar:2,name:'m'},legs:{rar:2,name:'n'},thrust:{rar:2,name:'o'}}),
+  bars:{HP:.65,Armor:.55,Speed:.75,Dash:.8,Firepower:.75},desc:'No guns. Right stick swings. Shield blocks frontal fire, swings reflect bullets, 5% lifesteal, -30% damage while swinging, dash homes in and bashes.'},
  heavy:{n:'IRON BASTION',sub:'Heavy siege tank',hp:230,armor:.28,spd:165,dash:0,wpn:'cannon',col:'#ffb020',
   look:()=>({main:null,off:null,chip:{rar:3},neural:null,chest:{rar:3,name:'zz'},legs:{rar:2,name:'q'},thrust:{rar:0,name:'x'}}),
   bars:{HP:.95,Armor:.85,Speed:.3,Dash:.3,Firepower:.9},desc:'Slow but massive HP and armour. Siege cannon with splash.'}};
-const SHOPW={agile:['smg','blaster','gatling','arc','disc','beam','lsword','ltwin','lwhip'],heavy:['cannon','rail','launcher','hydra','flamer','scatter','paxe','lgreat','tower']};
+const SHOPW={melee:['lsword','lgreat','ltwin','paxe','lwhip','buckler','tower'],agile:['smg','blaster','gatling','arc','disc','beam','lsword','ltwin','lwhip'],heavy:['cannon','rail','launcher','hydra','flamer','scatter','paxe','lgreat','tower']};
 const STATS={dmg:{n:'Damage',ic:'✦',v:.10,f:v=>'+'+Math.round(v*100)+'% damage'},rate:{n:'Fire Rate',ic:'≫',v:.08,f:v=>'+'+Math.round(v*100)+'% attack rate'},hp:{n:'Max HP',ic:'♥',v:20,f:v=>'+'+Math.round(v)+' max HP'},
  spd:{n:'Speed',ic:'➤',v:.05,f:v=>'+'+Math.round(v*100)+'% move speed'},armor:{n:'Armour',ic:'⬢',v:.035,f:v=>'+'+(v*100).toFixed(1)+'% armour'},crit:{n:'Crit',ic:'✸',v:.04,f:v=>'+'+Math.round(v*100)+'% crit chance'},dash:{n:'Dash',ic:'⚡',v:.08,f:v=>'-'+Math.round(v*100)+'% dash cooldown'}};
 const PICKM=[1,1.5,2.2,3.2];
@@ -892,7 +896,7 @@ function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}c
 function isBossWave(w){return w===12;}
 function isSwarm(w){return w>0&&w%8===0;}
 function newRun(hero){const H=HEROES[hero];S.hero=hero;S.lvl=1;S.xp=0;S.inv=[];S.nid=0;
- S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
+ S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):H.shield?makeItem('arm',1,0,H.shield):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
  const L=H.look();S.look=L;RUN={cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
 function pstats(){const H=HEROES[S.hero]||HEROES.agile,B=RUN.b,E=S.eq,A={};for(const k of AFF)A[k]=0;let hp=0,armor=0,dmgB=0,crit=0,spd=0,dash=0,slow=0;
  for(const sl of SLOTS){const it=E[sl];if(!it)continue;for(const k in it.aff)A[k]+=it.aff[k];hp+=it.hp||0;armor+=it.armor||0;dmgB+=it.dmgB||0;crit+=it.critB||0;spd+=it.spdB||0;dash+=it.dashB||0;
@@ -919,11 +923,11 @@ function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wa
 function endRun(win){recBest();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
 function wTier(){const r=G?G.wave:1;return r>=18?3:r>=12?2:r>=6?1:0;}
-function makeOffers(){const own=SHOPW[S.hero],oth=SHOPW[S.hero==='agile'?'heavy':'agile'];const t=wTier(),lv=1+Math.floor((G?G.wave:1)/4);
+function makeOffers(){const own=SHOPW[S.hero],oth=S.hero==='melee'?SHOPW.melee:SHOPW[S.hero==='agile'?'heavy':'agile'];const t=wTier(),lv=1+Math.floor((G?G.wave:1)/4);
  const w=shuffle(own.slice()).slice(0,3).concat([pick(oth)]).map(tp=>{const it=makeItem('arm',lv,Math.min(3,t+(R()<.2?1:0)),tp);return {it,cost:price(70+45*it.rar+(WEAP[tp].k==='gun'?0:-15)),sold:0};});
  const g=shuffle(['chest','legs','thrust','chip','neural']).slice(0,3).map(k=>{const it=makeItem(k,lv,Math.min(3,t+(R()<.25?1:0)));return {it,cost:price(55+40*it.rar),sold:0};});
  return {w,g};}
-function rollPick(){const r=G?G.wave:1;return shuffle(Object.keys(STATS)).slice(0,3).map(k=>{const x=R(),rar=x<.04+.01*r?3:x<.14+.02*r?2:x<.45+.02*r?1:0;return {k,rar,v:STATS[k].v*PICKM[rar]};});}
+function rollPick(){const r=G?G.wave:1;const pool=S.hero==='melee'?['dmg','dmg','rate','rate','hp','hp','armor','armor','spd','crit','dash']:Object.keys(STATS);const ks=[];shuffle(pool.slice()).forEach(k=>{if(ks.length<3&&!ks.includes(k))ks.push(k);});return ks.map(k=>{const x=R(),rar=x<.04+.01*r?3:x<.14+.02*r?2:x<.45+.02*r?1:0;return {k,rar,v:STATS[k].v*PICKM[rar]};});}
 function showLoot(){if(!G)return;G.lootAt=1e9;if(!RUN.picks)RUN.picks=rollPick();
  $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">ROUND ${G.wave} CLEAR</div><div class="sub">CHOOSE ONE UPGRADE</div></div><div class="pk3">${RUN.picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pick="${i}" style="--rc:${c};animation-delay:${i*.08}s"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">+$${G.lastBonus||0} round bonus · cash $${RUN.cash}</div>`;
  show('loot');sfx('level');$('loot').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const o=RUN.picks[+b.dataset.pick];if(!o)return;RUN.b[o.k]+=o.v;RUN.picks=null;const old=G.ps.hp;G.ps=pstats();if(o.k==='hp')G.p.hp+=G.ps.hp-old;sfx('item');showShop();});}
@@ -958,10 +962,10 @@ function showTitle(){G=null;auTrack('hub');$('title').innerHTML=`<canvas id="kar
  <span class="btn yl" id="tg" style="font-size:30px;padding:14px 40px">START GAME ▶</span><div class="row"><span class="btn gh sm" id="tam">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="tmu">${S.mute?'🔇':'🔊'}</span></div><div class="st">${S.best?'Best: round '+S.best+' · ':''}<span id="verl" style="padding:6px">${VER}</span></div>`;
  show('title');drawKeyArt($('kart'));bindVer();
  $('tg').onclick=()=>{auStart();sfx('click');showSelect();};$('tam').onclick=()=>{cycleAim();showTitle();};$('tmu').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();showTitle();};}
-function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class="hc" data-hero="${k}" style="border-color:${H.col}"><canvas id="hc_${k}" width="300" height="300"></canvas><div class="nm" style="color:${H.col}">${H.n}</div><div class="ds">${H.sub} · starts with ${WEAP[H.wpn].n}${H.twin?' x2':''}</div>
+function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class="hc" data-hero="${k}" style="border-color:${H.col}"><canvas id="hc_${k}" width="300" height="300"></canvas><div class="nm" style="color:${H.col}">${H.n}</div><div class="ds">${H.sub} · starts with ${WEAP[H.wpn].n}${H.twin?' x2':''}${H.shield?' + '+WEAP[H.shield].n:''}</div>
  ${Object.entries(H.bars).map(([n,v])=>`<div class="sb"><span>${n}</span><i><b style="width:${v*100}%;background:${H.col}"></b></i></div>`).join('')}<div class="ds" style="margin-top:4px">${H.desc}</div><span class="btn ${k==='agile'?'':'yl'}" style="margin-top:6px">SELECT</span></div>`;};
- $('select').innerHTML=`<div class="ttl" style="font-size:32px">CHOOSE YOUR BOT</div><div class="hs">${c('agile')}${c('heavy')}</div><span class="btn gh sm" id="sb">◀ TITLE</span>`;show('select');
- for(const k of['agile','heavy']){const cv2=$('hc_'+k),g=cv2.getContext('2d'),old=cx;cx=g;try{g.translate(150,160);g.scale(4.2,4.2);const L=HEROES[k].look();L.main=makeItem('arm',1,1,HEROES[k].wpn);L.off=HEROES[k].twin?makeItem('arm',1,1,HEROES[k].wpn):null;drawPlayer(0,0,-1.57,-1.57,false,1,0,1,false,L,k);}finally{cx=old;}}
+ $('select').innerHTML=`<div class="ttl" style="font-size:32px">CHOOSE YOUR BOT</div><div class="hs">${c('agile')}${c('melee')}${c('heavy')}</div><span class="btn gh sm" id="sb">◀ TITLE</span>`;show('select');
+ for(const k of['agile','melee','heavy']){const cv2=$('hc_'+k),g=cv2.getContext('2d'),old=cx;cx=g;try{g.translate(150,160);g.scale(4.2,4.2);const L=HEROES[k].look();L.main=makeItem('arm',1,1,HEROES[k].wpn);L.off=HEROES[k].twin?makeItem('arm',1,1,HEROES[k].wpn):HEROES[k].shield?makeItem('arm',1,1,HEROES[k].shield):null;drawPlayer(0,0,-1.57,-1.57,false,1,0,1,false,L,k);}finally{cx=old;}}
  $('select').querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{sfx('item');startGame(b.dataset.hero);});$('sb').onclick=()=>{sfx('click');showTitle();};}
 function startGame(hero){newRun(hero);for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(1);G.banner={t:1.6,txt:'ROUND 1',sub:HEROES[hero].n+' deployed · survive 45s'};G.waveT=2;show('play');}
 function startPlay(){startGame(S.hero||'agile');}
