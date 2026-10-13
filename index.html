@@ -329,7 +329,7 @@ function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=
  if(isBossWave(w))spawnBoss();
  sfx('warp');G.banner={t:1.1,txt:'WAVE '+w,sub:(isBossWave(w)?'GUARDIAN WAVE · ':'')+'Survive '+G.wDur+'s',boss:isBossWave(w)?1:0};}
 function waveSpawn(){const d=G.d,w=G.wave;let alive=0;for(const e of G.en)if(!e.dead)alive++;if(alive>=ECAP)return;
- const pool=['drone','drone','drone','gunner','gunner','brute'];if(w>=3||d>=2)pool.push('artillery');if(w>=4)pool.push('brute','gunner');if(w>=2)pool.push('dasher','dasher');if(w>=3)pool.push('bomber');if(w>=4)pool.push('splitter','flamer');if(w>=6)pool.push('carrier');if(w>=6||w%4===0)pool.push('warden','warden');if(w>=7)pool.push('brute','artillery','healer','carrier');if(w>=9)pool.push('warden','splitter','bomber');
+ const pool=['gunner','gunner','brute'];if(w>=3||d>=2)pool.push('artillery');if(w>=4)pool.push('brute','gunner');if(w>=2)pool.push('dasher','dasher');if(w>=3)pool.push('bomber');if(w>=4)pool.push('splitter','flamer');if(w>=6)pool.push('carrier');if(w>=6||w%4===0)pool.push('warden','warden');if(w>=7)pool.push('brute','artillery','healer','carrier');if(w>=9)pool.push('warden','splitter','bomber');
  const k=Math.min(G.queue,ECAP-alive,1+Math.floor(w/4));
  for(let n=0;n<k;n++){G.queue--;const t=pick(pool);let x,y;
   if(t==='turret'){const s=freeSpot(G.D.arena,220);x=s.x;y=s.y;}
@@ -357,7 +357,7 @@ function spawnBoss(){G.bossOn=true;const pd=G.D.pads.slice().sort((a,b)=>Math.hy
 function activateRoom(r){r.st=1;
  if(r.kind==='boss'){const b=spawnEnemy('boss',r.cx,r.cy-40,r);b.spawn=1.4;G.boss=b;r.en=1;auTrack('boss');sfx('roar');G.banner={t:2.2,txt:'WARNING',sub:'GUARDIAN UNIT OVERSEER-X',boss:1};G.shake=10;return;}
  const d=G.d,n=Math.min(10,(r.kind==='cache'?2:3)+ri(0,2)+Math.floor(d/2));
- const pool=['drone','drone','gunner','gunner','brute'];if(d>=2||r.kind==='cache')pool.push('turret','turret');if(d>=3)pool.push('brute','drone');
+ const pool=['gunner','gunner','brute'];if(d>=2||r.kind==='cache')pool.push('turret','turret');if(d>=3)pool.push('brute','drone');
  for(let i=0;i<n;i++){const s=freeSpot(r,170);spawnEnemy(r.kind==='cache'&&i<2?'turret':pick(pool),s.x,s.y,r);}r.en=n;sfx('warp');}
 function addTxt(x,y,s,col,sz,life){if(G.txt.length>40)G.txt.shift();G.txt.push({x,y,s,col,sz:sz||16,t:0,life:life||.7,vy:-60});}
 function part(o){if(G.parts.length>=Q.maxParts)G.parts.shift();o.t=0;G.parts.push(o);}
@@ -525,7 +525,7 @@ function updEnemy(e,dt){const p=G.p;e.t+=dt;e.flash-=dt;if(e.spawn>0){e.spawn-=d
  if(mx||my){const m=Math.hypot(mx,my);moveC(e,mx/m*e.spd*dt,my/m*e.spd*dt);}
  if(d<e.r+p.r)hurtPlayer(e.dmg);}
 function bossAI(e,dt,d,ang,ux,uy){const p=G.p,rage=e.hp<e.hpMax*.5;if(rage&&!e.rg){e.rg=1;const s=freeSpot(G.D.arena,80);dropPw(s.x,s.y);addTxt(e.x,e.y-50,'RAGE!','#ff2e88',26,1.2);}e.pT-=dt;e.spin+=dt*(rage?2.4:1.6);e.ang=ang;
- if(e.pT<=0){e.ph=(e.ph+1)%4;e.pT=e.ph===3?1.4:rage?2.6:3.2;e.k=0;if(e.ph===2&&G.en.length<9){for(let i=0;i<(rage?3:2);i++){const s=freeSpot(e.room,90);spawnEnemy('drone',s.x,s.y,null);}sfx('warp');}if(e.ph===3){e.ca=ang;e.tele=.5;}}
+ if(e.pT<=0){e.ph=(e.ph+1)%4;e.pT=e.ph===3?1.4:rage?2.6:3.2;e.k=0;if(e.ph===3){e.ca=ang;e.tele=.5;}}
  e.cd-=dt;
  if(e.ph===0){moveC(e,ux*e.spd*.5*dt,uy*e.spd*.5*dt);if(e.cd<=0){e.cd=rage?.09:.1;ebul(e,e.spin*2,230);ebul(e,e.spin*2+Math.PI,230);if(rage)ebul(e,e.spin*2+Math.PI/2,230);}}
  else if(e.ph===1||e.ph===2){moveC(e,-uy*e.spd*dt*.6,ux*e.spd*dt*.6);if(e.cd<=0){e.cd=rage?.55:.8;for(let k=-2;k<=2;k++)ebul(e,ang+k*.18,320,1);sfx('shoot');}}
@@ -911,7 +911,7 @@ function gainXP(n){if(!G)return;const v=Math.max(1,Math.round(n*(1+.06*G.wave)))
 function recBest(){if(G&&G.wave>(S.best||0)){S.best=G.wave;G.newBest=1;}saveGame();}
 function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=null;const r=G.wave,sw=isSwarm(r);
  G.wDur=45;G.wLeft=45;G.medHealed=0;G.queue=1e9;G.wMul=(1+.1*(r-1)+(r>12?.08*(r-12):0))*(sw?.6:1);G.wDmg=1+.05*(r-1);
- if(sw){ECAP=Math.min(90,40+3*r);G.spI=.1;G.spT=.2;}else{ECAP=Math.min(46,14+r*2);G.spI=Math.max(.22,1.15-.05*r);G.spT=.6;}
+ if(sw){ECAP=Math.min(90,40+3*r);G.spI=.1;G.spT=.2;}else{ECAP=Math.min(46,14+r*2);G.spI=Math.max(.22,1.15-.05*r);G.spT=.6;}ECAP=Math.round(ECAP*1.04);G.spI/=1.04;
  if(isBossWave(r))spawnBoss();
  sfx(sw?'roar':'warp');G.banner=sw?{t:2.6,txt:'⚠ SWARM INCOMING ⚠',sub:'Round '+r+' · overwhelming numbers · survive 45s',boss:1}:isBossWave(r)?{t:2.4,txt:'TITAN SUPER-TANK',sub:'Boss round · destroy it',boss:1}:{t:1.2,txt:'ROUND '+r,sub:'Survive 45s'+(r>12?' · endless':'')};}
 function spawnBoss(){G.bossOn=true;const pd=G.D.pads.slice().sort((a,b)=>Math.hypot(b.x-G.p.x,b.y-G.p.y)-Math.hypot(a.x-G.p.x,a.y-G.p.y))[0];
