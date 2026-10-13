@@ -291,7 +291,7 @@ let G=null;
 const IN={mx:0,my:0,ax:0,ay:0,amag:0,dash:false,fire:false};
 const ETYPES={
  mboss:{hp:542,r:46,spd:38,dmg:20,xp:90,col:'#d9822b'},
- drone:{hp:5,r:9,spd:150,dmg:0,xp:6,col:'#ff2424'},
+ drone:{hp:5,r:9,spd:123,dmg:0,xp:6,col:'#ff2424'},
  gunner:{hp:30,r:14,spd:85,dmg:10,xp:9,col:'#ff8a1f'},
  brute:{hp:75,r:19,spd:70,dmg:20,xp:15,col:'#ff3b3b'},
  turret:{hp:45,r:15,spd:0,dmg:9,xp:11,col:'#ffd23f'},
@@ -333,14 +333,14 @@ function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=
 function waveSpawn(){const d=G.d,w=G.wave;let alive=0;for(const e of G.en)if(!e.dead)alive++;if(alive>=ECAP)return;
  const pool=['gunner','gunner','brute'];if(w>=3||d>=2)pool.push('artillery');if(w>=4)pool.push('brute','gunner');if(w>=2)pool.push('dasher','dasher');if(w>=3)pool.push('bomber');if(w>=4)pool.push('splitter','flamer');if(w>=6)pool.push('carrier');if(w>=6||w%4===0)pool.push('warden','warden');if(w>=7)pool.push('brute','artillery','healer','carrier');if(w>=9)pool.push('warden','splitter','bomber');
  const k=Math.min(G.queue,ECAP-alive,1+Math.floor(w/4));
- let ex=0;const RCAP=ECAP+20,pq=isSwarm(w)?.2:.133;for(let n=0;n<k;n++){G.queue--;const pk=w>=2&&R()<pq,t=pk?'drone':pick(pool);let x,y;
+ let ex=0;const RCAP=ECAP+20,pq=isSwarm(w)?.17:.119;for(let n=0;n<k;n++){G.queue--;const pk=w>=2&&R()<pq,t=pk?'drone':pick(pool);let x,y;
   if(t==='turret'){const s=freeSpot(G.D.arena,220);x=s.x;y=s.y;}
   else if(R()<.5){const pd=pick(G.D.pads);x=pd.x+rnd(-24,24);y=pd.y+rnd(-24,24);}
   else{const s=edgeSpot();x=s.x;y=s.y;}
   if(hitsWall(x,y,20)||Math.hypot(x-G.p.x,y-G.p.y)<(t==='drone'?260:140)){const s=freeSpot(G.D.arena,t==='drone'?300:180);x=s.x;y=s.y;}
   if(t==='warden'&&G.empW!==G.wave){G.empW=G.wave;if(!(G.pw.emp>0)&&!G.drops.some(d=>d.k==='pw'&&d.pw==='emp')){const s=freeSpot(G.D.arena,70);dropPw(s.x,s.y,'emp');G.empCD=6;addTxt(s.x,s.y-24,'BREAKER','#8a7dff',16,1.2);}}
   const e=spawnEnemy(t,x,y,null);e.hp=e.hpMax=t==='drone'?5:e.hp*G.wMul;e.dmg*=G.wDmg;e.spawn=t==='drone'?.8:.7;if(t==='drone')sfx('buzz');
-  if(pk){const m=ri(4,7);for(let j=0;j<m&&alive+k+ex<RCAP;j++){ex++;const a=j*1.257+R()*.5,rr=24+12*Math.floor(j/5),dx=Math.cos(a)*rr,dy=Math.sin(a)*rr,bad=hitsWall(x+dx,y+dy,10);let qx=bad?x:x+dx,qy=bad?y:y+dy;const pd=Math.hypot(qx-G.p.x,qy-G.p.y);if(pd<260){const s=freeSpot(G.D.arena,300);qx=s.x;qy=s.y;}const d2=spawnEnemy('drone',qx,qy,null);d2.hp=d2.hpMax=5;d2.spawn=.8;}}}}
+  if(pk){const m=ri(2,4);for(let j=0;j<m&&alive+k+ex<RCAP;j++){ex++;const a=j*1.257+R()*.5,rr=24+12*Math.floor(j/5),dx=Math.cos(a)*rr,dy=Math.sin(a)*rr,bad=hitsWall(x+dx,y+dy,10);let qx=bad?x:x+dx,qy=bad?y:y+dy;const pd=Math.hypot(qx-G.p.x,qy-G.p.y);if(pd<260){const s=freeSpot(G.D.arena,300);qx=s.x;qy=s.y;}const d2=spawnEnemy('drone',qx,qy,null);d2.hp=d2.hpMax=5;d2.spawn=.8;}}}}
 function edgeSpot(){for(let i=0;i<20;i++){const side=ri(0,3),u=rnd(2,MW-2)*TILE,x=side===0?2*TILE:side===1?(MW-2)*TILE:u,y=side===2?2*TILE:side===3?(MH-2)*TILE:u;if(!hitsWall(x,y,20)&&Math.hypot(x-G.p.x,y-G.p.y)>200)return{x,y};}return freeSpot(G.D.arena,200);}
 function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wave;sfx('clear');
  for(const e of G.en)if(!e.dead){e.noLoot=1;burst(e.x,e.y,e.col,8,220);e.dead=true;}G.bul=G.bul.filter(b=>b.pl);G.drops=G.drops.filter(d=>d.k!=='pw');
@@ -396,6 +396,7 @@ function doMelee(){const p=G.p,ps=G.ps;if(p.mcd>0)return;const arms=[ps.main,ps.
 function swing(dir,o){const p=G.p;sfx('saber');part({k:'slash',x:p.x,y:p.y,a:dir,arc:o.arc,r:o.range,life:.18,col:o.col});let hit=0;
  for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d>o.range+e.r)continue;const df=Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-dir+9.42)%6.283)-3.14);if(df>o.arc/2&&d>e.r+p.r)continue;
   const crit=R()<G.ps.crit;const md=o.dmg*(G.pw.dmg>0?1.35:1)*(crit?2:1);if(S.hero==='melee')p.hp=Math.min(G.ps.hp,p.hp+md*.05);hitEnemy(e,{dmg:md,crit,vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:o.kb});hit++;}
+ for(const e of G.en){if(e.dead||e.spawn>0||e.type!=='drone'||e.hp<=0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d>Math.max(90,o.range+e.r))continue;const df=Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-dir+9.42)%6.283)-3.14);if(df>o.arc/2&&d>e.r+p.r)continue;hitEnemy(e,{dmg:Math.max(10,o.dmg),vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:0});hit++;}
  for(const b of G.bul){if(b.pl||b.dead)continue;const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>o.range+8)continue;const df=Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-dir+9.42)%6.283)-3.14);if(df<o.arc/2){if(S.hero==='melee'){b.pl=1;b.vx=Math.cos(dir)*520;b.vy=Math.sin(dir)*520;b.dmg=o.dmg*.5;b.hit=[];b.pierce=0;b.col=o.col;b.life=1;b.lob=0;b.eflame=0;}else b.dead=true;burst(b.x,b.y,o.col,4,200,2);}}
  if(hit){G.hitstop=Math.max(G.hitstop,.04);G.shake=Math.max(G.shake,5);}}
 function shieldArm(){const ps=G.ps;return [ps.main,ps.off].find(a=>a&&a.k==='shield');}
