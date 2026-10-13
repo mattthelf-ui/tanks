@@ -753,7 +753,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='tanks v13';
+const VER='tanks v14';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -931,7 +931,7 @@ function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wa
  for(const d of G.drops)if(d.k==='xp'){gainXP(d.v);d.dead=true;}G.drops=[];
  const bonus=Math.round((20+G.wave*8+(isBossWave(G.wave)?400:0))*DF().cash);RUN.cash+=bonus;RUN.earned+=bonus;G.lastBonus=bonus;recBest();
  G.state='loot';G.loot=1;G.lootAt=.6;RUN.offers=null;RUN.picks=null;G.banner={t:1,txt:'ROUND '+G.wave+' CLEAR',sub:'+$'+bonus+' bonus'};dlog('roundCleared '+G.wave);}
-function endRun(win){recBest();}
+function endRun(win){recBest();clearRun();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
 function wTier(){const r=G?G.wave:1;return r>=18?3:r>=12?2:r>=6?1:0;}
 function makeOffers(){const own=SHOPW[S.hero],oth=S.hero==='melee'?SHOPW.melee:SHOPW[S.hero==='agile'?'heavy':'agile'];const t=wTier(),lv=1+Math.floor((G?G.wave:1)/4);
@@ -959,7 +959,7 @@ function buy(id){const ps=pstats();let cost=0,ok=false;
  if(ok){RUN.cash-=cost;sfx('item');G.ps=pstats();showShop();}}
 function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),1600);}
 function closeGear(){if(G&&G.state==='loot'){const k=G.p.hp/G.ps.hp;G.ps=pstats();G.p.hp=Math.max(1,Math.min(G.ps.hp,Math.round(G.ps.hp*k)));showShop();}else showTitle();}
-function closeShop(){if(!G||G.state!=='loot')return;G.loot=null;G.ps=pstats();G.p.hp=Math.min(G.p.hp,G.ps.hp);show('play');continueWave();}
+function closeShop(){if(!G||G.state!=='loot')return;G.loot=null;G.ps=pstats();G.p.hp=Math.min(G.p.hp,G.ps.hp);saveRun();show('play');continueWave();}
 // ---- screens ----
 function show(id){dlog('show '+id+(G?' st='+G.state+' w='+G.wave:''));if(id==='play'||ui.scr==='play')resetSticks();ui.scr=id;['hub','hangar','result','pause','loot','title','select','shop'].forEach(s=>{const e=$(s);if(e)e.classList.toggle('on',s===id);});}
 function showHub(){showTitle();}
@@ -972,15 +972,31 @@ function drawKeyArt(cv2){const W2=cv2.width=Math.round(innerWidth*Math.min(2,dev
   g.save();g.translate(W2>H2?sx+W2*.3:sx+22*u,W2>H2?hz-6*u:hz+6*u);g.scale(sc,sc);const ag=HEROES.agile.look();ag.main=makeItem('arm',1,3,'blaster');ag.off=makeItem('arm',1,3,'lsword');drawPlayer(0,0,-1.9,-1.9,false,1,0,1,false,ag,'agile');g.restore();}finally{cx=old;}
  for(let k=0;k<14;k++){const x=R()*W2,y=R()*H2*.6,r=(1+R()*2)*u;g.fillStyle=k%2?'#ffd23f':'#19e3ff';g.globalAlpha=.7;g.beginPath();g.arc(x,y,r,0,6.283);g.fill();}g.globalAlpha=1;}
 function showTitle(){G=null;auTrack('hub');$('title').innerHTML=`<canvas id="kart" style="position:absolute;inset:0;width:100%;height:100%;z-index:-1"></canvas><div style="flex:1"></div><div class="ttl tt">TANKS</div><div class="sub" style="font-size:14px">ANIME ROBO ARENA · SURVIVE THE ROUNDS</div><div style="flex:1.4"></div>
- <span class="btn yl" id="tg" style="font-size:30px;padding:14px 40px">START GAME ▶</span><div class="row"><span class="btn gh sm" id="tam">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="tmu">${S.mute?'🔇':'🔊'}</span></div><div class="st">${S.bestD&&(S.bestD.easy||S.bestD.normal||S.bestD.hard)?'Best: '+['easy','normal','hard'].map(k=>DIFF[k].n[0]+' '+(S.bestD[k]||0)).join(' · ')+' · ':''}<span id="verl" style="padding:6px">${VER}</span></div>`;
+ ${(()=>{const sv=loadRun();return sv?`<span class="btn pk" id="tc" style="font-size:24px;padding:12px 30px">CONTINUE ▶<div style="font-size:12px;font-weight:700">${HEROES[sv.hero].n} · ${DIFF[sv.diff].n} · round ${sv.wave+1}</div></span>`:''})()}<span class="btn yl" id="tg" style="font-size:30px;padding:14px 40px">START GAME ▶</span><div class="row"><span class="btn gh sm" id="tam">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="tmu">${S.mute?'🔇':'🔊'}</span></div><div class="st">${S.bestD&&(S.bestD.easy||S.bestD.normal||S.bestD.hard)?'Best: '+['easy','normal','hard'].map(k=>DIFF[k].n[0]+' '+(S.bestD[k]||0)).join(' · ')+' · ':''}<span id="verl" style="padding:6px">${VER}</span></div>`;
  show('title');drawKeyArt($('kart'));bindVer();
- $('tg').onclick=()=>{auStart();sfx('click');showSelect();};$('tam').onclick=()=>{cycleAim();showTitle();};$('tmu').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();showTitle();};}
+ $('tg').onclick=()=>{auStart();sfx('click');if(loadRun()&&!confirm('Start a new game? Your saved run will be overwritten.'))return;showSelect();};if($('tc'))$('tc').onclick=()=>{auStart();sfx('click');continueRun();};$('tam').onclick=()=>{cycleAim();showTitle();};$('tmu').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();showTitle();};}
 function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class="hc" data-hero="${k}" style="border-color:${H.col}"><canvas id="hc_${k}" width="300" height="300"></canvas><div class="nm" style="color:${H.col}">${H.n}</div><div class="ds">${H.sub} · starts with ${WEAP[H.wpn].n}${H.twin?' x2':''}${H.shield?' + '+WEAP[H.shield].n:''}</div>
  ${Object.entries(H.bars).map(([n,v])=>`<div class="sb"><span>${n}</span><i><b style="width:${v*100}%;background:${H.col}"></b></i></div>`).join('')}<div class="ds" style="margin-top:4px">${H.desc}</div><span class="btn ${k==='agile'?'':'yl'}" style="margin-top:6px">SELECT</span></div>`;};
  $('select').innerHTML=`<div class="ttl" style="font-size:32px">CHOOSE YOUR BOT</div><div class="row" id="dfr">${['easy','normal','hard'].map(k=>`<span class="btn sm ${S.diff===k||(!S.diff&&k==='normal')?'':'gh'}" data-diff="${k}" style="${S.diff===k||(!S.diff&&k==='normal')?'background:'+DIFF[k].col+';color:#111':''}">${DIFF[k].n}${(S.bestD||{})[k]?' · '+S.bestD[k]:''}</span>`).join('')}</div><div class="hs">${c('agile')}${c('melee')}${c('heavy')}</div><span class="btn gh sm" id="sb">◀ TITLE</span>`;show('select');
  for(const k of['agile','melee','heavy']){const cv2=$('hc_'+k),g=cv2.getContext('2d'),old=cx;cx=g;try{g.translate(150,160);g.scale(4.2,4.2);const L=HEROES[k].look();L.main=makeItem('arm',1,1,HEROES[k].wpn);L.off=HEROES[k].twin?makeItem('arm',1,1,HEROES[k].wpn):HEROES[k].shield?makeItem('arm',1,1,HEROES[k].shield):null;drawPlayer(0,0,-1.57,-1.57,false,1,0,1,false,L,k);}finally{cx=old;}}
- $('select').querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{sfx('item');startGame(b.dataset.hero);});$('sb').onclick=()=>{sfx('click');showTitle();};$('select').querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.diff;saveGame();sfx('click');showSelect();});}
-function startGame(hero){newRun(hero);for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(1);G.banner={t:1.6,txt:'ROUND 1',sub:HEROES[hero].n+' deployed · survive 45s'};G.waveT=2;show('play');}
+ $('select').querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{sfx('item');startGame(b.dataset.hero,{pre:1});});$('sb').onclick=()=>{sfx('click');showTitle();};$('select').querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.diff;saveGame();sfx('click');showSelect();});}
+function startGame(hero,o){newRun(hero);for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(1);G.banner={t:1.6,txt:'ROUND 1',sub:HEROES[hero].n+' deployed · survive 45s'};G.waveT=2;
+ if(o&&o.pre){clearRun();G.state='prepick';RUN.pre={i:0,n:7,leg:ri(0,6)};showPrePick();}else show('play');}
+function showPrePick(){const P=RUN.pre;if(!G||!P)return;const leg=P.i===P.leg;let picks=rollPick();if(leg)picks=picks.map(o=>({k:o.k,rar:3,v:STATS[o.k].v*PICKM[3]}));P.cur=picks;
+ $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">SYSTEM BOOT</div><div class="sub">UPGRADE ${P.i+1}/${P.n}${leg?' · <b style="color:#ffd23f">★ GUARANTEED LEGENDARY SET ★</b>':''}</div></div><div class="pk3">${picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pre="${i}" style="--rc:${c};animation-delay:${i*.06}s${leg?';box-shadow:0 0 22px #ffd23f,0 0 4px #fff inset;border-color:#ffd23f':''}"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">${HEROES[S.hero].n} · ${DF().n} · pick ${P.n-P.i} more before round 1</div>`;
+ show('loot');sfx(leg?'level':'item');$('loot').querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const o=P.cur&&P.cur[+b.dataset.pre];if(!o)return;P.cur=null;RUN.b[o.k]+=o.v;G.ps=pstats();G.p.hp=G.ps.hp;P.i++;sfx('item');if(P.i<P.n)showPrePick();else{RUN.pre=null;G.state='play';show('play');}});}
+const RKEY=(typeof TKEY!=='undefined'?TKEY:'tanks')+'_run',RVER=14;
+function saveRun(){try{if(!G)return;localStorage.setItem(RKEY,JSON.stringify({v:RVER,t:Date.now(),hero:S.hero,diff:S.diff||'normal',wave:G.wave,kills:G.kills||0,hpF:Math.max(.05,Math.min(1,G.p.hp/G.ps.hp)),
+ run:{cash:RUN.cash,earned:RUN.earned,b:RUN.b,gMax:RUN.gMax||3,gDmg:RUN.gDmg||1},inv:S.inv,eq:S.eq,lvl:S.lvl,xp:S.xp,nid:S.nid}));}catch(e){}}
+function clearRun(){try{localStorage.removeItem(RKEY);}catch(e){}}
+function loadRun(){let s=null;const raw=(()=>{try{return localStorage.getItem(RKEY);}catch(e){return null;}})();if(!raw)return null;try{s=JSON.parse(raw);}catch(e){s=null;}if(!s||typeof s!=='object'){clearRun();return null;}
+ const num=x=>typeof x==='number'&&isFinite(x);const ok=s.v===RVER&&HEROES[s.hero]&&DIFF[s.diff]&&num(s.wave)&&s.wave>=1&&s.run&&num(s.run.cash)&&s.run.b&&typeof s.run.b==='object'&&Object.values(s.run.b).every(num)&&Array.isArray(s.inv)&&s.eq&&typeof s.eq==='object'&&s.eq.main&&WEAP[s.eq.main.type];
+ if(!ok){clearRun();return null;}return s;}
+function continueRun(){const s=loadRun();if(!s){showTitle();return;}try{S.diff=s.diff;newRun(s.hero);S.inv=s.inv;S.eq=s.eq;S.lvl=s.lvl||1;S.xp=s.xp||0;S.nid=Math.max(s.nid||0,S.nid);
+ RUN.cash=s.run.cash;RUN.earned=s.run.earned||0;Object.assign(RUN.b,s.run.b);RUN.gMax=s.run.gMax;RUN.gDmg=s.run.gDmg;RUN.gren=RUN.gMax;
+ for(const st of[ui.L,ui.R]){st.id=null;st.kx=st.ky=0;}applyIn();startRun(1);G.wave=s.wave;G.cleared=s.wave;G.kills=s.kills||0;G.ps=pstats();G.p.hp=Math.max(1,Math.round(G.ps.hp*(s.hpF||1)));show('play');nextWave();G.banner={t:1.8,txt:'RUN RESUMED',sub:'Round '+G.wave+' · '+DF().n};}
+ catch(e){dlog('continue failed '+e.message);clearRun();showTitle();}}
+
 function startPlay(){startGame(S.hero||'agile');}
 function showResult(){const its=0;$('result').innerHTML=`<div class="ttl" style="font-size:40px">TANK DESTROYED</div><div class="pn" style="min-width:260px;text-align:center"><div class="st">Round reached</div><b style="font-size:40px;font-style:italic">${G.wave}</b>${G.newBest?'<div style="color:#ffd23f;font-weight:900">NEW BEST!</div>':''}
  <div class="st">Cash earned <b style="color:#ffd23f">$${RUN.earned}</b> · Kills <b>${G.kills}</b></div><div class="st">${HEROES[S.hero].n} · <b style="color:${DF().col}">${DF().n}</b> · best ${(S.bestD||{})[S.diff||'normal']||G.wave}</div></div>
