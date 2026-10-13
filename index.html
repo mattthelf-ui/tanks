@@ -217,7 +217,7 @@ const NBOTS={
  raijin:{n:'RAIJIN Thunder Core',d:'Orbit drone · rapid piercing lightning bolts, +8% speed',col:'#ffe23f',spd:.08,fire:{dmg:9,rate:4,spd:1100,pierce:3}},
  hikari:{n:'HIKARI Lumen Unit',d:'Orbit drone · +10% crit, +10% XP, fires bolts',col:'#3fa9ff',crit:.1,xp:.1,fire:{dmg:11,rate:1.8,spd:900}},
  kurogane:{n:'KUROGANE Iron Fang',d:'Orbit drone · heavy shells that splash, +8% damage',col:'#ff8a1f',dmgB:.08,fire:{dmg:24,rate:.9,spd:640,splash:60}}};
-const MEDIC={n:'Standard Medic Bot',d:'Support drone · repairs 1.5 HP/s during runs',col:'#9dff5a',regen:1.5};
+const MEDIC_HPS=.6,MEDIC_DELAY=2,MEDIC_CAP=.25;const MEDIC={n:'Standard Medic Bot',d:'Support drone · repairs 0.6 HP/s when out of combat (2s after a hit) · max 25% of max HP per round',col:'#9dff5a'};
 function botDef(b){return b&&b.bt?(b.bt==='medic'?MEDIC:NBOTS[b.bt]):null;}
 function makeBot(bt){const m=bt==='medic';return {id:++S.nid,slot:'neural',bt,rar:m?0:4,lv:1,name:m?MEDIC.n:NBOTS[bt].n,aff:{},lock:!m};}
 function allItems(){return S.inv.concat(SLOTS.map(s=>S.eq[s]).filter(Boolean));}
@@ -362,7 +362,8 @@ function activateRoom(r){r.st=1;
 function addTxt(x,y,s,col,sz,life){if(G.txt.length>40)G.txt.shift();G.txt.push({x,y,s,col,sz:sz||16,t:0,life:life||.7,vy:-60});}
 function part(o){if(G.parts.length>=Q.maxParts)G.parts.shift();o.t=0;G.parts.push(o);}
 function burst(x,y,col,n,sp,sz){for(let i=0;i<n;i++){const a=R()*6.283,v=sp*rnd(.3,1);part({k:'spark',x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rnd(.2,.45),col,sz:sz||3});}}
-function botTick(dt){const b=activeBot();if(!b){G.bot=null;return;}const d=botDef(b),p=G.p;G.bot=G.bot||{a:0,cd:1};const o=G.bot;o.a+=dt*2.4;o.x=p.x+Math.cos(o.a)*38;o.y=p.y+Math.sin(o.a)*38-10;o.col=d.col;o.cd-=dt;
+function botTick(dt){const b=activeBot();if(!b){G.bot=null;return;}const d=botDef(b),p=G.p;G.bot=G.bot||{a:0,cd:1};const o=G.bot;o.a+=dt*(b.bt==='medic'?1.2:2.4);o.x=p.x+Math.cos(o.a)*(b.bt==='medic'?26:38);o.y=p.y+Math.sin(o.a)*(b.bt==='medic'?26:38)-10;o.col=d.col;o.cd-=dt;
+ if(b.bt==='medic'){const cap=G.ps.hp*MEDIC_CAP;G.medHealed=G.medHealed||0;o.healing=G.state==='play'&&p.hp>0&&p.hp<G.ps.hp&&G.t-(p.hurtT||-99)>=MEDIC_DELAY&&G.medHealed<cap;if(o.healing){const h=Math.min(MEDIC_HPS*dt,cap-G.medHealed,G.ps.hp-p.hp);p.hp+=h;G.medHealed+=h;}return;}
  if(!d.fire||o.cd>0||G.state!=='play')return;let best=null,bd=420;for(const e of G.en){if(e.dead||e.spawn>0)continue;const k=Math.hypot(e.x-o.x,e.y-o.y);if(k<bd){bd=k;best=e;}}if(!best)return;
  const f=d.fire;o.cd=1/f.rate;const an=Math.atan2(best.y-o.y,best.x-o.x);G.bul.push(nb({x:o.x,y:o.y,vx:Math.cos(an)*f.spd,vy:Math.sin(an)*f.spd,dmg:f.dmg*G.ps.dm,crit:false,r:4,life:.9,pl:1,pierce:f.pierce||0,hit:[],col:d.col,rail:!!f.pierce,splash:f.splash||0}));
  if(b.bt==='aiko')for(const q of G.bul)if(!q.pl&&!q.dead&&Math.hypot(q.x-o.x,q.y-o.y)<26){q.dead=true;q.life=0;}}
@@ -400,7 +401,7 @@ function dash(){const p=G.p;if(p.dcd>0||p.dashT>0)return;let dx=IN.mx,dy=IN.my,m
  p.dx=dx/m;p.dy=dy/m;p.dashT=.17;p.dcd=(G.pw.speed>0?.8:1.3)*(1-G.ps.dash);p.inv=.3;sfx('dash');G.speedT=.25;}
 function hurtPlayer(dmg,x,y){const p=G.p;if(p.inv>0||p.dashT>0||G.state!=='play')return;if(window.__RC&&__RC.god)dmg=0;
  if(G.pw.shield>0&&G.shHits>0){G.shHits--;p.inv=.2;sfx('ehit');part({k:'ring',x:p.x,y:p.y,life:.3,col:'#7affd6',sz:60});addTxt(p.x,p.y-24,'BLOCK','#7affd6',16);if(G.shHits<=0)G.pw.shield=0;return;}
- dmg*=1-G.ps.armor;if(S.hero==='melee'&&(p.swing>0||(p.mcd||0)>0))dmg*=.7;p.hp-=dmg;p.inv=.45;p.slowT=.25;p.flash=.12;G.shake=Math.max(G.shake,7);G.flashT=.12;sfx('hurt');addTxt(p.x,p.y-20,'-'+Math.round(dmg),'#ff4d6d',18);
+ p.hurtT=G.t;dmg*=1-G.ps.armor;if(S.hero==='melee'&&(p.swing>0||(p.mcd||0)>0))dmg*=.7;p.hp-=dmg;p.inv=.45;p.slowT=.25;p.flash=.12;G.shake=Math.max(G.shake,7);G.flashT=.12;sfx('hurt');addTxt(p.x,p.y-20,'-'+Math.round(dmg),'#ff4d6d',18);
  if(p.hp<=0){p.hp=0;G.state='dead';G.stT=0;sfx('boom',1.4);burst(p.x,p.y,'#19e3ff',40,420,4);part({k:'ring',x:p.x,y:p.y,life:.6,col:'#fff',sz:120});endRun(false);}}
 function gainXP(n){n=Math.max(1,Math.round(n*(1+G.ps.xp)));S.xp+=n;G.xp+=n;while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;G.lvls++;const old=G.ps.hp;G.ps=pstats();G.p.hp=G.ps.hp;sfx('level');
  G.banner={t:1.6,txt:'LEVEL UP!',sub:'LV '+S.lvl+' · max HP '+old+' → '+G.ps.hp,lv:1};part({k:'ring',x:G.p.x,y:G.p.y,life:.6,col:'#7affd6',sz:140});}}
@@ -675,7 +676,7 @@ function render(){
  const busy=G.en.length>=22;
  for(const q of G.parts){if(busy||q.k!=='ghost')continue;c.globalAlpha=.35*(1-q.t/q.life);if(q.en){c.fillStyle=q.en.col;c.beginPath();c.arc(q.x,q.y,q.en.r,0,6.283);c.fill();}else{c.fillStyle='#19e3ff';c.beginPath();c.arc(q.x,q.y,15,0,6.283);c.fill();}}c.globalAlpha=1;
  for(const e of G.en)if(inV(e.x,e.y,60))drawEnemy(e,t);
- if(G.bot&&G.bot.x!=null&&G.state!=='dead'){const o=G.bot,c=cx;c.save();c.shadowColor=o.col;c.shadowBlur=12;c.fillStyle='#1a2040';c.strokeStyle=o.col;c.lineWidth=2.5;c.beginPath();c.arc(o.x,o.y,8,0,6.283);c.fill();c.stroke();c.fillStyle=o.col;c.beginPath();c.arc(o.x,o.y,3.2,0,6.283);c.fill();c.restore();}
+ if(G.bot&&G.bot.x!=null&&G.state!=='dead'){const o=G.bot,c=cx;c.save();if(o.healing){c.globalAlpha=.35+.25*Math.sin(t*8);c.fillStyle=o.col;c.beginPath();c.arc(o.x,o.y,14,0,6.283);c.fill();c.strokeStyle=o.col;c.lineWidth=2;c.beginPath();c.moveTo(o.x,o.y);c.lineTo(p.x,p.y);c.stroke();c.globalAlpha=1;}c.shadowColor=o.col;c.shadowBlur=12;c.fillStyle='#1a2040';c.strokeStyle=o.col;c.lineWidth=2.5;c.beginPath();c.arc(o.x,o.y,8,0,6.283);c.fill();c.stroke();c.fillStyle=o.col;c.beginPath();c.arc(o.x,o.y,3.2,0,6.283);c.fill();c.restore();}
  if(G.state!=='dead'&&!(p.inv>0&&p.dashT<=0&&Math.floor(t*30)%2))drawPlayer(p.x,p.y,p.ang,p.face,p.flash>0,p.moving,p.recoil,t);
  if(G.pw.shield>0&&G.state!=='dead'){c.strokeStyle='rgba(122,255,214,'+(.5+.3*Math.sin(t*10))+')';c.lineWidth=3;c.beginPath();for(let i=0;i<=6;i++){const a=i*1.047+t;c.lineTo(p.x+Math.cos(a)*24,p.y+Math.sin(a)*24);}c.stroke();}
  if(G.state!=='dead'){drawSaber(p);const sa=shieldArm();if(sa){cx.strokeStyle=sa.w.col;cx.globalAlpha=p.blockT>0?.95:.28;cx.lineWidth=p.blockT>0?6:3;cx.beginPath();cx.arc(p.x,p.y,p.r+10,p.ang-sa.w.arc/2,p.ang+sa.w.arc/2);cx.stroke();cx.globalAlpha=1;if(p.blockT>0)p.blockT-=1/60;}}
@@ -897,7 +898,7 @@ function isBossWave(w){return w===12;}
 function isSwarm(w){return w>0&&w%8===0;}
 function newRun(hero){const H=HEROES[hero];S.hero=hero;S.lvl=1;S.xp=0;S.inv=[];S.nid=0;
  S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):H.shield?makeItem('arm',1,0,H.shield):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
- const L=H.look();S.look=L;RUN={cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
+ S.eq.neural=makeBot('medic');const L=H.look();S.look=L;RUN={cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
 function pstats(){const H=HEROES[S.hero]||HEROES.agile,B=RUN.b,E=S.eq,A={};for(const k of AFF)A[k]=0;let hp=0,armor=0,dmgB=0,crit=0,spd=0,dash=0,slow=0;
  for(const sl of SLOTS){const it=E[sl];if(!it)continue;for(const k in it.aff)A[k]+=it.aff[k];hp+=it.hp||0;armor+=it.armor||0;dmgB+=it.dmgB||0;crit+=it.critB||0;spd+=it.spdB||0;dash+=it.dashB||0;
   if(it.slot==='arm'&&WEAP[it.type].k==='shield'){armor+=WEAP[it.type].armor;slow+=WEAP[it.type].slow||0;}}
@@ -909,7 +910,7 @@ function lookEq(){const L=S.look||{},o={};for(const k of SLOTS)o[k]=S.eq[k]||(k=
 function gainXP(n){if(!G)return;const v=Math.max(1,Math.round(n*(1+.06*G.wave)));RUN.cash+=v;RUN.earned+=v;}
 function recBest(){if(G&&G.wave>(S.best||0)){S.best=G.wave;G.newBest=1;}saveGame();}
 function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=null;const r=G.wave,sw=isSwarm(r);
- G.wDur=45;G.wLeft=45;G.queue=1e9;G.wMul=(1+.1*(r-1)+(r>12?.08*(r-12):0))*(sw?.6:1);G.wDmg=1+.05*(r-1);
+ G.wDur=45;G.wLeft=45;G.medHealed=0;G.queue=1e9;G.wMul=(1+.1*(r-1)+(r>12?.08*(r-12):0))*(sw?.6:1);G.wDmg=1+.05*(r-1);
  if(sw){ECAP=Math.min(90,40+3*r);G.spI=.1;G.spT=.2;}else{ECAP=Math.min(46,14+r*2);G.spI=Math.max(.22,1.15-.05*r);G.spT=.6;}
  if(isBossWave(r))spawnBoss();
  sfx(sw?'roar':'warp');G.banner=sw?{t:2.6,txt:'⚠ SWARM INCOMING ⚠',sub:'Round '+r+' · overwhelming numbers · survive 45s',boss:1}:isBossWave(r)?{t:2.4,txt:'TITAN SUPER-TANK',sub:'Boss round · destroy it',boss:1}:{t:1.2,txt:'ROUND '+r,sub:'Survive 45s'+(r>12?' · endless':'')};}
