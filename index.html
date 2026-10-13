@@ -333,14 +333,15 @@ function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=
 function waveSpawn(){const d=G.d,w=G.wave;let alive=0;for(const e of G.en)if(!e.dead)alive++;if(alive>=ECAP)return;
  const pool=['gunner','gunner','brute'];if(w>=3||d>=2)pool.push('artillery');if(w>=4)pool.push('brute','gunner');if(w>=2)pool.push('dasher','dasher');if(w>=3)pool.push('bomber');if(w>=4)pool.push('splitter','flamer');if(w>=6)pool.push('carrier');if(w>=6||w%4===0)pool.push('warden','warden');if(w>=7)pool.push('brute','artillery','healer','carrier');if(w>=9)pool.push('warden','splitter','bomber');
  const k=Math.min(G.queue,ECAP-alive,1+Math.floor(w/4));
- let ex=0;const RCAP=ECAP+20,pq=isSwarm(w)?.17:.119;for(let n=0;n<k;n++){G.queue--;const pk=w>=2&&R()<pq,t=pk?'drone':pick(pool);let x,y;
+ let ex=0;const RCAP=ECAP+20,pq=isSwarm(w)?.17:.119;for(let n=0;n<k;n++){G.queue--;const DRW=16,roll=w>=2&&R()<pq,pk=roll&&w>=DRW,fill=roll&&w<DRW,t=pk?'drone':pick(pool);let x,y;
   if(t==='turret'){const s=freeSpot(G.D.arena,220);x=s.x;y=s.y;}
   else if(R()<.5){const pd=pick(G.D.pads);x=pd.x+rnd(-24,24);y=pd.y+rnd(-24,24);}
   else{const s=edgeSpot();x=s.x;y=s.y;}
   if(hitsWall(x,y,20)||Math.hypot(x-G.p.x,y-G.p.y)<(t==='drone'?260:140)){const s=freeSpot(G.D.arena,t==='drone'?300:180);x=s.x;y=s.y;}
   if(t==='warden'&&G.empW!==G.wave){G.empW=G.wave;if(!(G.pw.emp>0)&&!G.drops.some(d=>d.k==='pw'&&d.pw==='emp')){const s=freeSpot(G.D.arena,70);dropPw(s.x,s.y,'emp');G.empCD=6;addTxt(s.x,s.y-24,'BREAKER','#8a7dff',16,1.2);}}
   const e=spawnEnemy(t,x,y,null);e.hp=e.hpMax=t==='drone'?5:e.hp*G.wMul;e.dmg*=G.wDmg;e.spawn=t==='drone'?.8:.7;if(t==='drone')e.spd*=DF().ds;if(t==='drone')sfx('buzz');
-  if(pk){const m=ri(DF().pk[0],DF().pk[1]);for(let j=0;j<m&&alive+k+ex<RCAP;j++){ex++;const a=j*1.257+R()*.5,rr=24+12*Math.floor(j/5),dx=Math.cos(a)*rr,dy=Math.sin(a)*rr,bad=hitsWall(x+dx,y+dy,10);let qx=bad?x:x+dx,qy=bad?y:y+dy;const pd=Math.hypot(qx-G.p.x,qy-G.p.y);if(pd<260){const s=freeSpot(G.D.arena,300);qx=s.x;qy=s.y;}const d2=spawnEnemy('drone',qx,qy,null);d2.hp=d2.hpMax=5;d2.spd*=DF().ds;d2.spawn=.8;}}}}
+  if(pk){const m=ri(DF().pk[0],DF().pk[1]);for(let j=0;j<m&&alive+k+ex<RCAP;j++){ex++;const a=j*1.257+R()*.5,rr=24+12*Math.floor(j/5),dx=Math.cos(a)*rr,dy=Math.sin(a)*rr,bad=hitsWall(x+dx,y+dy,10);let qx=bad?x:x+dx,qy=bad?y:y+dy;const pd=Math.hypot(qx-G.p.x,qy-G.p.y);if(pd<260){const s=freeSpot(G.D.arena,300);qx=s.x;qy=s.y;}const d2=spawnEnemy('drone',qx,qy,null);d2.hp=d2.hpMax=5;d2.spd*=DF().ds;d2.spawn=.8;}}
+  if(fill){const m=ri(DF().pk[0],DF().pk[1]);for(let j=0;j<m&&alive+k+ex<RCAP;j++){ex++;const s=R()<.5?edgeSpot():freeSpot(G.D.arena,180);const t2=pick(pool);if(t2==='turret')continue;const e2=spawnEnemy(t2,s.x,s.y,null);e2.hp=e2.hpMax=e2.hp*G.wMul;e2.dmg*=G.wDmg;e2.spawn=.7;}}}}
 function edgeSpot(){for(let i=0;i<20;i++){const side=ri(0,3),u=rnd(2,MW-2)*TILE,x=side===0?2*TILE:side===1?(MW-2)*TILE:u,y=side===2?2*TILE:side===3?(MH-2)*TILE:u;if(!hitsWall(x,y,20)&&Math.hypot(x-G.p.x,y-G.p.y)>200)return{x,y};}return freeSpot(G.D.arena,200);}
 function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wave;sfx('clear');
  for(const e of G.en)if(!e.dead){e.noLoot=1;burst(e.x,e.y,e.col,8,220);e.dead=true;}G.bul=G.bul.filter(b=>b.pl);G.drops=G.drops.filter(d=>d.k!=='pw');
@@ -753,7 +754,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='tanks v14';
+const VER='tanks v15';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
