@@ -64,8 +64,9 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 @media (orientation:landscape) and (max-height:500px){.pcard{min-height:150px;padding:8px}.pic{font-size:36px}.pnm{font-size:19px}}
 
 /* v25 Haywire anime pass */
-#title{background:#07070b}#kart{z-index:-2!important}.kav{position:absolute;inset:0;z-index:-1;display:flex;justify-content:flex-end;align-items:flex-end;pointer-events:none}.kav img{height:100%;max-width:70%;object-fit:cover;object-position:left top;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%);filter:drop-shadow(0 0 30px rgba(255,30,40,.35))}
-@media (orientation:portrait){.kav{align-items:flex-start;justify-content:center}.kav img{height:62%;max-width:100%;width:100%;object-position:center 20%;-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}}
+#title{background:#07070b}#kart{z-index:-2!important}.kav{position:absolute;inset:0;z-index:-1;pointer-events:none}.kav img{width:100%;height:100%;object-fit:cover;object-position:60% 75%}.kav:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,7,11,.55),rgba(7,7,11,0) 35%,rgba(7,7,11,0) 60%,rgba(7,7,11,.75))}
+@media (orientation:portrait){.kav img{object-position:66% 70%}}
+@media (orientation:landscape){#title{align-items:flex-start;padding-left:max(24px,env(safe-area-inset-left))}#title>*:not(.kav):not(canvas){max-width:52vw}#title .tt{font-size:min(15vw,17vh,130px)!important}#title .row{justify-content:flex-start}#title .sub{margin-left:0!important;text-align:left}.kav img{object-position:80% 60%;transform:scale(1.15);transform-origin:85% 60%}.kav:after{background:linear-gradient(90deg,rgba(7,7,11,.8),rgba(7,7,11,.3) 45%,rgba(7,7,11,0) 65%)}}
 .hwlogo{color:#fff;text-shadow:4px 4px 0 #ff1e2e,-2px -2px 0 #111,0 0 26px rgba(255,30,40,.75)!important;letter-spacing:4px}
 .btn{clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);border-radius:2px}.btn.yl{background:linear-gradient(180deg,#fff,#d8dbe2);color:#111;box-shadow:0 0 18px rgba(255,30,40,.55)}.btn.pk{background:#e0162a}
 .ttl{text-shadow:3px 3px 0 #e0162a,-2px -2px 0 #111,0 0 18px rgba(255,30,40,.6)}
@@ -781,7 +782,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='haywire v25';
+const VER='haywire v26';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
