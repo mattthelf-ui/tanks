@@ -935,7 +935,7 @@ function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wa
  for(const e of G.en)if(!e.dead){burst(e.x,e.y,e.col,6,200);e.dead=true;}G.bul=G.bul.filter(b=>b.pl);
  for(const d of G.drops)if(d.k==='xp'){gainXP(d.v);d.dead=true;}G.drops=[];
  const bonus=Math.round((20+G.wave*8+(isBossWave(G.wave)?400:0))*DF().cash);RUN.cash+=bonus;RUN.earned+=bonus;G.lastBonus=bonus;recBest();
- G.state='loot';G.loot=1;G.lootAt=.6;RUN.offers=null;RUN.picks=null;G.banner={t:1,txt:'ROUND '+G.wave+' CLEAR',sub:'+$'+bonus+' bonus'};dlog('roundCleared '+G.wave);}
+ G.state='loot';G.loot=1;G.lootAt=.6;RUN.offers=null;RUN.rr=0;RUN.picks=null;G.banner={t:1,txt:'ROUND '+G.wave+' CLEAR',sub:'+$'+bonus+' bonus'};dlog('roundCleared '+G.wave);}
 function endRun(win){recBest();clearRun();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
 function wTier(){const r=G?G.wave:1;return r>=18?3:r>=12?2:r>=6?1:0;}
@@ -947,18 +947,20 @@ function rollPick(){const r=G?G.wave:1;const pool=S.hero==='melee'?['dmg','dmg',
 function showLoot(){if(!G)return;G.lootAt=1e9;if(!RUN.picks)RUN.picks=rollPick();
  $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">ROUND ${G.wave} CLEAR</div><div class="sub">CHOOSE ONE UPGRADE</div></div><div class="pk3">${RUN.picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pick="${i}" style="--rc:${c};animation-delay:${i*.08}s"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">+$${G.lastBonus||0} round bonus · cash $${RUN.cash}</div>`;
  show('loot');sfx('level');$('loot').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const o=RUN.picks[+b.dataset.pick];if(!o)return;RUN.b[o.k]+=o.v;RUN.picks=null;const old=G.ps.hp;G.ps=pstats();if(o.k==='hp')G.p.hp+=G.ps.hp-old;sfx('item');showShop();});}
+function rrc(){return price(25+15*(RUN.rr||0));}
 function showShop(){if(!G)return;G.lootAt=1e9;if(!RUN.offers)RUN.offers=makeOffers();const ps=pstats(),hp=Math.ceil(G.p.hp);
  const card=(id,o,sub)=>{const it=o.it,col=RAR[it.rar].c,dis=o.sold||RUN.cash<o.cost;return `<div class="sc r${it.rar}${dis?' dis':''}" data-buy="${id}" style="--rc:${col}"><div class="tag">${RAR[it.rar].n}</div><div class="nm" style="color:${col}">${it.name} ${o.sold?'':cmpArrow(it)}</div><div class="ds">${sub}</div><div class="ds">${itemDesc(it)}</div><div class="pr">${o.sold?'✓ IN INVENTORY':'$'+o.cost}</div></div>`;};
  const rc=price(40),fc=price(90),rp=(id,n,d,c)=>`<div class="sc rep${RUN.cash<c||hp>=ps.hp?' dis':''}" data-buy="${id}" style="--rc:#5dff9a"><div class="nm" style="color:#5dff9a">${n}</div><div class="ds">${d}</div><div class="pr">$${c}</div></div>`;
  $('shop').innerHTML=`<div class="hdr row" style="justify-content:space-between"><div class="ttl" style="font-size:30px">SHOP</div><div class="hpb"><i style="width:${100*hp/ps.hp}%"></i><span>HP ${hp}/${ps.hp}</span></div><div class="cash">$${RUN.cash}</div></div>
- <div class="sh">WEAPONS</div><div class="sg">${RUN.offers.w.map((o,i)=>card('w'+i,o,WEAP[o.it.type].k==='gun'?'Gun · Main/Off Arm':WEAP[o.it.type].k==='melee'?'Melee · tap right stick':'Shield · Off Arm')).join('')}</div>
+ <div class="sh row" style="justify-content:space-between">WEAPONS<span class="btn${RUN.cash<rrc()?' dis':''}" data-buy="rr" style="font-size:14px;padding:4px 10px">🎲 REROLL $${rrc()}</span></div><div class="sg">${RUN.offers.w.map((o,i)=>card('w'+i,o,WEAP[o.it.type].k==='gun'?'Gun · Main/Off Arm':WEAP[o.it.type].k==='melee'?'Melee · tap right stick':'Shield · Off Arm')).join('')}</div>
  <div class="sh">ARMOUR &amp; CHIPS</div><div class="sg">${RUN.offers.g.map((o,i)=>card('g'+i,o,ITYPE[o.it.slot])).join('')}</div>
  <div class="sh">GRENADES (${RUN.gMax}/round · dmg x${(RUN.gDmg||1).toFixed(2)})</div><div class="sg">${[['gx','Extra grenade','+1 grenade every round',price(60)],['gd','Bigger boom','Damage +25% & blast radius +15%',price(70)]].map(([id,n,d,c2])=>`<div class="sc rep${RUN.cash<c2?' dis':''}" data-buy="${id}" style="--rc:#ff8a1f"><div class="nm" style="color:#ff8a1f">${n}</div><div class="ds">${d}</div><div class="pr">$${c2}</div></div>`).join('')}</div>
  <div class="sh">REPAIRS</div><div class="sg">${rp('r1','Patch kit','Repair 35% HP',rc)}${rp('r2','Full overhaul','Repair to full HP',fc)}</div>
  <div class="row foot"><span class="btn" id="inv">🛠 INVENTORY${S.inv.length?' ('+S.inv.length+')':''}</span><span class="btn pk" id="nx" style="font-size:22px">NEXT ROUND ${G.wave+1} ▶</span></div>${isSwarm(G.wave+1)?'<div class="warn">⚠ Next round is a SWARM round</div>':isBossWave(G.wave+1)?'<div class="warn">⚠ Next round: TITAN super-tank</div>':''}`;
  show('shop');$('shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));$('nx').onclick=()=>{sfx('click');closeShop();};$('inv').onclick=()=>{sfx('click');IV.inRun=false;IV.f='all';showHangar();};}
 function buy(id){const ps=pstats();let cost=0,ok=false;
- if(/^[wg]\d+$/.test(id)){const o=RUN.offers[id[0]][+id.slice(1)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
+ if(id==='rr'){const c3=rrc();if(RUN.cash<c3)return;cost=c3;RUN.rr=(RUN.rr||0)+1;RUN.offers=makeOffers();ok=true;toast('Shop rerolled');}
+ else if(/^[wg]\d+$/.test(id)){const o=RUN.offers[id[0]][+id.slice(1)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
  else if(id==='gx'||id==='gd'){const c2=price(id==='gx'?60:70);if(RUN.cash<c2)return;cost=c2;if(id==='gx'){RUN.gMax++;RUN.gren++;}else RUN.gDmg=(RUN.gDmg||1)+.25;ok=true;toast(id==='gx'?'+1 grenade per round':'Grenade dmg +25%, radius +15%');}
  else{const full=id==='r2',c=price(full?90:40);if(RUN.cash<c||G.p.hp>=ps.hp)return;cost=c;G.p.hp=full?ps.hp:Math.min(ps.hp,G.p.hp+ps.hp*.35);ok=true;}
  if(ok){RUN.cash-=cost;sfx('item');G.ps=pstats();showShop();}}
