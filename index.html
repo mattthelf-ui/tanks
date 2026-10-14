@@ -958,7 +958,7 @@ function showShop(){if(!G)return;G.lootAt=1e9;if(!RUN.offers)RUN.offers=makeOffe
  <div class="row foot"><span class="btn" id="inv">🛠 INVENTORY${S.inv.length?' ('+S.inv.length+')':''}</span><span class="btn pk" id="nx" style="font-size:22px">NEXT ROUND ${G.wave+1} ▶</span></div>${isSwarm(G.wave+1)?'<div class="warn">⚠ Next round is a SWARM round</div>':isBossWave(G.wave+1)?'<div class="warn">⚠ Next round: TITAN super-tank</div>':''}`;
  show('shop');$('shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));$('nx').onclick=()=>{sfx('click');closeShop();};$('inv').onclick=()=>{sfx('click');IV.inRun=false;IV.f='all';showHangar();};}
 function buy(id){const ps=pstats();let cost=0,ok=false;
- if(id[0]==='w'||id[0]==='g'){const o=RUN.offers[id[0]][+id.slice(1)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
+ if(/^[wg]\d+$/.test(id)){const o=RUN.offers[id[0]][+id.slice(1)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
  else if(id==='gx'||id==='gd'){const c2=price(id==='gx'?60:70);if(RUN.cash<c2)return;cost=c2;if(id==='gx'){RUN.gMax++;RUN.gren++;}else RUN.gDmg=(RUN.gDmg||1)+.25;ok=true;toast(id==='gx'?'+1 grenade per round':'Grenade damage +25%');}
  else{const full=id==='r2',c=price(full?90:40);if(RUN.cash<c||G.p.hp>=ps.hp)return;cost=c;G.p.hp=full?ps.hp:Math.min(ps.hp,G.p.hp+ps.hp*.35);ok=true;}
  if(ok){RUN.cash-=cost;sfx('item');G.ps=pstats();showShop();}}
