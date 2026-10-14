@@ -67,7 +67,7 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 <script>
 'use strict';
 // ---------- procedural anime battle music + sfx (Web Audio) ----------
-const AU={ctx:null,cur:null,want:'hub',step:0,nt:0,muted:false,last:{}};
+const AU={ctx:null,cur:null,want:'hub',step:0,nt:0,muted:false,musOn:true,sfxOn:true,last:{}};
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 const MINOR=[0,2,3,5,7,8,10,12,14,15,17,19],PHRYG=[0,1,3,5,7,8,10,12,13,15,17,19];
 const TRACKS={
@@ -79,22 +79,24 @@ const TRACKS={
 };
 function auCurve(k){const n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i*2/n-1;c[i]=(1+k)*x/(1+k*Math.abs(x));}return c;}
 function auStart(){
+ if(AU.muted)return;
  if(AU.ctx){if(AU.ctx.state!=='running')AU.ctx.resume();return;}
- try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+ try{if(navigator.audioSession)navigator.audioSession.type='ambient';}catch(e){}
  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
  const c=AU.ctx=new C();
  AU.out=c.createDynamicsCompressor();AU.out.threshold.value=-3;AU.out.ratio.value=20;AU.out.attack.value=.002;AU.out.release.value=.1;AU.out.connect(c.destination);
  AU.mg=c.createGain();AU.mg.gain.value=AU.muted?0:1;AU.mg.connect(AU.out);
- AU.mus=c.createGain();AU.mus.gain.value=.25;AU.mus.connect(AU.mg);
- AU.sfx=c.createGain();AU.sfx.gain.value=.55;AU.sfx.connect(AU.mg);
+ AU.mus=c.createGain();AU.mus.gain.value=AU.musOn?.25:0;AU.mus.connect(AU.mg);
+ AU.sfx=c.createGain();AU.sfx.gain.value=AU.sfxOn?.55:0;AU.sfx.connect(AU.mg);
  const nb=c.createBuffer(1,c.sampleRate,c.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;AU.nb=nb;
  AU.dist=c.createWaveShaper();AU.dist.curve=auCurve(40);const gl=c.createBiquadFilter();gl.type='lowpass';gl.frequency.value=2600;AU.dist.connect(gl);gl.connect(AU.mus);
  AU.dly=c.createDelay();AU.dly.delayTime.value=60/152*.75;const fb=c.createGain();fb.gain.value=.3;AU.dly.connect(fb);fb.connect(AU.dly);AU.dly.connect(AU.mus);
  AU.nt=c.currentTime+.08;setInterval(auSched,25);
 }
-function auMute(m){AU.muted=m;if(AU.mg)AU.mg.gain.setTargetAtTime(m?0:1,AU.ctx.currentTime,.02);}
+function auCfg(mus,sfx){AU.musOn=!!mus;AU.sfxOn=!!sfx;AU.muted=!AU.musOn&&!AU.sfxOn;const c=AU.ctx;if(!c)return;if(AU.muted){if(c.state==='running')c.suspend();return;}const n=c.currentTime;AU.mg.gain.setTargetAtTime(1,n,.02);AU.mus.gain.setTargetAtTime(AU.musOn?.25:0,n,.02);AU.sfx.gain.setTargetAtTime(AU.sfxOn?.55:0,n,.02);if(c.state!=='running'&&!document.hidden)c.resume();}
+function auMute(m){auCfg(!m,!m);}
 function auTrack(n){AU.want=n;}
-function auSched(){const c=AU.ctx;if(!c||c.state!=='running')return;if(AU.muted){AU.nt=c.currentTime+.05;return;}if(AU.cur!==AU.want){AU.cur=AU.want;AU.step=0;AU.nt=Math.max(AU.nt,c.currentTime+.03);}
+function auSched(){const c=AU.ctx;if(!c||c.state!=='running')return;if(AU.muted||!AU.musOn){AU.nt=c.currentTime+.05;return;}if(AU.cur!==AU.want){AU.cur=AU.want;AU.step=0;AU.nt=Math.max(AU.nt,c.currentTime+.03);}
  const T=TRACKS[AU.cur],spb=60/T.bpm/4;if(AU.nt<c.currentTime-.2)AU.nt=c.currentTime+.03;
  while(AU.nt<c.currentTime+.12){auStep(T,AU.step,AU.nt,spb);AU.nt+=spb;AU.step++;}}
 function env(g,t,a,v,d){g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);}
@@ -110,7 +112,7 @@ function auStep(T,s,t,spb){
  if(T.lead&&sec===1){const ch=T.mel[bar%T.mel.length][st];if(ch&&ch!=='.'){const n=T.key+T.sc[+ch];['square','sawtooth'].forEach((ty,i)=>{const o=osc(ty,mtof(n)*(i?1.004:1),t,spb*3,.06,M,.01);o.connect&&0;});const o2=osc('square',mtof(n),t,spb*2,.03,AU.dly);}}
  else if(T.arp){const q=(bar%4===0)?3:4,arr=[0,q,7,12,7,q];const n=root+24+arr[st%6];osc('square',mtof(n),t,spb*.8,.035,M);}
 }
-function sfx(n,v){const c=AU.ctx;if(!c||AU.muted||c.state!=='running')return;const now=c.currentTime;if(AU.last[n]&&now-AU.last[n]<.03)return;if(AU.voices>=24)return;AU.voices=(AU.voices||0)+1;setTimeout(()=>AU.voices--,350);AU.last[n]=now;const t=now+.005,D=AU.sfx;v=v||1;
+function sfx(n,v){const c=AU.ctx;if(!c||AU.muted||!AU.sfxOn||c.state!=='running')return;const now=c.currentTime;if(AU.last[n]&&now-AU.last[n]<.03)return;if(AU.voices>=24)return;AU.voices=(AU.voices||0)+1;setTimeout(()=>AU.voices--,350);AU.last[n]=now;const t=now+.005,D=AU.sfx;v=v||1;
  switch(n){
  case'blaster':{const o=osc('square',1300,t,.07,.12*v,D);o.frequency.exponentialRampToValueAtTime(380,t+.07);break;}
  case'scatter':{noise(t,.14,.35*v,'lowpass',2600,D);const o=osc('sawtooth',260,t,.1,.18*v,D);o.frequency.exponentialRampToValueAtTime(70,t+.1);break;}
@@ -754,7 +756,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='tanks v15';
+const VER='tanks v16';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -776,7 +778,7 @@ function applyIn(){const now=performance.now(),l=stickOut(ui.L,now),r=stickOut(u
 function autoPause(){if(ui.scr==='play'&&G&&G.state==='play')showPause();else for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)autoPause();});addEventListener('blur',autoPause);addEventListener('orientationchange',autoPause);
 function pdown(e){auStart();dlog('pdown '+e.pointerId+' '+e.pointerType+' '+Math.round(e.clientX)+','+Math.round(e.clientY)+' scr='+ui.scr+' st='+(G&&G.state));if(ui.scr!=='play'||!G||G.state!=='play')return;e.preventDefault();const x=e.clientX,y=e.clientY,now=performance.now();
- for(const b of ui.btns)if(Math.hypot(x-b.x,y-b.y)<b.r+10){if(b.id==='pause')showPause();else{S.mute=!S.mute;auMute(S.mute);saveGame();}return;}
+ for(const b of ui.btns)if(Math.hypot(x-b.x,y-b.y)<b.r+10){if(b.id==='pause')showPause();else{toggleAllAudio();}return;}
  if(S.dashBtn!==false&&Math.hypot(x-ui.D.x,y-ui.D.y)<ui.D.r+6){IN.dash=true;return;}
  if(hasMelee()&&Math.hypot(x-ui.M.x,y-ui.M.y)<ui.M.r+6){IN.melee=true;return;}
  if(Math.hypot(x-ui.N.x,y-ui.N.y)<ui.N.r+6){IN.gren=true;return;}
@@ -811,7 +813,7 @@ function hubHTML(){const ps=pstats(),need=xpNeed(S.lvl);S.selD=clamp(S.selD||1,1
 function showHub(){G=null;auTrack('hub');$('hub').innerHTML=hubHTML();show('hub');drawDoll('hubc');bindVer();
  $('dm').onclick=()=>{S.selD=Math.max(1,S.selD-1);sfx('click');showHub();};$('dp').onclick=()=>{S.selD=Math.min(S.maxD,S.selD+1);sfx('click');showHub();};
  $('go').onclick=()=>{auStart();sfx('click');startPlay(S.selD);};$('hg').onclick=()=>{sfx('click');showHangar();};
- $('mu').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();showHub();};$('am').onclick=()=>{cycleAim();showHub();};}
+ $('mu').onclick=()=>{toggleAllAudio();showHub();};$('am').onclick=()=>{cycleAim();showHub();};}
 function cycleAim(){S.aim={off:'soft',soft:'full',full:'off'}[S.aim||'soft'];saveGame();sfx('click');}
 function startPlay(d){for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(d);show('play');}
 // ---------- GEAR: paper doll + inventory (Skyrim-style slots) ----------
@@ -865,8 +867,8 @@ function showResult(){const win=G.state==='win';const its=G.items.slice().sort((
  <div class="row"><span class="btn yl" id="rr">RETRY ↻</span><span class="btn pk" id="rh">TO HUB</span><span class="btn" id="rg">GEAR</span></div>`;show('result');
  const rd=G.d;$('rr').onclick=()=>{sfx('click');startPlay(rd);};$('rh').onclick=()=>{sfx('click');showHub();};$('rg').onclick=()=>{sfx('click');G=null;showHangar();};}
 function showPause(){if(!G||G.state!=='play')return;G.state='pause';for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();
- $('pause').innerHTML=`<div class="ttl" style="font-size:36px">PAUSED</div><div class="row"><span class="btn pk" id="pr">RESUME</span><span class="btn gh" id="pm">${S.mute?'SOUND ON':'MUTE'}</span><span class="btn gh" id="pa">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh" id="pdb">DASH BUTTON: ${S.dashBtn===false?'OFF':'ON'}</span><span class="btn gh" id="pq">ABANDON RUN</span></div><div class="st">Loot and XP picked up so far are already saved.</div>`;show('pause');
- $('pr').onclick=()=>{G.state='play';show('play');};$('pm').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();G.state='play';showPause();};$('pq').onclick=()=>{showHub();};$('pa').onclick=()=>{cycleAim();G.state='play';showPause();};$('pdb').onclick=()=>{S.dashBtn=S.dashBtn===false;saveGame();G.state='play';showPause();};}
+ $('pause').innerHTML=`<div class="ttl" style="font-size:36px">PAUSED</div><div class="row"><span class="btn pk" id="pr">RESUME</span><span class="btn gh" id="pmu">MUSIC: ${S.music!==false?'ON':'OFF'}</span><span class="btn gh" id="psf">SFX: ${S.sfx!==false?'ON':'OFF'}</span><span class="btn gh" id="pa">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh" id="pdb">DASH BUTTON: ${S.dashBtn===false?'OFF':'ON'}</span><span class="btn gh" id="pq">ABANDON RUN</span></div><div class="st">Loot and XP picked up so far are already saved.</div>`;show('pause');
+ $('pr').onclick=()=>{G.state='play';show('play');};$('pmu').onclick=()=>{setAudio(S.music===false,S.sfx!==false);G.state='play';showPause();};$('psf').onclick=()=>{setAudio(S.music!==false,S.sfx===false);G.state='play';showPause();};$('pq').onclick=()=>{showHub();};$('pa').onclick=()=>{cycleAim();G.state='play';showPause();};$('pdb').onclick=()=>{S.dashBtn=S.dashBtn===false;saveGame();G.state='play';showPause();};}
 // ---------- loop ----------
 let lastT=0,fAcc=[],lowCheck=0;
 function frame(ts){requestAnimationFrame(frame);const now=ts||performance.now();let dt=lastT?(now-lastT)/1000:1/60;lastT=now;if(dt>1/20)dt=1/20;
@@ -902,10 +904,12 @@ const STATS={dmg:{n:'Damage',ic:'✦',v:.10,f:v=>'+'+Math.round(v*100)+'% damage
  spd:{n:'Speed',ic:'➤',v:.05,f:v=>'+'+Math.round(v*100)+'% move speed'},armor:{n:'Armour',ic:'⬢',v:.035,f:v=>'+'+(v*100).toFixed(1)+'% armour'},crit:{n:'Crit',ic:'✸',v:.04,f:v=>'+'+Math.round(v*100)+'% crit chance'},dash:{n:'Dash',ic:'⚡',v:.08,f:v=>'-'+Math.round(v*100)+'% dash cooldown'}};
 const PICKM=[1,1.5,2.2,3.2];
 let RUN={gren:3,gMax:3,gDmg:1,cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};
-function saveGame(){try{localStorage.setItem(TKEY,JSON.stringify({mute:S.mute,aim:S.aim,dashBtn:S.dashBtn!==false,diff:S.diff||'normal',bestD:S.bestD||{},best:S.best||0,medicGiven:1}));}catch(e){}}
-function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}catch(e){}S={v:1,mute:!!o.mute,aim:o.aim||'soft',dashBtn:o.dashBtn!==false,diff:DIFF[o.diff]?o.diff:'normal',bestD:o.bestD||{normal:o.best||0},best:o.best||0,lvl:1,xp:0,inv:[],eq:{},nid:0,runs:0,kills:0,bestW:{},hero:'agile',medicGiven:1,maxD:1,selD:1};}
+function saveGame(){try{localStorage.setItem(TKEY,JSON.stringify({mute:S.mute,music:S.music!==false,sfx:S.sfx!==false,aim:S.aim,dashBtn:S.dashBtn!==false,diff:S.diff||'normal',bestD:S.bestD||{},best:S.best||0,medicGiven:1}));}catch(e){}}
+function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}catch(e){}S={v:1,mute:!!o.mute,aim:o.aim||'soft',dashBtn:o.dashBtn!==false,diff:DIFF[o.diff]?o.diff:'normal',bestD:o.bestD||{normal:o.best||0},best:o.best||0,lvl:1,xp:0,inv:[],eq:{},nid:0,runs:0,kills:0,bestW:{},hero:'agile',medicGiven:1,maxD:1,selD:1};S.music=o.music!=null?!!o.music:!o.mute;S.sfx=o.sfx!=null?!!o.sfx:!o.mute;S.mute=!S.music&&!S.sfx;auCfg(S.music,S.sfx);}
 function isBossWave(w){return w===12;}
 const DIFF={easy:{n:'EASY',col:'#5dff9a',hp:.7,dmg:.7,sp:.75,ds:.85,pk:[1,3],cash:1.3},normal:{n:'NORMAL',col:'#ffd23f',hp:1,dmg:1,sp:1,ds:1,pk:[2,4],cash:1},hard:{n:'HARD',col:'#ff3d6e',hp:1.35,dmg:1.35,sp:1.25,ds:1.15,pk:[3,5],cash:.8}};function DF(){return DIFF[S.diff]||DIFF.normal;}
+function setAudio(m,x){S.music=!!m;S.sfx=!!x;S.mute=!S.music&&!S.sfx;auCfg(S.music,S.sfx);if(!S.mute)auStart();saveGame();}
+function toggleAllAudio(){if(S.mute)setAudio(true,true);else setAudio(false,false);}
 function isSwarm(w){return w>0&&w%8===0;}
 function newRun(hero){const H=HEROES[hero];S.hero=hero;S.lvl=1;S.xp=0;S.inv=[];S.nid=0;
  S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):H.shield?makeItem('arm',1,0,H.shield):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
@@ -973,9 +977,9 @@ function drawKeyArt(cv2){const W2=cv2.width=Math.round(innerWidth*Math.min(2,dev
   g.save();g.translate(W2>H2?sx+W2*.3:sx+22*u,W2>H2?hz-6*u:hz+6*u);g.scale(sc,sc);const ag=HEROES.agile.look();ag.main=makeItem('arm',1,3,'blaster');ag.off=makeItem('arm',1,3,'lsword');drawPlayer(0,0,-1.9,-1.9,false,1,0,1,false,ag,'agile');g.restore();}finally{cx=old;}
  for(let k=0;k<14;k++){const x=R()*W2,y=R()*H2*.6,r=(1+R()*2)*u;g.fillStyle=k%2?'#ffd23f':'#19e3ff';g.globalAlpha=.7;g.beginPath();g.arc(x,y,r,0,6.283);g.fill();}g.globalAlpha=1;}
 function showTitle(){G=null;auTrack('hub');$('title').innerHTML=`<canvas id="kart" style="position:absolute;inset:0;width:100%;height:100%;z-index:-1"></canvas><div style="flex:1"></div><div class="ttl tt">TANKS</div><div class="sub" style="font-size:14px">ANIME ROBO ARENA · SURVIVE THE ROUNDS</div><div style="flex:1.4"></div>
- ${(()=>{const sv=loadRun();return sv?`<span class="btn pk" id="tc" style="font-size:24px;padding:12px 30px">CONTINUE ▶<div style="font-size:12px;font-weight:700">${HEROES[sv.hero].n} · ${DIFF[sv.diff].n} · round ${sv.wave+1}</div></span>`:''})()}<span class="btn yl" id="tg" style="font-size:30px;padding:14px 40px">START GAME ▶</span><div class="row"><span class="btn gh sm" id="tam">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="tmu">${S.mute?'🔇':'🔊'}</span></div><div class="st">${S.bestD&&(S.bestD.easy||S.bestD.normal||S.bestD.hard)?'Best: '+['easy','normal','hard'].map(k=>DIFF[k].n[0]+' '+(S.bestD[k]||0)).join(' · ')+' · ':''}<span id="verl" style="padding:6px">${VER}</span></div>`;
+ ${(()=>{const sv=loadRun();return sv?`<span class="btn pk" id="tc" style="font-size:24px;padding:12px 30px">CONTINUE ▶<div style="font-size:12px;font-weight:700">${HEROES[sv.hero].n} · ${DIFF[sv.diff].n} · round ${sv.wave+1}</div></span>`:''})()}<span class="btn yl" id="tg" style="font-size:30px;padding:14px 40px">START GAME ▶</span><div class="row"><span class="btn gh sm" id="tam">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="tmus">MUSIC: ${S.music!==false?'ON':'OFF'}</span><span class="btn gh sm" id="tsfx">SFX: ${S.sfx!==false?'ON':'OFF'}</span></div><div class="st">${S.bestD&&(S.bestD.easy||S.bestD.normal||S.bestD.hard)?'Best: '+['easy','normal','hard'].map(k=>DIFF[k].n[0]+' '+(S.bestD[k]||0)).join(' · ')+' · ':''}<span id="verl" style="padding:6px">${VER}</span></div>`;
  show('title');drawKeyArt($('kart'));bindVer();
- $('tg').onclick=()=>{auStart();sfx('click');if(loadRun()&&!confirm('Start a new game? Your saved run will be overwritten.'))return;showSelect();};if($('tc'))$('tc').onclick=()=>{auStart();sfx('click');continueRun();};$('tam').onclick=()=>{cycleAim();showTitle();};$('tmu').onclick=()=>{S.mute=!S.mute;auMute(S.mute);saveGame();showTitle();};}
+ $('tg').onclick=()=>{auStart();sfx('click');if(loadRun()&&!confirm('Start a new game? Your saved run will be overwritten.'))return;showSelect();};if($('tc'))$('tc').onclick=()=>{auStart();sfx('click');continueRun();};$('tam').onclick=()=>{cycleAim();showTitle();};$('tmus').onclick=()=>{setAudio(S.music===false,S.sfx!==false);showTitle();};$('tsfx').onclick=()=>{setAudio(S.music!==false,S.sfx===false);sfx('click');showTitle();};}
 function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class="hc" data-hero="${k}" style="border-color:${H.col}"><canvas id="hc_${k}" width="300" height="300"></canvas><div class="nm" style="color:${H.col}">${H.n}</div><div class="ds">${H.sub} · starts with ${WEAP[H.wpn].n}${H.twin?' x2':''}${H.shield?' + '+WEAP[H.shield].n:''}</div>
  ${Object.entries(H.bars).map(([n,v])=>`<div class="sb"><span>${n}</span><i><b style="width:${v*100}%;background:${H.col}"></b></i></div>`).join('')}<div class="ds" style="margin-top:4px">${H.desc}</div><span class="btn ${k==='agile'?'':'yl'}" style="margin-top:6px">SELECT</span></div>`;};
  $('select').innerHTML=`<div class="ttl" style="font-size:32px">CHOOSE YOUR BOT</div><div class="row" id="dfr">${['easy','normal','hard'].map(k=>`<span class="btn sm ${S.diff===k||(!S.diff&&k==='normal')?'':'gh'}" data-diff="${k}" style="${S.diff===k||(!S.diff&&k==='normal')?'background:'+DIFF[k].col+';color:#111':''}">${DIFF[k].n}${(S.bestD||{})[k]?' · '+S.bestD[k]:''}</span>`).join('')}</div><div class="hs">${c('agile')}${c('melee')}${c('heavy')}</div><span class="btn gh sm" id="sb">◀ TITLE</span>`;show('select');
