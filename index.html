@@ -937,7 +937,7 @@ let RUN={gren:3,gMax:3,gDmg:1,cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0
 function saveGame(){try{localStorage.setItem(TKEY,JSON.stringify({mute:S.mute,music:S.music!==false,sfx:S.sfx!==false,aim:S.aim,dashBtn:S.dashBtn!==false,swap:!!S.swap,diff:S.diff||'normal',bestD:S.bestD||{},best:S.best||0,medicGiven:1}));}catch(e){}}
 function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}catch(e){}S={v:1,mute:!!o.mute,aim:o.aim||'soft',dashBtn:o.dashBtn!==false,swap:!!o.swap,diff:DIFF[o.diff]?o.diff:'normal',bestD:o.bestD||{normal:o.best||0},best:o.best||0,lvl:1,xp:0,inv:[],eq:{},nid:0,runs:0,kills:0,bestW:{},hero:'agile',medicGiven:1,maxD:1,selD:1};S.music=o.music!=null?!!o.music:!o.mute;S.sfx=o.sfx!=null?!!o.sfx:!o.mute;S.mute=!S.music&&!S.sfx;auCfg(S.music,S.sfx);}
 function isBossWave(w){return w===12;}
-var CASH_K=.85,BOOM_SILLY=true,BOOM_MAX=5,ELEC_MAX=3; // v31 tunables: income x0.85; BOOM_SILLY: 5th Bigger Boom stack = x10 radius (set false to revert)
+var CASH_K=1.2,BOOM_SILLY=true,BOOM_MAX=5,ELEC_MAX=3; // v31 tunables: income x0.85; BOOM_SILLY: 5th Bigger Boom stack = x10 radius (set false to revert)
 function boomR(){const n=gdn();return n>=5&&BOOM_SILLY?900:90*(1+.08*Math.min(4,n));}
 function hpLate(r){return r>5?Math.pow(1.07,r-5):1;}
 const DIFF={easy:{n:'EASY',col:'#5dff9a',hp:.7,dmg:.7,sp:.75,ds:.85,pk:[1,3],cash:1.3*CASH_K},normal:{n:'NORMAL',col:'#ffd23f',hp:1,dmg:1,sp:1,ds:1,pk:[2,4],cash:CASH_K},hard:{n:'HARD',col:'#ff3d6e',hp:1.35,dmg:1.35*1.25,sp:1.25*1.18,ds:1.15,pk:[3,5],cash:.8*.8*CASH_K}};function DF(){return DIFF[S.diff]||DIFF.normal;}
