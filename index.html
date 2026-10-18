@@ -167,8 +167,8 @@ const R=Math.random,rnd=(a,b)=>a+R()*(b-a),ri=(a,b)=>Math.floor(a+R()*(b-a+1)),p
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const RAR=[{n:'Common',c:'#b9c2cf',m:1,q:0},{n:'Rare',c:'#3fa9ff',m:1.25,q:1},{n:'Epic',c:'#c45cff',m:1.55,q:2},{n:'Ultra',c:'#ff4fd8',m:1.72,q:2.4},{n:'Ultimate',c:'#ff3a3a',m:1.88,q:2.8},{n:'Legendary',c:'#ffb020',m:2.05,q:3.2},{n:'SOLAR',c:'#fff3b1',m:2.6,q:4.2}];
-const SOLAR_RATE=1/5000,RV=34;const RQ=r=>(RAR[r]||RAR[0]).q;
-const PREF=['Standard','Tuned','Prototype','Ultra','Ultimate','Mythic','Solar'];
+const SOLAR_RATE=1/5000,RV=35;const RQ=r=>(RAR[r]||RAR[0]).q;
+const PREF=['Common','Rare','Epic','Ultra','Ultimate','Legendary','SOLAR'];
 // ---- arms: guns, melee, shields (all fit Main Arm or Off Arm) ----
 const WEAP={
  blaster:{k:'gun',n:'Pulse Blaster',dmg:10,rate:6.5,spd:900,spread:.05,count:1,pierce:0,col:'#3ff6ff',r:5,snd:'blaster'},
@@ -242,7 +242,7 @@ const NBOTS={
  raijin:{n:'RAIJIN Thunder Core',d:'Orbit drone · rapid piercing lightning bolts, +8% speed',col:'#ffe23f',spd:.08,fire:{dmg:9,rate:4,spd:1100,pierce:3}},
  hikari:{n:'HIKARI Lumen Unit',d:'Orbit drone · +10% crit, +10% XP, fires bolts',col:'#3fa9ff',crit:.1,xp:.1,fire:{dmg:11,rate:1.8,spd:900}},
  kurogane:{n:'KUROGANE Iron Fang',d:'Orbit drone · heavy shells that splash, +8% damage',col:'#ff8a1f',dmgB:.08,fire:{dmg:24,rate:.9,spd:640,splash:60}}};
-const MEDIC_HPS=.6,MEDIC_DELAY=2,MEDIC_CAP=.25;const MEDIC={n:'Standard Medic Bot',d:'Support drone · repairs 0.6 HP/s when out of combat (2s after a hit) · max 25% of max HP per round',col:'#9dff5a'};
+const MEDIC_HPS=.6,MEDIC_DELAY=2,MEDIC_CAP=.25;const MEDIC={n:'Common Medic Bot',d:'Support drone · repairs 0.6 HP/s when out of combat (2s after a hit) · max 25% of max HP per round',col:'#9dff5a'};
 function botDef(b){return b&&b.bt?(b.bt==='medic'?MEDIC:NBOTS[b.bt]):null;}
 function makeBot(bt){const m=bt==='medic';return {id:++S.nid,slot:'neural',bt,rar:m?0:4,lv:1,name:m?MEDIC.n:NBOTS[bt].n,aff:{},lock:!m};}
 function allItems(){return S.inv.concat(SLOTS.map(s=>S.eq[s]).filter(Boolean));}
@@ -334,9 +334,12 @@ function clsLabel(it){const c=CLS[wcls(it)]||CLS.pistol;return c[1]+' '+c[0];}
 function armPool(rar){const p=GUNS.concat(GUNS,MELW);return rar>=2?p.concat(SPECW):p;}
 function shopRar(t,bump){const b=[0,1,3,4][t]||0;return Math.min(5,b+(R()<bump?1:0));}
 function solarCol(){const k=.5+.5*Math.sin(performance.now()/180);return k>.5?'#fff3b1':'#ffb347';}
-function rarMig(it){if(!it||it.rv===RV)return it;if(it.rar===3||it.rar===4)it.rar=5;if(it.rar>6)it.rar=6;
- if(it.slot==='arm'&&OLDW[it.type]){const nt=OLDW[it.type],ow=WEAP[it.type],nw=WEAP[nt];const op=it.dmg*it.rate*(ow.count||1);it.type=nt;it.rate=+(nw.rate*(1+.05*RQ(it.rar))).toFixed(2);it.dmg=+(op/it.rate).toFixed(1);if(nw.spec&&it.rar<2)it.rar=2;it.name=PREF[it.rar]+' '+nw.n;}
- else if(it.name&&/^(Standard|Tuned|Prototype|Mythic) /.test(it.name))it.name=PREF[it.rar]+it.name.slice(it.name.indexOf(' '));
+function rarMig(it){if(!it||it.rv===RV)return it;const ov=it.rv||0;
+ if(ov<34){if(it.rar===3||it.rar===4)it.rar=5;if(it.rar>6)it.rar=6;
+  if(it.slot==='arm'&&OLDW[it.type]){const nt=OLDW[it.type],ow=WEAP[it.type],nw=WEAP[nt];const op=it.dmg*it.rate*(ow.count||1);it.type=nt;it.rate=+(nw.rate*(1+.05*RQ(it.rar))).toFixed(2);it.dmg=+(op/it.rate).toFixed(1);if(nw.spec&&it.rar<2)it.rar=2;it.name=PREF[it.rar]+' '+nw.n;}}
+ if(it.rar>6)it.rar=6;
+ // v35: tier prefixes match tier labels (Common..Legendary, SOLAR)
+ if(it.name){const m=/^(Standard|Tuned|Prototype|Mythic|Solar|Common|Rare|Epic|Ultra|Ultimate|Legendary|SOLAR) /.exec(it.name);if(m)it.name=PREF[it.rar||0]+it.name.slice(m[0].length-1);}
  it.rv=RV;return it;}
 function armStats(it,dm,rm){if(!it)return null;rarMig(it);let w=WEAP[it.type]||WEAP.pistol;if(w.k==='melee')w=Object.assign({},w,{range:it.len||w.range,col:it.blade||w.col});
  else if(it.perk==='pierce')w=Object.assign({},w,{pierce:(w.pierce||0)+1});return {wt:it.type,k:w.k,dmg:it.dmg*dm,rate:it.rate*rm,w,perk:it.perk};}
@@ -832,7 +835,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='haywire v34';
+const VER='haywire v35';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -883,7 +886,7 @@ function hubHTML(){const ps=pstats(),need=xpNeed(S.lvl);S.selD=clamp(S.selD||1,1
  <canvas id="hubc" width="320" height="320" style="width:120px;height:120px"></canvas><div class="pn" style="width:300px;max-width:92vw"><div class="row" style="justify-content:space-between"><b style="font-style:italic;font-size:18px">UNIT LV ${S.lvl}</b><span class="st">${S.xp}/${need} XP</span></div>
  <div class="bar" style="width:100%"><i style="width:${100*S.xp/need}%"></i></div>
  <div class="st">HP <b>${ps.hp}</b> · DMG <b>${(ps.main?ps.main.dmg:0).toFixed(1)}</b> · Armor <b>${Math.round(ps.armor*100)}%</b> · Crit <b>${Math.round(ps.crit*100)}%</b></div>
- <div class="st" style="color:${S.eq.main?RAR[S.eq.main.rar].c:'#fff'}">${S.eq.main?S.eq.main.name:'No Main Arm'}${S.eq.off?' + '+S.eq.off.name:''}</div>${S.migrated?'<div class="st" style="color:#7affd6">Your old gear was moved into the new slots.</div>':''}${S.medicNew?'<div class="st" style="color:#9dff5a;font-weight:800">🎁 First login reward: Standard Medic Bot is in your inventory (GEAR → Neural).</div>':''}</div>
+ <div class="st" style="color:${S.eq.main?RAR[S.eq.main.rar].c:'#fff'}">${S.eq.main?S.eq.main.name:'No Main Arm'}${S.eq.off?' + '+S.eq.off.name:''}</div>${S.migrated?'<div class="st" style="color:#7affd6">Your old gear was moved into the new slots.</div>':''}${S.medicNew?'<div class="st" style="color:#9dff5a;font-weight:800">🎁 First login reward: Common Medic Bot is in your inventory (GEAR → Neural).</div>':''}</div>
  <div class="row"><span class="btn gh sm" id="dm">◀</span><div class="pn" style="text-align:center;min-width:130px"><div class="st">DEPTH</div><b style="font-size:22px;font-style:italic">SECTOR ${S.selD}</b><div class="st">Best wave: ${(S.bestW&&S.bestW[S.selD])||0}${S.selD>=S.maxD?' · beat wave 5 to unlock next':''}</div></div><span class="btn gh sm" id="dp">▶</span></div>
  <div class="row"><span class="btn pk" id="go">DEPLOY ▶</span><span class="btn" id="hg">GEAR</span><span class="btn gh sm" id="am">AIM: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh sm" id="mu">${S.mute?'🔇':'🔊'}</span></div>
  <div class="st" style="opacity:.7"><span id="verl" style="padding:6px">${VER}</span> · Timed waves · pick 1 of 3 loot after each · guardian every 5th wave · extract after it for a bonus</div>`;}
@@ -1243,7 +1246,7 @@ function hwHud(c,L,T,t){if(!G.gsT||G.t-G.gsT>.5){G.gsT=G.t;G.gsH=gsNow();}hwScre
  const A=G.alert||hwAlert(G.wave),z=ZP();c.fillStyle='rgba(5,6,10,.75)';c.fillRect(X,y+31,bw,30);c.fillStyle='#ff3040';c.fillText('ALERT',X+4,y+44);for(let i=0;i<5;i++){c.fillStyle=i<A?(Math.floor(t*3)%2&&i===A-1?'#ffb020':'#ff3040'):'#333';c.fillRect(X+46+i*11,y+35,9,10);}c.fillStyle='#9aa6c0';c.font='bold 9px system-ui';c.fillText(z.n,X+4,y+56);}
 // ---- HAYWIRE SPECIAL MOVES (v24) ----
 var HWN={agile:'OVERLOAD CHARGE',heavy:'SEISMIC SHOCKWAVE',melee:'CYCLONE BLADE'};
-function hwGain(b){return b.melee?(S.hero==='melee'?2.6:1.4):S.hero==='heavy'?1.9:.4;}
+function hwGain(b){if(b.hwbl)return 0;return b.melee?(S.hero==='melee'?2.6:1.4):S.hero==='heavy'?1.9:.4;}
 function hwLayout(port){const H2=ui.HW;H2.r=26;H2.x=ui.N.x;H2.y=ui.N.y-ui.N.r-H2.r-16;
  const bad=()=>[[ui.R,ui.grab],[ui.L,ui.grab],[ui.M,ui.M.r],[ui.D,ui.D.r],[ui.N,ui.N.r]].some(([o,r])=>Math.hypot(H2.x-o.x,H2.y-o.y)<r+H2.r+16);
  for(let i=0;i<40&&bad();i++){H2.y-=6;}}
@@ -1256,7 +1259,7 @@ function hwFire(){const p=G.p;if(G.state!=='play'||(G.hw||0)<100||G.sp)return;G.
  G.banner={t:1.2,txt:HWN[h]+'!',sub:'HAYWIRE MOVE',pc:'#ff2e88'};G.shake=Math.max(G.shake,10);G.hitstop=.05;sfx('roar');sfx(h==='melee'?'saber':h==='heavy'?'boom':'rail',1.3);
  part({k:'ring',x:p.x,y:p.y,life:.4,col:h==='agile'?'#19e3ff':h==='heavy'?'#ffb020':'#c45cff',sz:120});}
 function hwSpecTick(dt){G.hwImm=(G.hwImm||0)-dt;if(IN.hwm){IN.hwm=false;hwFire();}if(window.__RC&&__RC.bot&&!__RC.noHwAuto&&(G.hw||0)>=100&&!G.sp&&G.en.some(e=>!e.dead&&e.spawn<=0&&Math.hypot(e.x-G.p.x,e.y-G.p.y)<260))hwFire();
- const s=G.sp;if(!s)return;const p=G.p,ux=Math.cos(s.a),uy=Math.sin(s.a),B=hwBase();s.t+=dt;G.hwT=Math.max(0,s.T-s.t);
+ hwBladeTick(dt);const s=G.sp;if(!s)return;const p=G.p,ux=Math.cos(s.a),uy=Math.sin(s.a),B=hwBase();s.t+=dt;G.hwT=Math.max(0,s.T-s.t);
  if(s.k==='agile'){// charge 6 tiles, then 10x10 tile blast at impact; enemies along the path are hit too
   if(s.t<s.T){moveC(p,ux*620*dt,uy*620*dt);p.inv=Math.max(p.inv,.05);if(R()<.9)part({k:'ghost',x:p.x,y:p.y,a:p.ang,f:p.face,life:.25});burst(p.x,p.y,'#19e3ff',2,160,2);
    for(const e of G.en)if(!e.dead&&Math.hypot(e.x-p.x,e.y-p.y)<80+e.r){hwHit(e,B*.6,ux,uy,'#19e3ff',300);s.hit.add(e);}}
@@ -1266,17 +1269,39 @@ function hwSpecTick(dt){G.hwImm=(G.hwImm||0)-dt;if(IN.hwm){IN.hwm=false;hwFire()
   const len=10*TILE,hw=1.5*TILE,front=Math.min(1,s.t/s.T)*len;for(const e of G.en){if(e.dead||s.hit.has(e))continue;const dx=e.x-s.x0,dy=e.y-s.y0,al=dx*ux+dy*uy,pe=Math.abs(-dx*uy+dy*ux);if(al>-e.r&&al<=front+e.r&&pe<=hw+e.r){hwHit(e,B*2.2,ux,uy,'#ffb020',520);s.hit.add(e);}}
   if(R()<.8)burst(s.x0+ux*front+rnd(-20,20)*-uy,s.y0+uy*front+rnd(-20,20)*ux,'#ffb020',3,240,3);G.shake=Math.max(G.shake,8);
   if(!G.fx||G.fx.k!=='quake')G.fx={k:'quake',x:s.x0,y:s.y0,a:s.a,t:0,L:s.T+.5,len,hw};if(s.t>=s.T){G.sp=null;sfx('boom',1.2);}}
- else{// cyclone: 3 spins, each hits everything in a 10x10 tile square
-  const H=5*TILE,k=Math.floor(s.t/(s.T/3));p.ang=s.a+s.t*16;p.swing=.16;p.swingA=p.ang;if(k>s.n||s.n===0&&!s.h0){s.h0=1;s.n=Math.max(s.n,k);s.hit=new Set();for(const e of G.en)if(!e.dead&&hwInSq(e,p.x,p.y,H)){const d=Math.hypot(e.x-p.x,e.y-p.y)||1;hwHit(e,B*.8,(e.x-p.x)/d,(e.y-p.y)/d,'#c45cff',260);}sfx('saber',1.2);G.shake=Math.max(G.shake,9);part({k:'ring',x:p.x,y:p.y,life:.3,col:'#c45cff',sz:2*H});}
-  if(!G.fx||G.fx.k!=='spin')G.fx={k:'spin',x:p.x,y:p.y,t:0,L:s.T+.25};G.fx.x=p.x;G.fx.y=p.y;if(s.t>=s.T){G.sp=null;burst(p.x,p.y,'#c45cff',30,420,4);}}}
-function hwFxDraw(t){const f=G.fx;if(!f)return;f.t+=1/60;if(f.t>f.L){G.fx=null;return;}const c=cx,k=f.t/f.L,al=1-k;c.save();
+ else{// v35 laser-blade cyclone: both weapons fling crescent laser blades that spiral out through the 10x10 tile zone
+  const H=5*TILE;p.ang=s.a+s.t*16;p.swing=.16;p.swingA=p.ang;if(!s.dm){s.dm=new Map();s.cap=B*2.7;s.ec=0;s.cols=hwBladeCols();sfx('saber',1.2);}
+  s.ec-=dt;while(s.ec<=0&&s.t<s.T){s.ec+=.055;s.n++;for(let w=0;w<2;w++){const th=p.ang+w*Math.PI;(G.hwBl=G.hwBl||[]).push({cx:p.x,cy:p.y,th,r:26,t:0,L:.62,col:s.cols[w],tr:[],hit:new Set(),dmg:B*.5,cap:s.cap,dm:s.dm,dir:1});}
+   if(s.n%6===0){sfx('saber',.7);G.shake=Math.max(G.shake,6);}}
+  if(!G.fx||G.fx.k!=='spin')G.fx={k:'spin',x:p.x,y:p.y,t:0,L:s.T+.25,cols:s.cols};G.fx.x=p.x;G.fx.y=p.y;if(s.t>=s.T){G.sp=null;burst(p.x,p.y,s.cols[0],24,420,4);burst(p.x,p.y,s.cols[1],16,380,3);}}}
+function hwBladeCols(){const ps=G.ps||{},c=a=>a&&a.w&&a.w.col||null,m=c(ps.main)||'#c45cff',o=c(ps.off)||(m==='#c45cff'?'#ff2e88':m);return [m,o];}
+function hwBladeTick(dt){const L=G.hwBl;if(!L||!L.length)return;if(G.state==='loot'||G.state==='win'||G.state==='prepick'){G.hwBl=[];return;}const H=5*TILE;
+ for(const b of L){b.t+=dt;b.th+=dt*5.2;b.r+=dt*(300+260*b.t);const x=b.cx+Math.cos(b.th)*b.r,y=b.cy+Math.sin(b.th)*b.r;b.tr.push(x,y);if(b.tr.length>16)b.tr.splice(0,2);b.x=x;b.y=y;
+  if(b.t>b.L||Math.abs(x-b.cx)>H||Math.abs(y-b.cy)>H){b.done=1;continue;}
+  for(const e of G.en){if(e.dead||e.spawn>0||b.hit.has(e))continue;if(Math.hypot(e.x-x,e.y-y)>e.r+16)continue;b.hit.add(e);const got=b.dm.get(e)||0;if(got>=b.cap)continue;const d=Math.min(b.dmg,b.cap-got);b.dm.set(e,got+d);
+   const boss=e.type==='boss'||e.type==='mboss',ux=Math.cos(b.th+1.2),uy=Math.sin(b.th+1.2);hitEnemy(e,{dmg:e.type==='drone'?Math.max(d,99):boss?d*.35:d,crit:0,vx:ux,vy:uy,x:e.x,y:e.y,col:b.col,melee:1,hwbl:1,kb:boss?0:120});
+   burst(x,y,b.col,5,260,2);burst(x,y,'#fff',3,200,1.5);if(R()<.5)part({k:'star',x,y,life:.12,col:'#fff',sz:16,a:R()*6});}}
+ G.hwBl=L.filter(b=>!b.done);}
+function hwBladeDraw(t){const L=G.hwBl;if(!L||!L.length)return;const c=cx;c.save();c.lineCap='round';c.lineJoin='round';
+ for(const b of L){const al=Math.max(0,1-b.t/b.L)*.9+.1,tr=b.tr;
+  if(tr.length>=4){for(let i=2;i<tr.length;i+=2){const k=i/tr.length;c.globalAlpha=al*k*.55;c.strokeStyle=b.col;c.lineWidth=2+9*k;c.beginPath();c.moveTo(tr[i-2],tr[i-1]);c.lineTo(tr[i],tr[i+1]);c.stroke();}}
+  const va=Math.atan2(Math.sin(b.th)*(300)+Math.cos(b.th)*b.r*5.2,Math.cos(b.th)*300-Math.sin(b.th)*b.r*5.2);c.save();c.translate(b.x,b.y);c.rotate(va);
+  const S2=13+8*Math.min(1,b.t*4);c.globalAlpha=al*.4;c.fillStyle=b.col;c.beginPath();c.arc(0,0,S2*1.5,-1.9,1.9);c.arc(-S2*.7,0,S2*1.2,1.6,-1.6,true);c.closePath();c.fill();
+  c.globalAlpha=al;c.fillStyle=b.col;c.beginPath();c.arc(0,0,S2,-1.75,1.75);c.arc(-S2*.55,0,S2*.85,1.45,-1.45,true);c.closePath();c.fill();
+  c.fillStyle='#fff';c.beginPath();c.arc(0,0,S2*.82,-1.4,1.4);c.arc(-S2*.35,0,S2*.6,1.2,-1.2,true);c.closePath();c.fill();c.restore();}
+ c.restore();}
+function hwFxDraw(t){hwBladeDraw(t);const f=G.fx;if(!f)return;f.t+=1/60;if(f.t>f.L){G.fx=null;return;}const c=cx,k=f.t/f.L,al=1-k;c.save();
  if(f.k==='volt'){const H=5*TILE;c.globalAlpha=al*.35;c.fillStyle='#19e3ff';c.fillRect(f.x-H,f.y-H,2*H,2*H);c.globalAlpha=al;c.strokeStyle='#e8fdff';c.lineWidth=4;c.strokeRect(f.x-H,f.y-H,2*H,2*H);
   c.strokeStyle='#19e3ff';c.lineWidth=3;for(let i=0;i<7;i++){c.beginPath();let x=f.x,y=f.y;c.moveTo(x,y);const a=R()*6.283;for(let j=0;j<5;j++){x+=Math.cos(a+rnd(-.6,.6))*34;y+=Math.sin(a+rnd(-.6,.6))*34;c.lineTo(x,y);}c.stroke();}
   c.lineWidth=12;c.globalAlpha=al*.5;c.beginPath();c.moveTo(f.x0,f.y0);c.lineTo(f.x,f.y);c.stroke();}
  else if(f.k==='quake'){c.translate(f.x,f.y);c.rotate(f.a);const fr=Math.min(1,f.t/(f.L-.5))*f.len;c.globalAlpha=al*.4;c.fillStyle='#ff8a1f';c.fillRect(0,-f.hw,fr,2*f.hw);c.globalAlpha=al;c.fillStyle='#ffe23f';c.fillRect(Math.max(0,fr-22),-f.hw,22,2*f.hw);
   c.strokeStyle='#3a1a00';c.lineWidth=3;c.beginPath();for(let x=10;x<fr;x+=26){c.moveTo(x,-f.hw*.6+((x*7)%20));c.lineTo(x+18,f.hw*.5-((x*3)%18));}c.stroke();c.strokeStyle='#ffb020';c.lineWidth=2;c.strokeRect(0,-f.hw,f.len,2*f.hw);}
- else{const H=5*TILE;c.translate(f.x,f.y);c.globalAlpha=al*.18+.1;c.fillStyle='#c45cff';c.fillRect(-H,-H,2*H,2*H);c.globalAlpha=Math.min(1,al+.3);c.strokeStyle='#e7b8ff';c.lineWidth=3;c.strokeRect(-H,-H,2*H,2*H);
-  c.rotate(t*16);c.lineCap='round';for(let i=0;i<3;i++){c.rotate(2.094);c.strokeStyle='#c45cff';c.lineWidth=16;c.globalAlpha=.45;c.beginPath();c.arc(0,0,H*.85,0,1.2);c.stroke();c.strokeStyle='#fff';c.lineWidth=5;c.globalAlpha=.9;c.beginPath();c.arc(0,0,H*.85,0,1.2);c.stroke();}c.lineCap='butt';}
+ else{const cs=f.cols||['#c45cff','#ff2e88'],R0=58;c.translate(f.x,f.y);c.lineCap='round';
+  c.globalAlpha=.16*al+.06;c.fillStyle=cs[0];c.beginPath();c.arc(0,0,R0+14,0,6.283);c.fill();
+  c.rotate(t*18);for(let i=0;i<4;i++){c.rotate(1.571);const col=cs[i%2];c.strokeStyle=col;c.lineWidth=18;c.globalAlpha=.35*al+.1;c.beginPath();c.arc(0,0,R0,0,1.25);c.stroke();
+   c.lineWidth=7;c.globalAlpha=.85*al+.15;c.beginPath();c.arc(0,0,R0,.15,1.25);c.stroke();c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.arc(0,0,R0,.45,1.25);c.stroke();
+   c.strokeStyle=col;c.lineWidth=3;c.globalAlpha=.5*al;c.beginPath();c.arc(0,0,R0+20,.6,1.1);c.stroke();}
+  c.lineCap='butt';}
  c.restore();}
 function hwBtnDraw(t){if(!G||G.state!=='play')return;const b=ui.HW,c=cx,full=(G.hw||0)>=100,f=(G.hw||0)/100;c.save();
  if(full){c.globalAlpha=.35+.25*Math.sin(t*8);c.fillStyle='#ff2e88';c.beginPath();c.arc(b.x,b.y,b.r+10,0,6.283);c.fill();c.globalAlpha=1;}
@@ -1400,7 +1425,7 @@ Object.assign(ETYPES,{
  swat:{hp:30,r:13,spd:108,dmg:7,xp:9,col:'#2f6bff'},
  inmate:{hp:14,r:9,spd:175,dmg:3,xp:4,col:'#ff7a1a'}});
 ETYPES.mboss.col='#2f6bff';ETYPES.boss.col='#ffd23f';
-var RNAME={sec:'SECURITY BOT',stun:'STUN BOT',heavy:'HEAVY BOT',shield:'SHIELD BOT',capture:'CAPTURE BOT',swat:'SWAT BOT',inmate:'INMATES',turret:'TURRET',mboss:'SWAT COMMANDER',boss:'WARDEN BOT'};
+var RNAME={sec:'SECURITY BOT',stun:'STUN BOT',heavy:'HEAVY BOT',shield:'SHIELD BOT',capture:'CAPTURE BOT',swat:'SWAT BOT',inmate:'INMATES',turret:'TURRET',mboss:'SWAT COMMANDER BOT',boss:'WARDEN BOT'};
 var RDRAW={sec:1,stun:1,heavy:1,shield:1,capture:1,swat:1,mboss:1,boss:1,inmate:1};
 function rosterPool(w){const sp=[];if(w>=2)sp.push('stun');if(w>=3)sp.push('heavy');if(w>=4)sp.push('capture');if(w>=5||w%4===0)sp.push('shield');if(w>=6)sp.push('swat');if(w>=8)sp.push('stun','heavy');if(w>=10)sp.push('capture','shield');
  const n=Math.max(2,Math.round(sp.length*1.5)),pool=[];for(let i=0;i<n;i++)pool.push('sec');return pool.concat(sp);}
@@ -1453,7 +1478,7 @@ function mbossTick(e,dt){const p=G.p,dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||
  if(e.cd2<=0&&d<650){e.cd2=(S.hero==='melee'?6.3:4.8)*(e.lite?1.4:1);const ml=S.hero==='melee'||e.lite,T=1.3,px=Math.cos(ang+1.57),py=Math.sin(ang+1.57),n=ml?1:2;for(let k=-n;k<=n;k++){const tx=p.x+k*55*px,ty=p.y+k*55*py;G.bul.push(nb({x:e.x,y:e.y,vx:(tx-e.x)/T,vy:(ty-e.y)/T,dmg:e.dmg,r:7,life:T,l0:T,pl:0,col:'#ffd23f',lob:1,tx,ty,wm:1}));}sfx('shoot');}
  if(e.cd3<=0){e.cd3=e.lite?14:9;if(hwAlive()<ECAP){const n=e.lite?1:2;for(let i=0;i<n;i++){const a=R()*6.283,m=hwSpawn('swat',e.x+Math.cos(a)*(e.r+30),e.y+Math.sin(a)*(e.r+30),.5);m.sqd=1;}addTxt(e.x,e.y-e.r-30,'SWAT, MOVE IN!','#2f6bff',16,1.1);sfx('warp',.6);}}
  if(d<e.r+p.r)hurtPlayer(e.dmg*1.2);}
-function mbossBar(e){const c=cx,w=110,y=-e.r-26;c.fillStyle=INK;c.fillRect(-w/2-2,y-2,w+4,10);c.fillStyle='#2f6bff';c.fillRect(-w/2,y,w*Math.max(0,e.hp/e.hpMax),6);bigText(e.lite?'SWAT COMMANDER MK-I':'SWAT COMMANDER',0,y-10,12,'#9fc0ff');}
+function mbossBar(e){const c=cx,w=110,y=-e.r-26;c.fillStyle=INK;c.fillRect(-w/2-2,y-2,w+4,10);c.fillStyle='#2f6bff';c.fillRect(-w/2,y,w*Math.max(0,e.hp/e.hpMax),6);bigText(e.lite?'SWAT COMMANDER BOT MK-I':'SWAT COMMANDER BOT',0,y-10,12,'#9fc0ff');}
 // ---------- WARDEN BOT (boss) ----------
 function bossAI(e,dt,d,ang,ux,uy){const p=G.p,rage=e.hp<e.hpMax*.5;if(rage&&!e.rg){e.rg=1;const s=freeSpot(G.D.arena,80);dropPw(s.x,s.y);addTxt(e.x,e.y-90,'WARDEN ENRAGED!','#ff2e88',26,1.2);}e.pT-=dt;e.spin+=dt*(rage?2.4:1.6);e.ang=ang;
  if(e.pT<=0){e.ph=(e.ph+1)%4;e.pT=e.ph===3?1.6:rage?2.8:3.4;e.k=0;e.lwT=0;if(e.ph===3){e.ca=ang;e.tele=.7;e.slam=0;}if(e.ph===2)addTxt(e.x,e.y-e.r-20,'LOCKDOWN!','#ff3dd2',20,1);}
