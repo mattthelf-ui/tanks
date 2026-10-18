@@ -839,7 +839,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='haywire v41';
+const VER='haywire v42';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1076,7 +1076,9 @@ function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class=
  for(const k of['agile','melee','heavy']){const cv2=$('hc_'+k),g=cv2.getContext('2d'),old=cx;cx=g;try{g.translate(150,160);g.scale(4.2,4.2);const L=HEROES[k].look();L.main=makeItem('arm',1,1,HEROES[k].wpn);L.off=HEROES[k].twin?makeItem('arm',1,1,HEROES[k].wpn):HEROES[k].shield?makeItem('arm',1,1,HEROES[k].shield):null;drawPlayer(0,0,-1.57,-1.57,false,1,0,1,false,L,k);}finally{cx=old;}}
  $('select').querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{sfx('item');startGame(b.dataset.hero,{pre:1});});$('sb').onclick=()=>{sfx('click');showTitle();};$('select').querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.diff;saveGame();sfx('click');showSelect();});}
 function startGame(hero,o){newRun(hero);for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(1);G.banner={t:1.6,txt:'ROUND 1',sub:HEROES[hero].n+' deployed · survive 45s'};G.waveT=2;
- if(o&&o.pre){clearRun();G.state='prepick';RUN.pre={i:0,n:7,leg:ri(0,6)};showPrePick();}else show('play');}
+ if(o&&o.pre){clearRun();if(TEST_PICKS){G.state='prepick';RUN.pre={i:0,n:7,leg:ri(0,6)};showPrePick();}else show('play');}else show('play');}
+// v42: the 7 free starting picks (incl. 1 guaranteed Legendary) are a test-only boost. Set true to turn them back on.
+var TEST_PICKS=false;
 function showPrePick(){const P=RUN.pre;if(!G||!P)return;const leg=P.i===P.leg;let picks=rollPick();if(leg)picks=picks.map(o=>({k:o.k,rar:5,v:STATS[o.k].v*PICKM[5]}));P.cur=picks;
  $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">SYSTEM BOOT</div><div class="sub">UPGRADE ${P.i+1}/${P.n}${leg?' · <b style="color:#ffd23f">★ GUARANTEED LEGENDARY SET ★</b>':''}</div></div><div class="pk3">${picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pre="${i}" style="--rc:${c};animation-delay:${i*.06}s${leg?';box-shadow:0 0 22px #ffd23f,0 0 4px #fff inset;border-color:#ffd23f':''}"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">${HEROES[S.hero].n} · ${DF().n} · pick ${P.n-P.i} more before round 1</div>`;
  show('loot');sfx(leg?'level':'item');$('loot').querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const o=P.cur&&P.cur[+b.dataset.pre];if(!o)return;P.cur=null;RUN.b[o.k]+=o.v;G.ps=pstats();G.p.hp=G.ps.hp;P.i++;sfx('item');if(P.i<P.n)showPrePick();else{RUN.pre=null;G.state='play';show('play');}});}
@@ -1366,7 +1368,7 @@ function revHud(c,L,T,t){if(!(G.revMax>0))return;c.save();c.font='italic 900 15p
 function shHud(c,L,T,t){revHud(c,L,T,t);if(typeof wsPickHud==='function')wsPickHud(c);rosterNewDraw(c);if(!(G.shMax>0))return;const f=G.sh/G.shMax,z=nShield(S.eq.neural);c.save();c.transform(1,0,-.2,1,0,0);c.fillStyle='#05060a';c.fillRect(L+46,T+19,146,5);c.fillStyle=G.shFlash>0?'#fff':'#19e3ff';c.fillRect(L+46,T+19,146*f,5);
  if(f<1&&z){const k=Math.min(1,(G.t-(G.shHit||0))/z.cd);c.fillStyle='rgba(122,255,255,.35)';c.fillRect(L+46+146*f,T+19,146*(1-f)*k,5);}c.restore();}
 // ---- v30: Phoenix Protocol set (revives) ----
-var TEST_SET=true; // v30 testing: puts the full Phoenix set in inventory for new runs & loaded saves. Set false to remove.
+var TEST_SET=false; // v30 testing: puts the full Phoenix set in inventory for new runs & loaded saves. v42: hidden (false). Set true to turn back on.
 function giveTestSet(){if(!TEST_SET||window.__noSet||!S||!S.inv)return;if(allItems().some(i=>i.set==='phoenix'))return;S.inv.push(...makeSet());}
 var SETS={phoenix:{n:'Phoenix Protocol',c:'#ff5a1f',need:3,rev:2,pieces:{chest:'Phoenix Protocol Aegis',legs:'Phoenix Protocol Greaves',thrust:'Phoenix Protocol Wings'}}};
 function makeSet(){const P=SETS.phoenix,o=[];for(const sl in P.pieces){const it=makeItem(sl,1,3);it.name=P.pieces[sl];it.set='phoenix';o.push(it);}return o;}
