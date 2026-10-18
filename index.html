@@ -84,6 +84,7 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 @keyframes glit{0%,90%{transform:none}92%{transform:translate(3px,-1px)}96%{transform:translate(-3px,1px)}}
 @media (orientation:landscape) and (max-height:500px){.rart{height:30vh}}
 .wic{display:block;position:relative;margin:2px auto 4px;flex:none;pointer-events:none}.wic i{position:absolute;display:block}.sl .wic{margin:1px auto}
+.hpw .hps{width:100%;height:100%;object-fit:cover;object-position:var(--op,50% 30%);filter:none;display:block}.hwsel .hpw{overflow:hidden;margin:0 -6px 4px}@media (orientation:landscape) and (max-height:500px){.hwsel .hpw{height:110px}}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
 <div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div>
 <script>
@@ -838,7 +839,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='haywire v40';
+const VER='haywire v41';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1309,6 +1310,8 @@ function hwBtnDraw(t){if(!G||G.state!=='play')return;const b=ui.HW,c=cx,full=(G.
  c.font='italic 900 '+(full?11:10)+'px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle=full?'#fff':'#ff7ab8';c.fillText(full?'GO!':'HW',b.x,b.y-4);c.font='bold 8px system-ui';c.fillText(full?'HAYWIRE':Math.floor(f*100)+'%',b.x,b.y+8);c.restore();}
 // ---- v25 anime art pass ----
 var HSEC={agile:'SEC-7',melee:'SEC-9',heavy:'SEC-12'};
+// v41 select art (16:9) framing: keep visor + weapon in view on narrow/short cards
+var SELOP={agile:'50% 8%',melee:'46% 10%',heavy:'58% 20%'};
 function drawKeyArt(cv2){const W2=cv2.width=Math.round(innerWidth*Math.min(2,devicePixelRatio||1)),H2=cv2.height=Math.round(innerHeight*Math.min(2,devicePixelRatio||1)),g=cv2.getContext('2d');
  const gr=g.createLinearGradient(0,0,0,H2);gr.addColorStop(0,'#07070b');gr.addColorStop(.6,'#1a0508');gr.addColorStop(1,'#300a0e');g.fillStyle=gr;g.fillRect(0,0,W2,H2);
  for(const [x,y,r] of[[.12,.3,.25],[.85,.2,.3],[.5,.95,.5]]){const rg=g.createRadialGradient(W2*x,H2*y,0,W2*x,H2*y,Math.max(W2,H2)*r);rg.addColorStop(0,'rgba(255,30,40,.35)');rg.addColorStop(1,'rgba(255,30,40,0)');g.fillStyle=rg;g.fillRect(0,0,W2,H2);}
@@ -1317,7 +1320,7 @@ function drawKeyArt(cv2){const W2=cv2.width=Math.round(innerWidth*Math.min(2,dev
 function hwDecor(w){try{
  if(w==='title'){const t=$('title');if(!t.querySelector('.kav')){const d=document.createElement('div');d.className='kav';d.innerHTML='<img src="art/title.webp" alt="">';t.prepend(d);}
   const tt=t.querySelector('.tt');if(tt)tt.classList.add('hwlogo');}
- if(w==='select'){$('select').classList.add('hwsel');for(const c of document.querySelectorAll('#select .hc')){const k=c.dataset.hero;if(c.querySelector('.hp'))continue;const d=document.createElement('div');d.className='hpw';d.style.setProperty('--hc',HEROES[k].col);d.innerHTML=`<img class="hp" src="art/hero-${k}.webp" alt=""><span class="sec">${HSEC[k]}</span>`;c.prepend(d);}}
+ if(w==='select'){$('select').classList.add('hwsel');for(const c of document.querySelectorAll('#select .hc')){const k=c.dataset.hero;if(c.querySelector('.hp'))continue;const d=document.createElement('div');d.className='hpw';d.style.setProperty('--hc',HEROES[k].col);d.style.setProperty('--op',SELOP[k]||'50% 30%');d.innerHTML=`<img class="hp hps" src="art/sel-${k}.webp" alt=""><span class="sec">${HSEC[k]}</span>`;c.prepend(d);}}
  if(w==='shop'){const s=$('shop');if(!s.querySelector('.shart')){const i=document.createElement('img');i.className='shart';s.prepend(i);}s.querySelector('.shart').src='art/hero-'+S.hero+'.webp';}
  if(w==='result'){const r=$('result');const d=document.createElement('div');d.className='rart';d.innerHTML=`<img src="art/hero-${S.hero}.webp" alt=""><div class="rtag">${HSEC[S.hero]} · SIGNAL LOST</div>`;r.prepend(d);}
  }catch(e){dlog('decor '+e.message);}}
