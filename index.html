@@ -203,9 +203,21 @@ const AFF=['crit','rate','dmg','spd','regen','hp','xp','ward','armor','dash'];
 const AFFL={crit:v=>'+'+Math.round(v*100)+'% crit',rate:v=>'+'+Math.round(v*100)+'% attack rate',dmg:v=>'+'+Math.round(v*100)+'% damage',spd:v=>'+'+Math.round(v*100)+'% move speed',regen:v=>'+'+v.toFixed(1)+' HP/s',hp:v=>'+'+Math.round(v)+' HP',xp:v=>'+'+Math.round(v*100)+'% XP',ward:v=>'+'+Math.round(v*100)+'% vs shields',armor:v=>'+'+Math.round(v*100)+'% armor',dash:v=>'-'+Math.round(v*100)+'% dash cooldown'};
 const AFFW={crit:300,rate:300,dmg:300,spd:250,regen:20,hp:1.2,xp:120,ward:120,armor:400,dash:150};
 function affVal(k,m,p){return {crit:.04*m,rate:.06*m,dmg:.07*m,spd:.04*m,regen:.5*m*p,hp:12*m*p,xp:.06*m,ward:.25*m,armor:.03*m,dash:.06*m}[k]*rnd(.85,1.15);}
-function rollRar(d,min){const r=R();let x=r<SOLAR_RATE?6:r<.004+.002*d?5:r<.009+.005*d?4:r<.016+.008*d?3:r<.07+.02*d?2:r<.28+.03*d?1:0;return Math.max(x,min||0);}
+// v44 rarity pacing. Level = current round (G.d is fixed at 1 in Haywire runs). Each tier unlocks at RGATE and ramps
+// smoothly (smoothstep over RRAMP levels) from its start odds to its cap. SOLAR is 1/5000 at any level (no gate).
+const RGATE=[1,1,10,30,45,60],RODDS=[null,[.25,.35],[.03,.15],[.015,.08],[.01,.04],[.005,.02]],RRAMP=20,PITY_N=40,BOSS_UP=.35;
+function lootLvl(){return Math.max(1,(typeof G!=='undefined'&&G&&G.wave)||1);}
+function maxRar(lv){let t=0;for(let i=1;i<6;i++)if(lv>=RGATE[i])t=i;return t;}
+function rarP(t,lv,lean){if(lv<RGATE[t])return 0;const[a,b]=RODDS[t],x=Math.min(1,Math.max(0,(lv+(lean||0)-RGATE[t])/RRAMP)),s=x*x*(3-2*x);return a+(b-a)*s;}
+function rarClamp(r,lv){lv=lv==null?lootLvl():lv;return r>=6?r:Math.min(r,maxRar(lv));}
+// rollRar(lv,min,o): o.lean = shop leans better (odds as if lv+lean, gates still at lv); o.boss = may go one tier up (capped);
+// o.drop = counts toward the pity timer (RUN.pity, saved in the run save).
+function rollRar(lv,min,o){o=o||{};lv=lv==null?lootLvl():lv;const top=maxRar(lv);if(R()<SOLAR_RATE)return 6;let m=Math.min(min||0,top);
+ const pity=o.drop&&typeof RUN!=='undefined'&&RUN&&top>=2;if(pity&&(RUN.pity||0)>=PITY_N)m=Math.max(m,2);
+ const r=R();let acc=0,x=0;for(let t=top;t>=1;t--){acc+=rarP(t,lv,o.lean);if(r<acc){x=t;break;}}
+ if(o.boss&&R()<BOSS_UP)x=Math.min(top,x+1);x=Math.max(x,m);if(pity)RUN.pity=x>=2?0:(RUN.pity||0)+1;return x;}
 const IKINDS=['arm','arm','arm','chip','neural','chest','legs','thrust'];
-function makeItem(kind,d,rar,type,wave){rar=rar==null?rollRar(d):rar;if(kind==='arm'&&type&&WEAP[type]&&WEAP[type].spec&&rar<2)rar=2;const m=RAR[rar].m,q=RQ(rar),p=1+.2*(d-1)+.02*(wave||0),it={id:++S.nid,slot:kind,rar,lv:d,aff:{},rv:RV};
+function makeItem(kind,d,rar,type,wave){rar=rar==null?rollRar(lootLvl()):rar;if(kind==='arm'&&type&&WEAP[type]&&WEAP[type].spec&&rar<2){if(maxRar(lootLvl())>=2)rar=2;else type=null;} /* v44: Specials are Epic+, none before Epic unlocks */const m=RAR[rar].m,q=RQ(rar),p=1+.2*(d-1)+.02*(wave||0),it={id:++S.nid,slot:kind,rar,lv:d,aff:{},rv:RV};
  if(kind==='arm'){const t=type||pick(armPool(rar)),w=WEAP[t];it.type=t;it.dmg=+(w.dmg*m*p*rnd(.92,1.08)).toFixed(1);it.rate=+(w.rate*rnd(.95,1.05)*(1+.05*q)).toFixed(2);if(rar>=4&&w.k==='gun')it.perk=w.splash||w.hitscan?'acid':(R()<.5?'pierce':'acid');it.name=PREF[rar]+' '+w.n;if(w.k==='melee'){if(!w.model)it.blade=BLADE[rar];it.len=Math.round(w.range+q*6);}}
  else if(kind==='chip'){it.dmgB=+(.05*m*rnd(.9,1.1)).toFixed(3);}
  else if(kind==='neural'){it.shR=+rnd(.9,1.1).toFixed(2);}
@@ -250,7 +262,7 @@ function makeBot(bt){const m=bt==='medic';return {id:++S.nid,slot:'neural',bt,ra
 function allItems(){return S.inv.concat(SLOTS.map(s=>S.eq[s]).filter(Boolean));}
 function neuralCount(){return allItems().filter(b=>b.bt&&b.bt!=='medic').length;}
 function addBot(b){if(b.bt!=='medic'&&neuralCount()>=BOT_CAP)return {scrap:scrapItem(Object.assign({},b,{lv:Math.max(3,b.lv)}))};if(!S.eq.neural)S.eq.neural=b;else S.inv.push(b);saveGame();return {bot:b};}
-function rollNeural(d){return R()<.0025+.0006*d;}
+function rollNeural(d){if(lootLvl()<RGATE[4])return false;return R()<.0025+.0006*d;} // v44: Neural Link bots are Ultimate tier -> gated
 function makeNeural(){const owned=allItems().map(b=>b.bt),free=Object.keys(NBOTS).filter(k=>!owned.includes(k));return makeBot(pick(free.length?free:Object.keys(NBOTS)));}
 function activeBot(){const n=S.eq.neural;return n&&n.bt?n:null;}
 function ensureBots(){if(!S.medicGiven){S.medicGiven=1;const m=makeBot('medic');if(!S.eq.neural)S.eq.neural=m;else S.inv.push(m);S.medicNew=1;saveGame();}}
@@ -334,7 +346,8 @@ var OLDW={blaster:'assault',scatter:'assault',rail:'sniper',launcher:'demo',flam
 function wcls(it){const w=it&&WEAP[it.type];if(!w)return null;return w.k==='gun'?(w.cls||'pistol'):w.k;}
 function clsLabel(it){const c=CLS[wcls(it)]||CLS.pistol;return c[1]+' '+c[0];}
 function armPool(rar){const p=GUNS.concat(GUNS,MELW);return rar>=2?p.concat(SPECW):p;}
-function shopRar(t,bump){const b=[0,1,3,4][t]||0;return Math.min(5,b+(R()<bump?1:0));}
+function shopRar(t,bump){return rollRar(lootLvl(),0,{lean:SHOP_LEAN});} // v44: replaces v34 round bands; follows level gates, leans a little better
+var SHOP_LEAN=5;
 function solarCol(){const k=.5+.5*Math.sin(performance.now()/180);return k>.5?'#FFF4D6':'#ffb347';}
 function rarMig(it){if(!it||it.rv===RV)return it;const ov=it.rv||0;
  if(ov<34){if(it.rar===3||it.rar===4)it.rar=5;if(it.rar>6)it.rar=6;
@@ -430,9 +443,9 @@ function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wa
 // PLAYTEST SETTING (v13, Matt): from wave LOOT_PT_WAVE on, cards 1-2 are Rare or better, card 3 is Rare+ with LOOT_PT_LEG chance of Legendary (else Rare/Epic 50/50).
 const LOOT_PT_ON=true,LOOT_PT_WAVE=15,LOOT_PT_LEG=.15;
 function lootChoices(){const w=G.wave,boss=isBossWave(w),pt=LOOT_PT_ON&&w>=LOOT_PT_WAVE,out=[];for(let i=0;i<3;i++){let it;const kinds=IKINDS.filter(k=>!out.some(o=>o.slot===k&&k!=='arm'));
- if(pt&&i===2){const x=R(),r=x<LOOT_PT_LEG?5:x<.35?4:x<.6?3:(R()<.5?2:1);it=makeItem(pick(kinds),G.d,r,null,w);}
+ if(pt&&i===2){const x=R(),r=rarClamp(x<LOOT_PT_LEG?5:x<.35?4:x<.6?3:(R()<.5?2:1));it=makeItem(pick(kinds),G.d,r,null,w);}
  else if(rollNeural(G.d+Math.floor(w/3)+(boss?4:0)))it=makeNeural();
- else{const floor=boss&&i===0?2:pt?1:(w>=8?1:0);it=makeItem(pick(kinds),G.d,rollRar(G.d+Math.floor(w/2),floor),null,w);}out.push(it);}return out;}
+ else{const floor=boss&&i===0?2:pt?1:(w>=8?1:0);it=makeItem(pick(kinds),G.d,rollRar(lootLvl(),floor,{boss,drop:1}),null,w);}out.push(it);}return out;}
 function takeLoot(i){const it=G.loot[i];const r=addItem(it);G.items.push(it);G.lootMsg=r?r.name:null;G.loot=null;}
 function continueWave(){if(!G||G.state!=='loot'||G.loot){dlog('continueWave blocked '+(G&&G.state));if(G&&G.state==='loot'&&G.loot)return;if(!G||G.state!=='loot')return;}dlog('continueWave');G.state='play';G.bul=G.bul.filter(b=>b.pl);nextWave();}
 function recBest(){S.bestW=S.bestW||{};if(G.cleared>(S.bestW[G.d]||0)){S.bestW[G.d]=G.cleared;G.newBest=1;}saveGame();}
@@ -504,11 +517,11 @@ function killEnemy(e){if(e.dead)return;e.dead=true;if(e.type==='mboss'){const c=
  
  if(e.type==='boss'){G.boss=null;G.bul=G.bul.filter(b=>b.pl);G.p.inv=1.5;G.bossOn=false;{const cx2=hitsWall(e.x+50,e.y,18)?e.x:e.x+50;}G.banner={t:2.2,txt:'WARDEN BOT DOWN',sub:'Survive the timer'};auTrack('main');
   G.en.forEach(o=>{if(!o.dead&&o!==e&&o.type==='drone'){o.dead=true;burst(o.x,o.y,o.col,10,250);}});}}
-function dropItem(x,y,minR,boss){const it=rollNeural(G.d+(boss?4:0))?makeNeural():makeItem(pick(IKINDS),G.d,rollRar(G.d+(boss?2:0),minR||0),null,G.wave);G.drops.push({k:'item',x,y,vx:rnd(-120,120),vy:rnd(-120,120),it,t:0});}
+function dropItem(x,y,minR,boss){const it=rollNeural(G.d+(boss?4:0))?makeNeural():makeItem(pick(IKINDS),G.d,rollRar(lootLvl(),minR||0,{boss,drop:1}),null,G.wave);G.drops.push({k:'item',x,y,vx:rnd(-120,120),vy:rnd(-120,120),it,t:0});}
 function roomCleared(r){r.st=2;G.cleared++;sfx('clear');addTxt(G.p.x,G.p.y-40,'ROOM CLEAR','#7affd6',22,1.1);
  if(r.kind==='cache'||R()<.55)G.drops.push({k:'chest',x:r.cx,y:r.cy,t:0,cache:r.kind==='cache'});}
 function endRun(win){recBest();const w=G.cleared,bon=Math.round(w*14*(1+.3*(G.d-1))*(win?1.5:1));G.bonus=bon;if(bon>0){const lv0=S.lvl;S.xp+=bon;G.xp+=bon;while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;G.lvls++;}}
- const nItems=win?1:0;for(let i=0;i<nItems;i++){const it=makeItem(pick(IKINDS),G.d,rollRar(G.d+Math.floor(w/5),win&&i===0?1:0),null,G.wave);addItem(it);G.items.push(it);}
+ const nItems=win?1:0;for(let i=0;i<nItems;i++){const it=makeItem(pick(IKINDS),G.d,rollRar(lootLvl(),win&&i===0?1:0,{drop:1}),null,G.wave);addItem(it);G.items.push(it);}
  if(win){S.selD=Math.min(S.maxD,G.d+1);}S.best=Math.max(S.best||0,G.d);saveGame();}
 function update(dt){
  if(!G)return;const p=G.p,ps=G.ps;
@@ -839,7 +852,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
  c2.scale(k,k);c2.font='italic 900 '+sz+'px system-ui,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.lineJoin='round';c2.lineWidth=Math.max(3,sz/5);c2.strokeStyle=INK;c2.strokeText(s,w/2,sz*.9);c2.fillStyle=col;c2.fillText(s,w/2,sz*.9);cv2.k=k;TXC.set(key,cv2);return cv2;}
 
 
-const VER='haywire v43';
+const VER='haywire v44';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1027,7 +1040,7 @@ function endRun(win){recBest();clearRun();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
 function wTier(){const r=G?G.wave:1;return r>=18?3:r>=12?2:r>=6?1:0;}
 function makeOffers(){const own=SHOPW[S.hero],oth=S.hero==='melee'?SHOPW.melee:SHOPW[S.hero==='agile'?'heavy':'agile'];const t=wTier(),lv=1+Math.floor((G?G.wave:1)/4);
- const w=shuffle(own.slice()).slice(0,3).concat([pick(oth)]).map(tp=>{const it=makeItem('arm',lv,shopRar(t,.2),R()<.18&&t>=1?pick(SPECW):tp);return {it,cost:price(70+45*RQ(it.rar)+(WEAP[tp].k==='gun'?0:-15)),sold:0};});
+ const w=shuffle(own.slice()).slice(0,3).concat([pick(oth)]).map(tp=>{const it=makeItem('arm',lv,shopRar(t,.2),R()<.18&&maxRar(lootLvl())>=2?pick(SPECW):tp);return {it,cost:price(70+45*RQ(it.rar)+(WEAP[tp].k==='gun'?0:-15)),sold:0};});
  const g=shuffle(['chest','legs','thrust','chip','neural']).slice(0,3).map(k=>{const it=makeItem(k,lv,shopRar(t,.25));return {it,cost:price(55+40*RQ(it.rar)),sold:0};});
  return {w,g};}
 function rollPick(){const r=G?G.wave:1;const pool=S.hero==='melee'?['dmg','dmg','rate','rate','hp','hp','armor','armor','spd','crit','dash']:Object.keys(STATS);const ks=[];shuffle(pool.slice()).forEach(k=>{if(ks.length<3&&!ks.includes(k))ks.push(k);});return ks.map(k=>{const x=R(),rar=x<.04+.01*r?5:x<.14+.02*r?2:x<.45+.02*r?1:0;return {k,rar,v:STATS[k].v*PICKM[rar]};});}
@@ -1076,21 +1089,23 @@ function showSelect(){G=null;const c=(k)=>{const H=HEROES[k];return `<div class=
  for(const k of['agile','melee','heavy']){const cv2=$('hc_'+k),g=cv2.getContext('2d'),old=cx;cx=g;try{g.translate(150,160);g.scale(4.2,4.2);const L=HEROES[k].look();L.main=makeItem('arm',1,1,HEROES[k].wpn);L.off=HEROES[k].twin?makeItem('arm',1,1,HEROES[k].wpn):HEROES[k].shield?makeItem('arm',1,1,HEROES[k].shield):null;drawPlayer(0,0,-1.57,-1.57,false,1,0,1,false,L,k);}finally{cx=old;}}
  $('select').querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{sfx('item');startGame(b.dataset.hero,{pre:1});});$('sb').onclick=()=>{sfx('click');showTitle();};$('select').querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.diff;saveGame();sfx('click');showSelect();});}
 function startGame(hero,o){newRun(hero);for(const s of[ui.L,ui.R]){s.id=null;s.kx=s.ky=0;}applyIn();startRun(1);G.banner={t:1.6,txt:'ROUND 1',sub:HEROES[hero].n+' deployed · survive 45s'};G.waveT=2;
- if(o&&o.pre){clearRun();if(TEST_PICKS){G.state='prepick';RUN.pre={i:0,n:7,leg:ri(0,6)};showPrePick();}else show('play');}else show('play');}
+ if(o&&o.pre){clearRun();if(TEST_PICKS){G.state='prepick';RUN.pre={i:0,n:7,leg:ri(0,6)};showPrePick();}else if(START_PICKS){G.state='prepick';RUN.pre={i:0,n:START_RARS.length,leg:-1,rars:START_RARS};showPrePick();}else show('play');}else show('play');}
 // v42: the 7 free starting picks (incl. 1 guaranteed Legendary) are a test-only boost. Set true to turn them back on.
 var TEST_PICKS=false;
-function showPrePick(){const P=RUN.pre;if(!G||!P)return;const leg=P.i===P.leg;let picks=rollPick();if(leg)picks=picks.map(o=>({k:o.k,rar:5,v:STATS[o.k].v*PICKM[5]}));P.cur=picks;
- $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">SYSTEM BOOT</div><div class="sub">UPGRADE ${P.i+1}/${P.n}${leg?' · <b style="color:#ffd23f">★ GUARANTEED LEGENDARY SET ★</b>':''}</div></div><div class="pk3">${picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pre="${i}" style="--rc:${c};animation-delay:${i*.06}s${leg?';box-shadow:0 0 22px #ffd23f,0 0 4px #fff inset;border-color:#ffd23f':''}"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">${HEROES[S.hero].n} · ${DF().n} · pick ${P.n-P.i} more before round 1</div>`;
+// v44 (Matt): every new run starts with 2 free stat picks before Round 1: one Legendary, then one Epic. Exempt from level gates.
+var START_PICKS=true,START_RARS=[5,2];
+function showPrePick(){const P=RUN.pre;if(!G||!P)return;const leg=P.i===P.leg;let picks=rollPick();if(leg)picks=picks.map(o=>({k:o.k,rar:5,v:STATS[o.k].v*PICKM[5]}));if(P.rars){const fr=P.rars[P.i];picks=picks.map(o=>({k:o.k,rar:fr,v:STATS[o.k].v*PICKM[fr]}));}P.cur=picks;
+ $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">SYSTEM BOOT</div><div class="sub">${P.rars?'FREE '+RAR[P.rars[P.i]].n.toUpperCase()+' UPGRADE · ':''}UPGRADE ${P.i+1}/${P.n}${leg?' · <b style="color:#ffd23f">★ GUARANTEED LEGENDARY SET ★</b>':''}</div></div><div class="pk3">${picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pre="${i}" style="--rc:${c};animation-delay:${i*.06}s${leg?';box-shadow:0 0 22px #ffd23f,0 0 4px #fff inset;border-color:#ffd23f':''}"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">${HEROES[S.hero].n} · ${DF().n} · pick ${P.n-P.i} more before round 1</div>`;
  show('loot');sfx(leg?'level':'item');$('loot').querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const o=P.cur&&P.cur[+b.dataset.pre];if(!o)return;P.cur=null;RUN.b[o.k]+=o.v;G.ps=pstats();G.p.hp=G.ps.hp;P.i++;sfx('item');if(P.i<P.n)showPrePick();else{RUN.pre=null;G.state='play';show('play');}});}
 const RKEY=(typeof TKEY!=='undefined'?TKEY:'tanks')+'_run',RVER=14;
 function saveRun(){try{if(!G)return;localStorage.setItem(RKEY,JSON.stringify({v:RVER,t:Date.now(),hero:S.hero,diff:S.diff||'normal',wave:G.wave,kills:G.kills||0,hpF:Math.max(.05,Math.min(1,G.p.hp/G.ps.hp)),
- run:{riots:RUN.riots,seenE:RUN.seenE,cash:RUN.cash,earned:RUN.earned,b:RUN.b,gMax:RUN.gMax||3,gDmg:RUN.gDmg||1},inv:S.inv,eq:S.eq,lvl:S.lvl,xp:S.xp,nid:S.nid}));}catch(e){}}
+ run:{riots:RUN.riots,seenE:RUN.seenE,cash:RUN.cash,earned:RUN.earned,b:RUN.b,gMax:RUN.gMax||3,gDmg:RUN.gDmg||1,pity:RUN.pity||0},inv:S.inv,eq:S.eq,lvl:S.lvl,xp:S.xp,nid:S.nid}));}catch(e){}}
 function clearRun(){try{localStorage.removeItem(RKEY);}catch(e){}}
 function loadRun(){let s=null;const raw=(()=>{try{return localStorage.getItem(RKEY);}catch(e){return null;}})();if(!raw)return null;try{s=JSON.parse(raw);}catch(e){s=null;}if(!s||typeof s!=='object'){clearRun();return null;}
  const num=x=>typeof x==='number'&&isFinite(x);const ok=s.v===RVER&&HEROES[s.hero]&&DIFF[s.diff]&&num(s.wave)&&s.wave>=1&&s.run&&num(s.run.cash)&&s.run.b&&typeof s.run.b==='object'&&Object.values(s.run.b).every(num)&&Array.isArray(s.inv)&&s.eq&&typeof s.eq==='object'&&s.eq.main&&WEAP[s.eq.main.type];
  if(!ok){clearRun();return null;}return s;}
 function continueRun(){const s=loadRun();if(!s){showTitle();return;}try{S.diff=s.diff;newRun(s.hero);S.inv=s.inv;S.eq=s.eq;S.lvl=s.lvl||1;S.xp=s.xp||0;S.nid=Math.max(s.nid||0,S.nid);hwMigrate();
- RUN.cash=s.run.cash;RUN.riots=Array.isArray(s.run.riots)?s.run.riots.filter(x=>typeof x==='number'):null;RUN.seenE=s.run.seenE||{};RUN.earned=s.run.earned||0;Object.assign(RUN.b,s.run.b);RUN.gMax=Math.min(5,s.run.gMax||3);RUN.gDmg=Math.min(1+.12*BOOM_MAX,s.run.gDmg||1);RUN.gren=RUN.gMax;
+ RUN.cash=s.run.cash;RUN.riots=Array.isArray(s.run.riots)?s.run.riots.filter(x=>typeof x==='number'):null;RUN.seenE=s.run.seenE||{};RUN.earned=s.run.earned||0;Object.assign(RUN.b,s.run.b);RUN.gMax=Math.min(5,s.run.gMax||3);RUN.gDmg=Math.min(1+.12*BOOM_MAX,s.run.gDmg||1);RUN.gren=RUN.gMax;RUN.pity=s.run.pity||0;
  for(const st of[ui.L,ui.R]){st.id=null;st.kx=st.ky=0;}applyIn();startRun(1);G.wave=s.wave;G.cleared=s.wave;G.kills=s.kills||0;G.ps=pstats();G.p.hp=Math.max(1,Math.round(G.ps.hp*(s.hpF||1)));show('play');nextWave();G.banner={t:1.8,txt:'RUN RESUMED',sub:'Round '+G.wave+' · '+DF().n};}
  catch(e){dlog('continue failed '+e.message);clearRun();showTitle();}}
 
