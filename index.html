@@ -860,7 +860,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v46';
+const VER='haywire v47';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1048,9 +1048,21 @@ function endRun(win){recBest();clearRun();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
 function wTier(){const r=G?G.wave:1;return r>=18?3:r>=12?2:r>=6?1:0;}
 function makeOffers(){const own=SHOPW[S.hero],oth=S.hero==='melee'?SHOPW.melee:SHOPW[S.hero==='agile'?'heavy':'agile'];const t=wTier(),lv=1+Math.floor((G?G.wave:1)/4);
- const w=shuffle(own.slice()).slice(0,3).concat([pick(oth)]).map(tp=>{const it=makeItem('arm',lv,shopRar(t,.2),R()<.18&&maxRar(lootLvl())>=2?pick(SPECW):tp);return {it,cost:price(70+45*RQ(it.rar)+(WEAP[tp].k==='gun'?0:-15)),sold:0};});
- const g=shuffle(['chest','legs','thrust','chip','neural']).slice(0,3).map(k=>{const it=makeItem(k,lv,shopRar(t,.25));return {it,cost:price(55+40*RQ(it.rar)),sold:0};});
- return {w,g};}
+ const w=shuffle(own.slice()).slice(0,4).concat([pick(oth)]).map(tp=>{const it=makeItem('arm',lv,shopRar(t,.2),R()<.18&&maxRar(lootLvl())>=2?pick(SPECW):tp);return {it,cost:price(70+45*RQ(it.rar)+(WEAP[tp].k==='gun'?0:-15)),sold:0};});
+ const g=shuffle(['chest','legs','thrust','chip','neural']).slice(0,4).map(k=>{const it=makeItem(k,lv,shopRar(t,.25));return {it,cost:price(55+40*RQ(it.rar)),sold:0};});
+ return {w,g,v:makeVault(lv)};}
+// v47 BLACK MARKET (round BM_R+): premium credit sinks. Vault gear is always the TOP tier the v45 gates allow right now
+// (Epic at 7-19, Ultra 20+, Ultimate 30+, Legendary 40+; SOLAR 1/5000), 2 item levels higher than the normal shop and +1 affix.
+// Prices use price() like everything else, so they scale with the round.
+var BM_R=8,BM_W=1500,BM_WQ=500,BM_G=1200,BM_GQ=400,BM_I=1000,BM_LV=2;
+function vaultRar(){return R()<SOLAR_RATE?6:maxRar(lootLvl());}
+function vaultItem(kind,lv,type){const it=makeItem(kind,lv+BM_LV,vaultRar(),type);const free=AFF.filter(k=>!(k in it.aff));if(free.length){const k=pick(free);it.aff[k]=+affVal(k,RAR[it.rar].m,1+.2*(lv+BM_LV-1)).toFixed(3);}it.vault=1;it.name='Vault '+it.name;return it;}
+function makeVault(lv){if((G?G.wave:1)<BM_R)return null;const own=SHOPW[S.hero];
+ const w=shuffle(own.slice()).slice(0,2).map(tp=>{const it=vaultItem('arm',lv,R()<.18&&maxRar(lootLvl())>=2?pick(SPECW):tp);return {it,cost:price(BM_W+BM_WQ*RQ(it.rar)),sold:0};});
+ const gk=pick(['chest','legs','thrust','chip','neural']),gi=vaultItem(gk,lv);
+ const ks=Object.keys(RUN.b).filter(k=>STATS[k]),ik=pick(ks),ir=Math.min(maxRar(lootLvl()),5);
+ return {w,g:[{it:gi,cost:price(BM_G+BM_GQ*RQ(gi.rar)),sold:0}],imp:{k:ik,rar:ir,v:STATS[ik].v*PICKM[ir],cost:impCost(),sold:0}};}
+function impCost(){return price(BM_I*(1+.5*(RUN.imp||0)));}
 function rollPick(){const r=G?G.wave:1;const pool=S.hero==='melee'?['dmg','dmg','rate','rate','hp','hp','armor','armor','spd','crit','dash']:Object.keys(STATS);const ks=[];shuffle(pool.slice()).forEach(k=>{if(ks.length<3&&!ks.includes(k))ks.push(k);});return ks.map(k=>{const x=R(),rar=x<.04+.01*r?5:x<.14+.02*r?2:x<.45+.02*r?1:0;return {k,rar,v:STATS[k].v*PICKM[rar]};});}
 function showLoot(){if(!G)return;G.lootAt=1e9;if(!RUN.picks)RUN.picks=rollPick();
  $('loot').innerHTML=`<div class="hdr"><div class="ttl" style="font-size:30px">ROUND ${G.wave} CLEAR</div><div class="sub">CHOOSE ONE UPGRADE</div></div><div class="pk3">${RUN.picks.map((o,i)=>{const S2=STATS[o.k],c=RAR[o.rar].c;return `<div class="pcard r${o.rar}" data-pick="${i}" style="--rc:${c};animation-delay:${i*.08}s"><div class="pic">${S2.ic}</div><div class="prr">${RAR[o.rar].n}</div><div class="pnm">${S2.n}</div><div class="pval">${S2.f(o.v)}</div></div>`;}).join('')}</div><div class="st">+$${G.lastBonus||0} round bonus · cash $${RUN.cash}</div>`;
@@ -1063,12 +1075,15 @@ function showShop(){if(!G)return;G.lootAt=1e9;if(!RUN.offers)RUN.offers=makeOffe
  $('shop').innerHTML=`<div class="hdr row" style="justify-content:space-between"><div class="ttl" style="font-size:30px">SHOP</div><div class="hpb"><i style="width:${100*hp/ps.hp}%"></i><span>HP ${hp}/${ps.hp}</span></div><div class="cash">$${RUN.cash}</div></div>
  <div class="sh row" style="justify-content:space-between">WEAPONS<span class="btn${RUN.cash<rrc()?' dis':''}" data-buy="rr" style="font-size:14px;padding:4px 10px">🎲 REROLL $${rrc()}</span></div><div class="sg">${RUN.offers.w.map((o,i)=>card('w'+i,o,WEAP[o.it.type].k==='gun'?'Gun · Main/Off Arm':WEAP[o.it.type].k==='melee'?'Melee · tap right stick':'Shield · Off Arm')).join('')}</div>
  <div class="sh">ARMOUR &amp; CHIPS</div><div class="sg">${RUN.offers.g.map((o,i)=>card('g'+i,o,ITYPE[o.it.slot])).join('')}</div>
+ ${RUN.offers.v?`<div class="sh" style="color:#ffd23f">🕶 BLACK MARKET · top-tier vault gear &amp; implants</div><div class="sg">${RUN.offers.v.w.map((o,i)=>card('vw'+i,o,'VAULT · '+(WEAP[o.it.type].k==='gun'?'Gun · Main/Off Arm':WEAP[o.it.type].k==='melee'?'Melee · tap right stick':'Shield · Off Arm'))).join('')}${RUN.offers.v.g.map((o,i)=>card('vg'+i,o,'VAULT · '+ITYPE[o.it.slot])).join('')}${(()=>{const m=RUN.offers.v.imp,c=RAR[m.rar].c;return `<div class="sc r${m.rar}${m.sold||RUN.cash<m.cost?' dis':''}" data-buy="vi" style="--rc:${c}"><div class="tag">${RAR[m.rar].n}</div><div class="nm" style="color:${c}">${STATS[m.k].ic} ${RAR[m.rar].n} ${STATS[m.k].n} Implant</div><div class="ds">Permanent for this run · ${STATS[m.k].f(m.v)}</div><div class="ds">Each implant raises the next one's price (${RUN.imp||0} installed)</div><div class="pr">${m.sold?'✓ INSTALLED':'$'+m.cost}</div></div>`;})()}</div>`:''}
  <div class="sh">GRENADES (${RUN.gMax}/round · dmg x${(RUN.gDmg||1).toFixed(2)})</div><div class="sg">${[['gx','Extra grenade',gxn()>=2?'MAXED (5 per round)':'+1 grenade every round ('+gxn()+'/2)',gxc()],['gd','Bigger boom',gdn()>=BOOM_MAX?'MAXED':(gdn()===BOOM_MAX-1&&BOOM_SILLY?'Damage +12% & blast radius x10 (!!) (':'Damage +12% & blast radius +8% (')+gdn()+'/'+BOOM_MAX+')',gdc()]].map(([id,n,d,c2])=>`<div class="sc rep${RUN.cash<c2||(id==='gx'?gxn()>=2:gdn()>=3)?' dis':''}" data-buy="${id}" style="--rc:#ff8a1f"><div class="nm" style="color:#ff8a1f">${n}</div><div class="ds">${d}</div><div class="pr">$${c2}</div></div>`).join('')}</div>
  <div class="sh">REPAIRS</div><div class="sg">${rp('r1','Patch kit','Repair 35% HP',rc)}${rp('r2','Full overhaul','Repair to full HP',fc)}</div>
  <div class="row foot"><span class="btn" id="inv">🛠 INVENTORY${S.inv.length?' ('+S.inv.length+')':''}</span><span class="btn pk" id="nx" style="font-size:22px">NEXT ROUND ${G.wave+1} ▶</span></div>${isSwarm(G.wave+1)?'<div class="warn">⚠ Unrest rising in the cell blocks… a riot may break out</div>':isBossWave(G.wave+1)?'<div class="warn">⚠ Next round: TITAN super-tank</div>':''}`;
  show('shop');hwDecor('shop');$('shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));$('nx').onclick=()=>{sfx('click');closeShop();};$('inv').onclick=()=>{sfx('click');IV.inRun=false;IV.f='all';showHangar();};}
 function buy(id){const ps=pstats();let cost=0,ok=false;
  if(id==='rr'){const c3=rrc();if(RUN.cash<c3)return;cost=c3;RUN.rr=(RUN.rr||0)+1;RUN.offers=makeOffers();ok=true;toast('Shop rerolled');}
+ else if(/^v[wg]\d+$/.test(id)){const o=RUN.offers.v[id[1]][+id.slice(2)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
+ else if(id==='vi'){const m=RUN.offers.v&&RUN.offers.v.imp;if(!m||m.sold||RUN.cash<m.cost)return;cost=m.cost;m.sold=1;RUN.b[m.k]+=m.v;RUN.imp=(RUN.imp||0)+1;const old=G.ps.hp;G.ps=pstats();if(m.k==='hp')G.p.hp+=G.ps.hp-old;ok=true;toast('Implant installed: '+STATS[m.k].f(m.v));}
  else if(/^[wg]\d+$/.test(id)){const o=RUN.offers[id[0]][+id.slice(1)];if(o.sold||RUN.cash<o.cost)return;cost=o.cost;o.sold=1;S.inv.push(o.it);ok=true;toast(o.it.name+' → inventory');}
  else if(id==='gx'||id==='gd'){if(id==='gx'?gxn()>=2:gdn()>=BOOM_MAX)return;const c2=id==='gx'?gxc():gdc();if(RUN.cash<c2)return;cost=c2;if(id==='gx'){RUN.gMax++;RUN.gren++;}else RUN.gDmg=+(1+.12*(gdn()+1)).toFixed(2);ok=true;toast(id==='gx'?'+1 grenade per round':'Grenade dmg +12%, radius +8%');}
  else{const full=id==='r2',c=price(full?90:40);if(RUN.cash<c||G.p.hp>=ps.hp)return;cost=c;G.p.hp=full?ps.hp:Math.min(ps.hp,G.p.hp+ps.hp*.35);ok=true;}
@@ -1107,13 +1122,13 @@ function showPrePick(){const P=RUN.pre;if(!G||!P)return;const leg=P.i===P.leg;le
  show('loot');sfx(leg?'level':'item');$('loot').querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const o=P.cur&&P.cur[+b.dataset.pre];if(!o)return;P.cur=null;RUN.b[o.k]+=o.v;G.ps=pstats();G.p.hp=G.ps.hp;P.i++;sfx('item');if(P.i<P.n)showPrePick();else{RUN.pre=null;G.state='play';show('play');}});}
 const RKEY=(typeof TKEY!=='undefined'?TKEY:'tanks')+'_run',RVER=14;
 function saveRun(){try{if(!G)return;localStorage.setItem(RKEY,JSON.stringify({v:RVER,t:Date.now(),hero:S.hero,diff:S.diff||'normal',wave:G.wave,kills:G.kills||0,hpF:Math.max(.05,Math.min(1,G.p.hp/G.ps.hp)),
- run:{riots:RUN.riots,seenE:RUN.seenE,cash:RUN.cash,earned:RUN.earned,b:RUN.b,gMax:RUN.gMax||3,gDmg:RUN.gDmg||1,pity:RUN.pity||0},inv:S.inv,eq:S.eq,lvl:S.lvl,xp:S.xp,nid:S.nid}));}catch(e){}}
+ run:{riots:RUN.riots,seenE:RUN.seenE,cash:RUN.cash,earned:RUN.earned,b:RUN.b,gMax:RUN.gMax||3,gDmg:RUN.gDmg||1,pity:RUN.pity||0,imp:RUN.imp||0},inv:S.inv,eq:S.eq,lvl:S.lvl,xp:S.xp,nid:S.nid}));}catch(e){}}
 function clearRun(){try{localStorage.removeItem(RKEY);}catch(e){}}
 function loadRun(){let s=null;const raw=(()=>{try{return localStorage.getItem(RKEY);}catch(e){return null;}})();if(!raw)return null;try{s=JSON.parse(raw);}catch(e){s=null;}if(!s||typeof s!=='object'){clearRun();return null;}
  const num=x=>typeof x==='number'&&isFinite(x);const ok=s.v===RVER&&HEROES[s.hero]&&DIFF[s.diff]&&num(s.wave)&&s.wave>=1&&s.run&&num(s.run.cash)&&s.run.b&&typeof s.run.b==='object'&&Object.values(s.run.b).every(num)&&Array.isArray(s.inv)&&s.eq&&typeof s.eq==='object'&&s.eq.main&&WEAP[s.eq.main.type];
  if(!ok){clearRun();return null;}return s;}
 function continueRun(){const s=loadRun();if(!s){showTitle();return;}try{S.diff=s.diff;newRun(s.hero);S.inv=s.inv;S.eq=s.eq;S.lvl=s.lvl||1;S.xp=s.xp||0;S.nid=Math.max(s.nid||0,S.nid);hwMigrate();
- RUN.cash=s.run.cash;RUN.riots=Array.isArray(s.run.riots)?s.run.riots.filter(x=>typeof x==='number'):null;RUN.seenE=s.run.seenE||{};RUN.earned=s.run.earned||0;Object.assign(RUN.b,s.run.b);RUN.gMax=Math.min(5,s.run.gMax||3);RUN.gDmg=Math.min(1+.12*BOOM_MAX,s.run.gDmg||1);RUN.gren=RUN.gMax;RUN.pity=s.run.pity||0;
+ RUN.cash=s.run.cash;RUN.riots=Array.isArray(s.run.riots)?s.run.riots.filter(x=>typeof x==='number'):null;RUN.seenE=s.run.seenE||{};RUN.earned=s.run.earned||0;Object.assign(RUN.b,s.run.b);RUN.gMax=Math.min(5,s.run.gMax||3);RUN.gDmg=Math.min(1+.12*BOOM_MAX,s.run.gDmg||1);RUN.gren=RUN.gMax;RUN.pity=s.run.pity||0;RUN.imp=s.run.imp||0;
  for(const st of[ui.L,ui.R]){st.id=null;st.kx=st.ky=0;}applyIn();startRun(1);G.wave=s.wave;G.cleared=s.wave;G.kills=s.kills||0;G.ps=pstats();G.p.hp=Math.max(1,Math.round(G.ps.hp*(s.hpF||1)));show('play');nextWave();G.banner={t:1.8,txt:'RUN RESUMED',sub:'Round '+G.wave+' · '+DF().n};}
  catch(e){dlog('continue failed '+e.message);clearRun();showTitle();}}
 
