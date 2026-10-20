@@ -98,7 +98,7 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 .mn.lk{opacity:.4;filter:grayscale(.8)}.mn.mx{background:color-mix(in srgb,var(--bc) 30%,#0e1430)}.mn.on{box-shadow:0 0 0 2px #fff,0 0 14px var(--bc)}.mi{font-size:20px;line-height:1;color:var(--bc)}.mr{font-size:10px;font-weight:900;color:#fff}
 .mdet{width:100%;max-width:520px;min-height:96px;border:2px solid #19e3ff55;border-radius:8px;background:rgba(5,6,10,.75);padding:6px 8px;box-sizing:border-box}.mdh{font-weight:900;font-style:italic;font-size:15px}.mdh i{font-size:10px;color:#9aa6c0;font-style:normal}.mdd{font-size:12px;color:#dfe8ff;margin:3px 0}.mdn{font-size:12px;color:#9aa6c0;text-align:center;padding-top:28px}
 .btn.mplus{font-size:15px;padding:4px 16px;min-height:36px}.mft{position:static;background:none}
-.mskb{position:absolute;left:4px;bottom:4px;background:rgba(5,6,10,.85);border:2px solid #19e3ff;color:#19e3ff;font-weight:900;font-style:italic;font-size:10px;padding:3px 6px;border-radius:4px;cursor:pointer;z-index:2}.mskb b{background:#ffd23f;color:#111;border-radius:6px;padding:0 4px;margin-left:2px}
+.mskb{position:absolute;left:4px;bottom:4px;background:rgba(5,6,10,.85);border:2px solid var(--mc,#19e3ff);color:var(--mc,#19e3ff);font-weight:900;font-style:italic;font-size:10px;padding:3px 6px;border-radius:4px;cursor:pointer;z-index:2}.mskb b{background:#ffd23f;color:#111;border-radius:6px;padding:0 4px;margin-left:2px}
 .mres{margin-top:8px;min-width:260px;text-align:center}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
 <div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div><div id="tree" class="scr"></div>
@@ -505,7 +505,7 @@ function doMelee(){const p=G.p,ps=G.ps;if(p.mcd>0)return;const arms=[ps.main,ps.
  const dir=meleeDir();p.ang=dir;p.mcd=o.cd;p.swing=.16;p.swingA=dir;p.swingO=o;swing(dir,o);}
 function swing(dir,o){const p=G.p;sfx('saber');if(!(o.it&&typeof wsReady==='function'&&wsReady()))part({k:'slash',x:p.x,y:p.y,a:dir,arc:o.arc,r:o.range,life:.18,col:o.col});let hit=0;
  for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d>o.range+e.r)continue;const df=Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-dir+9.42)%6.283)-3.14);if(df>o.arc/2&&d>e.r+p.r)continue;
-  const crit=R()<G.ps.crit;const md=o.dmg*(G.pw.dmg>0?1.35:1)*(crit?2:1);if(S.hero==='melee')p.hp=Math.min(G.ps.hp,p.hp+md*.03);hitEnemy(e,{dmg:md,crit,vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:o.kb,acid:o.acid});hit++;}
+  const crit=R()<G.ps.crit;const md=o.dmg*(G.pw.dmg>0?1.35:1)*(crit?2:1);if(S.hero==='melee')p.hp=Math.min(G.ps.hp,p.hp+md*(.03+(typeof mLS==='function'?mLS():0)));hitEnemy(e,{dmg:md,crit,vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:o.kb,acid:o.acid});hit++;}
  for(const e of G.en){if(e.dead||e.spawn>0||e.type!=='drone'||e.hp<=0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d>Math.max(90,o.range+e.r))continue;const df=Math.abs(((Math.atan2(e.y-p.y,e.x-p.x)-dir+9.42)%6.283)-3.14);if(df>o.arc/2&&d>e.r+p.r)continue;hitEnemy(e,{dmg:Math.max(10,o.dmg),vx:Math.cos(dir),vy:Math.sin(dir),x:e.x,y:e.y,col:o.col,melee:1,kb:0});hit++;}
  for(const b of G.bul){if(b.pl||b.dead)continue;const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>o.range+8)continue;const df=Math.abs(((Math.atan2(b.y-p.y,b.x-p.x)-dir+9.42)%6.283)-3.14);if(df<o.arc/2){if(S.hero==='melee'){b.pl=1;b.vx=Math.cos(dir)*520;b.vy=Math.sin(dir)*520;b.dmg=o.dmg*.5;b.hit=[];b.pierce=0;b.col=o.col;b.life=1;b.lob=0;b.eflame=0;}else b.dead=true;burst(b.x,b.y,o.col,4,200,2);}}
  if(hit){G.hitstop=Math.max(G.hitstop,.04);G.shake=Math.max(G.shake,5);}}
@@ -872,7 +872,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v48';
+const VER='haywire v49';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1313,7 +1313,7 @@ function hwInSq(e,cx0,cy0,h){return Math.abs(e.x-cx0)<=h+e.r&&Math.abs(e.y-cy0)<
 function hwDir(){const p=G.p;if(IN.amag>.3)return Math.atan2(IN.ay,IN.ax);if(Math.hypot(IN.mx,IN.my)>.2)return Math.atan2(IN.my,IN.mx);let be=null,bd=600;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<bd){bd=d;be=e;}}return be?Math.atan2(be.y-p.y,be.x-p.x):p.ang;}
 var HW_MAXU=3; // v46: each special max 3 uses per round
 function hwFire(){const p=G.p;if(G.state!=='play'||(G.hw||0)<100||G.sp||(G.hwUses||0)>=HW_MAXU)return;G.hw=0;const a=hwDir(),h=S.hero;p.ang=p.face=a;
- const T=h==='melee'?1.25:h==='heavy'?DOME_T:VOLT_T;G.hwUses=(G.hwUses||0)+1;const lv=Math.min(3,G.hwUses);G.sp={k:h,t:0,T,a,x0:p.x,y0:p.y,hit:new Set(),n:0,lv};G.hwT=T;G.hwImm=T+.6;p.inv=Math.max(p.inv,h==='melee'?T*.6:.3);
+ const T=(h==='melee'?1.25:h==='heavy'?DOME_T:VOLT_T)+(typeof mSpecT==='function'?mSpecT(h):0);G.hwUses=(G.hwUses||0)+1;const lv=Math.min(3,G.hwUses);G.sp={k:h,t:0,T,a,x0:p.x,y0:p.y,hit:new Set(),n:0,lv};G.hwT=T;G.hwImm=T+.6;p.inv=Math.max(p.inv,h==='melee'?T*.6:.3);
  G.banner={t:1.2,txt:HWN[h]+(lv?' LV'+lv:'')+'!',sub:(h==='heavy'?'DOME':h==='melee'?'CYCLONE':'STORM')+[' LEVEL 1',' LEVEL 1',' LEVEL 2 · UPGRADED',' LEVEL 3 · MAX'][lv],pc:h==='heavy'?'#FF8A00':h==='melee'?'#c45cff':'#19e3ff'};addTxt(p.x,p.y-40,'LV'+lv+(lv===3?' MAX!':'!'),lv===3?'#fff':h==='heavy'?'#ffc46b':h==='melee'?'#e0a8ff':'#7fe8ff',18+4*lv,1);G.shake=Math.max(G.shake,10);G.hitstop=.05;sfx('roar');sfx(h==='melee'?'saber':h==='heavy'?'boom':'zap',1.3);
  part({k:'ring',x:p.x,y:p.y,life:.4,col:h==='agile'?'#19e3ff':h==='heavy'?'#ffb020':'#c45cff',sz:120});}
 function hwSpecTick(dt){G.hwImm=(G.hwImm||0)-dt;if(IN.hwm){IN.hwm=false;hwFire();}if(window.__RC&&__RC.bot&&!__RC.noHwAuto&&(G.hw||0)>=100&&!G.sp&&G.en.some(e=>!e.dead&&e.spawn<=0&&Math.hypot(e.x-G.p.x,e.y-G.p.y)<260))hwFire();
@@ -1506,7 +1506,7 @@ function voltDraw(t){const c=cx,S0=G.sp;if(S0&&S0.k==='agile'){const p=G.p,I=vol
 
 // ---- v40 IRON BASTION: AEGIS DOME (5s, 3 levels per round) ----
 var DOME_T=5,DOME_R=[0,150,166,182],DOME_D=.45,DOME_CAP=2.6,DOME_TICK=.25,DOME_M=[0,1,1.35,1.75];
-function domeR(s){return DOME_R[s.lv||1]*(s.t<.25?.35+.65*s.t/.25:1);}
+function domeR(s){return (typeof mDomeR==='function'?mDomeR():1)*DOME_R[s.lv||1]*(s.t<.25?.35+.65*s.t/.25:1);}
 function domeTick(dt,s,B){const p=G.p;if(!s.dome){s.dome=1;s.dm=new Map();s.nx=new Map();sfx('boom',1.1);G.shake=Math.max(G.shake,12);part({k:'ring',x:p.x,y:p.y,life:.5,col:'#FF8A00',sz:DOME_R[s.lv||1]*2.2});part({k:'ring',x:p.x,y:p.y,life:.35,col:'#fff',sz:DOME_R[s.lv||1]*1.6});}
  const R0=domeR(s),m=DOME_M[s.lv||1],cap=B*DOME_CAP*m,dmg=B*DOME_D*m;
  for(const e of G.en){if(e.dead||e.spawn>0)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d>R0+e.r)continue;const ux=dx/d,uy=dy/d,big=e.type==='boss'||e.type==='mboss'||e.type==='turret';
@@ -1514,7 +1514,7 @@ function domeTick(dt,s,B){const p=G.p;if(!s.dome){s.dome=1;s.dm=new Map();s.nx=n
   if(G.t>=(s.nx.get(e)||0)){s.nx.set(e,G.t+DOME_TICK);const got=s.dm.get(e)||0;if(got<cap){const dd=Math.min(dmg,cap-got);s.dm.set(e,got+dd);const boss=e.type==='boss'||e.type==='mboss';
     hitEnemy(e,{dmg:e.type==='drone'?Math.max(dd,99):boss?dd*.35:dd,crit:0,vx:ux,vy:uy,x:e.x,y:e.y,col:'#FF8A00',melee:1,hwbl:1,kb:big?0:160});}
    const cx2=p.x+ux*R0,cy2=p.y+uy*R0;if(G.domeCr.length<14)G.domeCr.push({x:cx2,y:cy2,a:Math.atan2(uy,ux),t:0});burst(cx2,cy2,'#ffc46b',4,220,2);}}
- for(const b of G.bul){if(b.dead||b.pl)continue;if(Math.hypot(b.x-p.x,b.y-p.y)<R0+(b.r||4)){b.dead=true;burst(b.x,b.y,'#fff',3,180,1.5);if(G.domeCr.length<14)G.domeCr.push({x:b.x,y:b.y,a:Math.atan2(b.y-p.y,b.x-p.x),t:.08});}}
+ for(const b of G.bul){if(b.dead||b.pl)continue;if(Math.hypot(b.x-p.x,b.y-p.y)<R0+(b.r||4)){b.dead=true;if(typeof mReflect==='function')mReflect(b);burst(b.x,b.y,'#fff',3,180,1.5);if(G.domeCr.length<14)G.domeCr.push({x:b.x,y:b.y,a:Math.atan2(b.y-p.y,b.x-p.x),t:.08});}}
  if(G.domeCr.length){for(const k of G.domeCr)k.t+=dt;G.domeCr=G.domeCr.filter(k=>k.t<.22);}}
 var DOME_HEX={};
 function domeHex(R){const k=Math.round(R);if(DOME_HEX[k])return DOME_HEX[k];const sc=2,c2=document.createElement('canvas');c2.width=c2.height=Math.ceil(2*R*sc+8);const g=c2.getContext('2d');g.scale(sc,sc);g.translate(R+2,R+2);
@@ -1735,9 +1735,10 @@ function wsPickHud(c){const q=G&&G.pickT;if(!q)return;q.t-=1/60;if(q.t<=0){G.pic
  c.fillText(q.nm,tx,y+35);c.font='10px system-ui';c.fillStyle='#aab';c.fillText(q.sub,tx,y+50);c.restore();}
 wsPreload();
 // ================= v48 BOT MASTERY + VOLT RUNNER SKILL TREE =================
-// Mastery is saved per bot in S.mast[hero] = {xp, sk:{id:rank}, rs:respecs}. Only VOLT RUNNER ('agile') earns XP for now.
+// Mastery is saved per bot in S.mast[hero] = {xp, sk:{id:rank}, rs:respecs}. v49: all three bots earn XP; each has its own tree (same rules).
 // XP: 10 per round survived, 25 per boss/mini-boss kill, x1.5 on Hard; kept on death. Level n costs 50+25n XP; cap 15; 1 point per level.
-var M_ON={agile:1},M_CAP=15,M_ROUND=10,M_BOSS=25,M_T=[0,5,10],M_RESPEC=500;
+var M_ON={agile:1,melee:1,heavy:1},M_CAP=15,M_ROUND=10,M_BOSS=25,M_T=[0,5,10],M_RESPEC=500;
+var MBRH={melee:[{n:'BLADE',c:'#c45cff',d:'Sword damage, Cyclone Blade'},{n:'GHOST',c:'#7affd6',d:'Dodge, speed, evasion'},{n:'BLOODLINE',c:'#ff3d6e',d:'Lifesteal, survival'}],heavy:[{n:'AEGIS',c:'#FF8A00',d:'Aegis Dome strength, size, duration'},{n:'SIEGE',c:'#ff5a3f',d:'Heavy weapon damage'},{n:'FORTRESS',c:'#9aa6c0',d:'Armor, HP, knockback'}]};
 var MBR=[{n:'STORM',c:'#19e3ff',d:'Lightning & special damage, chain hits'},{n:'OVERCLOCK',c:'#ffd23f',d:'Fire rate, special charge, move speed'},{n:'CONDUCTOR',c:'#5dff9a',d:'Shields, HP, survival'}];
 var MSK=[
  {id:'st1',b:0,t:0,ic:'⚡',n:'Charged Storm',max:5,v:.05,f:r=>'+'+Math.round(5*r)+'% Overload Storm damage'},
@@ -1752,6 +1753,36 @@ var MSK=[
  {id:'cd2',b:2,t:0,ic:'⛨',n:'Grounding',max:3,v:.02,f:r=>'+'+Math.round(2*r)+'% armor'},
  {id:'cd3',b:2,t:1,ic:'◈',n:'Static Skin',max:5,v:.03,f:r=>'-'+Math.round(3*r)+'% damage taken'},
  {id:'cdF',b:2,t:2,ic:'⚚',n:'LIGHTNING ROD',max:1,fin:1,f:r=>'Once per round, a hit that would kill you leaves you at 1 HP instead: 1.5s invulnerable plus a free LV1 storm burst. Phoenix revives are used first.'}];
+for(const s of MSK)s.h='agile';MBRH.agile=MBR;
+// v49 KAGEROU BLADE
+var MSK_MEL=[
+ {id:'kb1',b:0,t:0,ic:'✦',n:'Keen Edge',max:5,f:r=>'+'+Math.round(4*r)+'% sword damage'},
+ {id:'kb2',b:0,t:0,ic:'🌀',n:'Cyclone Spin',max:3,f:r=>'+'+Math.round(6*r)+'% Cyclone Blade damage'},
+ {id:'kb3',b:0,t:1,ic:'⟳',n:'Long Cyclone',max:3,f:r=>'+'+(0.15*r).toFixed(2)+'s Cyclone Blade duration'},
+ {id:'kbF',b:0,t:2,ic:'☽',n:'PHANTOM EDGE',max:1,fin:1,f:r=>'Every 4th sword swing also flings 2 laser crescents that spiral outward for 50% of the swing\'s damage each.'},
+ {id:'kg1',b:1,t:0,ic:'➤',n:'Light Step',max:5,f:r=>'+'+Math.round(3*r)+'% move speed'},
+ {id:'kg2',b:1,t:0,ic:'⇶',n:'Quick Dash',max:3,f:r=>'-'+Math.round(5*r)+'% dash cooldown'},
+ {id:'kg3',b:1,t:1,ic:'◌',n:'Evasion',max:5,f:r=>Math.round(3*r)+'% chance to dodge a hit completely'},
+ {id:'kgF',b:1,t:2,ic:'👤',n:'AFTERIMAGE',max:1,fin:1,f:r=>'Dashing or dodging grants 1.5s of +25% damage and +15% move speed.'},
+ {id:'kl1',b:2,t:0,ic:'🩸',n:'Siphon',max:3,f:r=>'+'+(0.3*r).toFixed(1)+'% lifesteal (base 3%)'},
+ {id:'kl2',b:2,t:0,ic:'♥',n:'Thick Hide',max:5,f:r=>'+'+Math.round(3*r)+'% max HP'},
+ {id:'kl3',b:2,t:1,ic:'✚',n:'Second Wind',max:5,f:r=>'+'+(0.3*r).toFixed(1)+' HP/s regeneration'},
+ {id:'klF',b:2,t:2,ic:'☠',n:'BLOOD PACT',max:1,fin:1,f:r=>'Each kill restores 2% of max HP (at most once every 0.5s).'}];
+// v49 IRON BASTION
+var MSK_HVY=[
+ {id:'ba1',b:0,t:0,ic:'◉',n:'Hardlight',max:5,f:r=>'+'+Math.round(5*r)+'% Aegis Dome damage'},
+ {id:'ba2',b:0,t:0,ic:'◎',n:'Wide Field',max:3,f:r=>'+'+Math.round(5*r)+'% dome radius'},
+ {id:'ba3',b:0,t:1,ic:'⏱',n:'Long Watch',max:3,f:r=>'+'+(0.4*r).toFixed(1)+'s dome duration'},
+ {id:'baF',b:0,t:2,ic:'⟲',n:'REFLECTOR',max:1,fin:1,f:r=>'Enemy bullets the dome blocks are zapped back at the nearest enemy (within 420px) for 3x their damage (bosses take 35%).'},
+ {id:'bs1',b:1,t:0,ic:'✹',n:'Heavy Ordnance',max:5,f:r=>'+'+Math.round(4*r)+'% weapon damage'},
+ {id:'bs2',b:1,t:0,ic:'≫',n:'Autoloader',max:3,f:r=>'+'+Math.round(3*r)+'% fire rate'},
+ {id:'bs3',b:1,t:1,ic:'✧',n:'Shrapnel',max:5,f:r=>'+'+Math.round(2*r)+'% crit chance'},
+ {id:'bsF',b:1,t:2,ic:'💥',n:'CHAIN DETONATION',max:1,fin:1,f:r=>'Enemies you kill explode, hitting others within 90px for 25% of special base damage (bosses take 35%). Blasts don\'t chain.'},
+ {id:'bf1',b:2,t:0,ic:'♥',n:'Plating',max:5,f:r=>'+'+Math.round(4*r)+'% max HP'},
+ {id:'bf2',b:2,t:0,ic:'⛨',n:'Bulwark',max:3,f:r=>'+'+Math.round(2*r)+'% armor'},
+ {id:'bf3',b:2,t:1,ic:'⬢',n:'Juggernaut',max:5,f:r=>'-'+Math.round(3*r)+'% damage taken, +'+Math.round(10*r)+'% knockback dealt'},
+ {id:'bfF',b:2,t:2,ic:'🛡',n:'LAST STAND',max:1,fin:1,f:r=>'Below 30% HP: take 25% less damage and deal 20% more damage.'}];
+for(const s of MSK_MEL)s.h='melee';for(const s of MSK_HVY)s.h='heavy';MSK=MSK.concat(MSK_MEL,MSK_HVY);
 var MSKI={};for(const s of MSK)MSKI[s.id]=s;
 function mCost(n){return 50+25*n;}
 function mCum(n){let t=0;for(let i=1;i<=n;i++)t+=mCost(i);return t;}
@@ -1759,12 +1790,12 @@ function mData(h){h=h||S.hero;if(!S.mast||typeof S.mast!=='object')S.mast={};let
 function mLvl(h){const x=mData(h).xp;let n=0;while(n<M_CAP&&x>=mCum(n+1))n++;return n;}
 function mSpent(h,b){const d=mData(h);let t=0;for(const id in d.sk){const s=MSKI[id];if(s&&(b==null||s.b===b))t+=d.sk[id]|0;}return t;}
 function mFree(h){return mLvl(h)-mSpent(h);}
-function sk(id){if(!S||S.hero!=='agile'||!M_ON.agile)return 0;const d=S.mast&&S.mast.agile;return d&&d.sk?(d.sk[id]|0):0;}
-function mCan(id){const s=MSKI[id],d=mData('agile');return s&&(d.sk[id]|0)<s.max&&mFree('agile')>0&&mSpent('agile',s.b)>=M_T[s.t];}
+function sk(id){const s=MSKI[id];if(!S||!s||S.hero!==s.h||!M_ON[s.h])return 0;const d=S.mast&&S.mast[s.h];return d&&d.sk?(d.sk[id]|0):0;}
+function mCan(id){const s=MSKI[id];if(!s)return false;const d=mData(s.h);return (d.sk[id]|0)<s.max&&mFree(s.h)>0&&mSpent(s.h,s.b)>=M_T[s.t];}
 function mGain(n,why){if(!G||!M_ON[S.hero])return;const v=Math.round(n*(S.diff==='hard'?1.5:1)),d=mData(),l0=mLvl();d.xp+=v;G.mx=G.mx||{xp:0,r:0,b:0,lv0:l0};G.mx.xp+=v;G.mx[why]+=v;const l1=mLvl();
  if(l1>l0&&G.p){addTxt(G.p.x,G.p.y-60,'MASTERY LV'+l1+'! +1 SKILL POINT','#19e3ff',20,1.6);sfx('level');}saveGame();}
 // ---- stat hooks ----
-var _mPst=pstats;pstats=function(){const st=_mPst.apply(this,arguments);if(S.hero!=='agile')return st;
+var _mPst=pstats;pstats=function(){const st=_mPst.apply(this,arguments);if(S.hero==='melee'||S.hero==='heavy')return mPst2(st);if(S.hero!=='agile')return st;
  const ab=sk('ocF')&&G&&G.abT>0,rm=1+.03*sk('oc1')+(ab?.25:0),sm=1+.03*sk('oc2')+(ab?.15:0);
  for(const a of[st.main,st.off])if(a)a.rate*=rm;st.rate*=rm;st.spd*=sm;st.hp=Math.round(st.hp*(1+.04*sk('cd1')));st.armor=Math.min(.7,st.armor+.02*sk('cd2'));return st;};
 function mskStorm(){return 1+.05*sk('st1');}
@@ -1795,13 +1826,13 @@ var _mRes=showResult;showResult=function(){const r=_mRes.apply(this,arguments);t
  const pn=$('result').querySelector('.pn');if(pn)pn.after(d);else $('result').appendChild(d);}}catch(e){dlog('mres '+e.message);}return r;};
 // ---- tree screen ----
 var MT={sel:null,from:'select'};
-function mRespecCost(){return G&&RUN?price(M_RESPEC*(1+mData('agile').rs)):0;}
-function showTree(from){if(from)MT.from=from;const h='agile',d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
+function mRespecCost(){return G&&RUN?price(M_RESPEC*(1+mData(MT.h||S.hero).rs)):0;}
+function showTree(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.hero||'agile',MBR=MBRH[h],d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
  const node=s=>{const r=d.sk[s.id]|0,lock=mSpent(h,s.b)<M_T[s.t],c=MBR[s.b].c;return `<div class="mn${s.fin?' fin':''}${lock?' lk':''}${r>=s.max?' mx':''}${MT.sel===s.id?' on':''}" data-sk="${s.id}" style="--bc:${c}"><div class="mi">${lock?'🔒':s.ic}</div><div class="mr">${r}/${s.max}</div></div>`;};
- const col=b=>{const B=MBR[b],sp=mSpent(h,b);return `<div class="mc" style="--bc:${B.c}"><div class="mh">${B.n}<i>${sp} pts</i></div>${[0,1,2].map(t=>`<div class="mt"><span class="ml">${t?'TIER '+(t+1)+' · '+M_T[t]+' pts':'TIER 1'}</span><div class="mrow">${MSK.filter(s=>s.b===b&&s.t===t).map(node).join('')}</div></div>`).join('')}</div>`;};
- const S1=MSKI[MT.sel];let det='<div class="mdn">Tap a skill to see what it does.</div>';
+ const col=b=>{const B=MBR[b],sp=mSpent(h,b);return `<div class="mc" style="--bc:${B.c}"><div class="mh">${B.n}<i>${sp} pts</i></div>${[0,1,2].map(t=>`<div class="mt"><span class="ml">${t?'TIER '+(t+1)+' · '+M_T[t]+' pts':'TIER 1'}</span><div class="mrow">${MSK.filter(s=>s.h===h&&s.b===b&&s.t===t).map(node).join('')}</div></div>`).join('')}</div>`;};
+ const S1=MSKI[MT.sel]&&MSKI[MT.sel].h===h?MSKI[MT.sel]:null;let det='<div class="mdn">Tap a skill to see what it does.</div>';
  if(S1){const r=d.sk[S1.id]|0,lock=mSpent(h,S1.b)<M_T[S1.t];det=`<div class="mdh" style="color:${MBR[S1.b].c}">${S1.ic} ${S1.n} <i>${r}/${S1.max} · ${MBR[S1.b].n}${S1.fin?' FINAL':''}</i></div><div class="mdd">${r?'Now: '+S1.f(r):'Not learned'}${r<S1.max&&!S1.fin?'<br>Next: '+S1.f(r+1):S1.fin&&!r?'<br>'+S1.f(1):''}</div>${lock?`<div class="mdd" style="color:#ff6a7a">Spend ${M_T[S1.t]} points in ${MBR[S1.b].n} to unlock (${mSpent(h,S1.b)}/${M_T[S1.t]})</div>`:''}<span class="btn mplus${mCan(S1.id)?'':' dis'}" id="mplus">+ LEARN</span>`;}
- $('tree').innerHTML=`<div class="mhd"><div class="ttl" style="font-size:24px">VOLT RUNNER · SKILLS</div><div class="mlv"><b>LV ${L}</b><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX LEVEL':(x-lo)+' / '+(hi-lo)+' XP'}</span></div><b style="color:${fr?'#ffd23f':'#9aa6c0'}">${fr} PT${fr===1?'':'S'}</b></div></div>
+ $('tree').innerHTML=`<div class="mhd"><div class="ttl" style="font-size:24px">${HEROES[h].n} · SKILLS</div><div class="mlv"><b>LV ${L}</b><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX LEVEL':(x-lo)+' / '+(hi-lo)+' XP'}</span></div><b style="color:${fr?'#ffd23f':'#9aa6c0'}">${fr} PT${fr===1?'':'S'}</b></div></div>
  <div class="mtree">${[0,1,2].map(col).join('')}</div><div class="mdet">${det}</div>
  <div class="row mft"><span class="btn gh sm" id="mback">◀ BACK</span><span class="btn sm${inShop&&mSpent(h)&&RUN.cash>=mRespecCost()?'':' dis'}" id="mresp">${inShop?'RESPEC $'+mRespecCost():'RESPEC · in shop'}</span></div>`;
  show('tree');const T=$('tree');T.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{MT.sel=b.dataset.sk;sfx('click');showTree();});
@@ -1810,6 +1841,30 @@ function showTree(from){if(from)MT.from=from;const h='agile',d=mData(h),L=mLvl(h
  $('mresp').onclick=()=>{if(!inShop){toast('Respec is available in the shop between rounds');return;}const c=mRespecCost();if(!mSpent(h)||RUN.cash<c)return;RUN.cash-=c;d.sk={};d.rs++;saveGame();mRefresh();sfx('item');toast('Skills reset · '+mLvl(h)+' points refunded');showTree();};}
 function mRefresh(){if(G&&G.p&&G.ps){const k=G.p.hp/G.ps.hp;G.ps=pstats();G.p.hp=Math.max(1,Math.min(G.ps.hp,Math.round(G.ps.hp*k)));}}
 var _mShow=show;show=function(id){const r=_mShow.apply(this,arguments);const t=$('tree');if(t)t.classList.toggle('on',id==='tree');return r;};
-var _mSel=showSelect;showSelect=function(){const r=_mSel.apply(this,arguments);try{const c=document.querySelector('#select .hc[data-hero="agile"] .hpw');if(c){const L=mLvl('agile'),fr=mFree('agile'),b=document.createElement('span');b.className='mskb';b.innerHTML=`⚡ MASTERY LV${L} · SKILLS${fr?' <b>'+fr+'</b>':''}`;b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select');};c.appendChild(b);}}catch(e){dlog('msel '+e.message);}return r;};
-var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{if(S.hero==='agile'){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree('agile'),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML='⚡ SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop');};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};
-</script></body></html>
+
+// ================= v49 KAGEROU + BASTION hooks =================
+function mDmgMul(st,k){for(const a of[st.main,st.off])if(a)a.dmg*=k;st.dmg*=k;}
+function mPst2(st){if(S.hero==='melee'){const ai=sk('kgF')&&G&&G.aiT>0;mDmgMul(st,1+.04*sk('kb1')+(ai?.25:0));st.spd*=1+.03*sk('kg1')+(ai?.15:0);st.dash=Math.min(.7,st.dash+.05*sk('kg2'));st.hp=Math.round(st.hp*(1+.03*sk('kl2')));st.regen=(st.regen||0)+.3*sk('kl3');}
+ else{mDmgMul(st,1+.04*sk('bs1'));for(const a of[st.main,st.off])if(a)a.rate*=1+.03*sk('bs2');st.rate*=1+.03*sk('bs2');st.crit+=.02*sk('bs3');st.hp=Math.round(st.hp*(1+.04*sk('bf1')));st.armor=Math.min(.7,st.armor+.02*sk('bf2'));}return st;}
+function mLS(){return .003*sk('kl1');}
+function mSpecT(h){return h==='melee'?.15*sk('kb3'):h==='heavy'?.4*sk('ba3'):0;}
+function mDomeR(){return 1+.05*sk('ba2');}
+var _mBase=hwBase;hwBase=function(){const b=_mBase.apply(this,arguments);if(G&&G.sp){if(S.hero==='melee'&&G.sp.k==='melee')return b*(1+.06*sk('kb2'));if(S.hero==='heavy'&&G.sp.k==='heavy')return b*(1+.05*sk('ba1'));}return b;};
+function mLow(){return S.hero==='heavy'&&sk('bfF')&&G&&G.p&&G.ps&&G.p.hp<G.ps.hp*.3;}
+var _mAbs2=shAbsorb;shAbsorb=function(d){if(d>0&&G&&G.state==='play'){if(S.hero==='melee'&&sk('kg3')&&R()<.03*sk('kg3')){G.dodN=(G.dodN||0)+1;if(sk('kgF'))mAI();if(G.p)addTxt(G.p.x,G.p.y-30,'DODGE','#7affd6',16,.6);return 0;}
+ if(S.hero==='heavy'){d*=1-.03*sk('bf3');if(mLow())d*=.75;}}return _mAbs2.call(this,d);};
+function mAI(){const was=G.aiT>0;G.aiT=1.5;if(!was)mRefresh();}
+var _mHit2=hitEnemy;hitEnemy=function(e,b){if(S.hero==='heavy'&&b&&G&&G.state==='play'&&!b.mx){if(sk('bf3')&&b.kb)b.kb*=1+.1*sk('bf3');if(mLow()&&!b.lsB){b.dmg*=1.2;b.lsB=1;G.lsN=(G.lsN||0)+1;}}return _mHit2.apply(this,arguments);};
+var _mSw=swing;swing=function(dir,o){const r=_mSw.apply(this,arguments);if(S.hero==='melee'&&sk('kbF')&&G&&G.state==='play'&&!G.sp){G.swN=(G.swN||0)+1;if(G.swN%4===0){const p=G.p,cols=typeof hwBladeCols==='function'?hwBladeCols():['#c45cff','#ff2e88'],dm=new Map();G.peN=(G.peN||0)+1;
+ for(let w=0;w<2;w++)(G.hwBl=G.hwBl||[]).push({cx:p.x,cy:p.y,th:dir+(w?.35:-.35),r:26,t:0,L:.55,col:cols[w],tr:[],hit:new Set(),dmg:(o.dmg||0)*.5,cap:(o.dmg||0)*.5,dm:new Map(),dir:1});sfx('saber',.8);}}return r;};
+var _mKill2=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_mKill2.apply(this,arguments);if(!e||was||!e.dead||!G||G.state!=='play')return r;
+ if(S.hero==='melee'&&sk('klF')&&G.t-(G.bpT||-9)>=.5){G.bpT=G.t;G.p.hp=Math.min(G.ps.hp,G.p.hp+G.ps.hp*.02);G.bpN=(G.bpN||0)+1;}
+ if(S.hero==='heavy'&&sk('bsF')&&!e.cdx&&!G.cdx){G.cdx=1;try{const d0=_mBase()*.25;G.cdN=(G.cdN||0)+1;part({k:'ring',x:e.x,y:e.y,life:.35,col:'#ff8a1f',sz:180});burst(e.x,e.y,'#ffb020',14,320,3);
+  for(const o of G.en){if(o.dead||o.spawn>0||o===e||Math.hypot(o.x-e.x,o.y-e.y)>90+o.r)continue;const boss=o.type==='boss'||o.type==='mboss';o.cdx=1;_mHit2(o,{dmg:boss?d0*.35:d0,crit:0,vx:o.x-e.x||1,vy:o.y-e.y,x:o.x,y:o.y,col:'#ff8a1f',hwbl:1,mx:1,kb:boss?0:80});o.cdx=0;}}finally{G.cdx=0;}}return r;};
+function mReflect(bl){if(S.hero!=='heavy'||!sk('baF')||!G)return;const p=G.p;let nb=null,nd=420;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<nd){nd=d;nb=e;}}if(!nb)return;
+ const boss=nb.type==='boss'||nb.type==='mboss',dd=(bl.dmg||5)*3*(boss?.35:1);G.rfN=(G.rfN||0)+1;(G.hwVb=G.hwVb||[]).push({p:vJag(bl.x,bl.y,nb.x,nb.y,8),t0:0,t:0,w:1,life:.2,lv:1});_mHit2(nb,{dmg:dd,crit:0,vx:nb.x-bl.x||1,vy:nb.y-bl.y,x:nb.x,y:nb.y,col:'#FF8A00',hwbl:1,mx:1,kb:0});}
+var _mSpT2=hwSpecTick;hwSpecTick=function(dt){if(S.hero==='melee'&&G&&G.p){const d=G.p.dashT>0;if(d&&!G.wasDash&&sk('kgF'))mAI();G.wasDash=d;if(G.aiT>0){G.aiT-=dt;if(G.aiT<=0)mRefresh();}}return _mSpT2.apply(this,arguments);};
+
+var MIC={agile:'⚡',melee:'🗡',heavy:'🛡'};
+var _mSel=showSelect;showSelect=function(){const r=_mSel.apply(this,arguments);try{for(const h of['agile','melee','heavy']){if(!M_ON[h])continue;const c=document.querySelector('#select .hc[data-hero="'+h+'"] .hpw');if(!c)continue;const L=mLvl(h),fr=mFree(h),b=document.createElement('span');b.className='mskb';b.style.setProperty('--mc',HEROES[h].col);b.innerHTML=`${MIC[h]} MASTERY LV${L} · SKILLS${fr?' <b>'+fr+'</b>':''}`;b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select',h);};c.appendChild(b);}}catch(e){dlog('msel '+e.message);}return r;};
+var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{const h=S.hero;if(M_ON[h]){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree(h),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML=MIC[h]+' SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop',h);};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};</script></body></html>
