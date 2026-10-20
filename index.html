@@ -101,6 +101,7 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 .mskb{position:absolute;left:4px;bottom:4px;background:rgba(5,6,10,.85);border:2px solid var(--mc,#19e3ff);color:var(--mc,#19e3ff);font-weight:900;font-style:italic;font-size:10px;padding:3px 6px;border-radius:4px;cursor:pointer;z-index:2}.mskb b{background:#ffd23f;color:#111;border-radius:6px;padding:0 4px;margin-left:2px}
 .mres{margin-top:8px;min-width:260px;text-align:center}
 .btn.mplus.dis{opacity:.4!important;filter:grayscale(1);pointer-events:none}
+.btn,.btn.sm,.btn.mplus,.hwsel .btn.sm,.hwsel .hc .btn,#hangar .btn.sm,.dbox .btn{min-height:44px!important;box-sizing:border-box}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
 <div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div><div id="tree" class="scr"></div>
 <script>
@@ -873,7 +874,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v51';
+const VER='haywire v52';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1004,7 +1005,8 @@ window.__RC={get G(){return G},get S(){return S},get RUN(){return RUN},IN,ui,Q,s
 // hidden debug log: long-press the version label on the hub
 function dbgOpen(){$('det2')&&$('det2').remove();const d=document.createElement('div');d.id='det2';d.className='det on';d.innerHTML=`<div class="pn dbox"><b>DEBUG LOG (${VER})</b><pre id="dbgp" style="font-size:10px;white-space:pre-wrap;user-select:text;-webkit-user-select:text">${DLOG.join('\n')||'(empty)'}\nscr=${ui.scr} st=${G&&G.state} L=${ui.L.id} R=${ui.R.id} touches=${nTouch} errs=${(window.__errs||[]).length}\n${(window.__errs||[]).slice(-3).join('\n')}</pre><span class="btn sm" id="dbgc">COPY</span><span class="btn sm gh" id="dbgx">CLOSE</span></div>`;document.body.appendChild(d);
  $('dbgx').onclick=()=>d.remove();$('dbgc').onclick=()=>{try{navigator.clipboard.writeText($('dbgp').innerText);}catch(e){}};}
-function bindVer(){const v=$('verl');if(!v)return;let t=null;v.addEventListener('pointerdown',()=>{t=setTimeout(dbgOpen,700);});['pointerup','pointerleave','pointercancel'].forEach(ev=>v.addEventListener(ev,()=>clearTimeout(t)));}
+const DEBUG_UI=/[?&]debug=1(&|$)/.test(location.search);
+function bindVer(){const v=$('verl');if(!v||!DEBUG_UI)return;let t=null;v.addEventListener('pointerdown',()=>{t=setTimeout(dbgOpen,700);});['pointerup','pointerleave','pointercancel'].forEach(ev=>v.addEventListener(ev,()=>clearTimeout(t)));}
 // ================= TANKS: overrides on top of the Core Breach engine =================
 const TKEY='tanks_v1';
 const HEROES={
@@ -1868,4 +1870,12 @@ var _mSpT2=hwSpecTick;hwSpecTick=function(dt){if(S.hero==='melee'&&G&&G.p){const
 
 var MIC={agile:'⚡',melee:'🗡',heavy:'🛡'};
 var _mSel=showSelect;showSelect=function(){const r=_mSel.apply(this,arguments);try{for(const h of['agile','melee','heavy']){if(!M_ON[h])continue;const c=document.querySelector('#select .hc[data-hero="'+h+'"] .hpw');if(!c)continue;const L=mLvl(h),fr=mFree(h),b=document.createElement('span');b.className='mskb';b.style.setProperty('--mc',HEROES[h].col);b.innerHTML=`${MIC[h]} MASTERY LV${L} · SKILLS${fr?' <b>'+fr+'</b>':''}`;b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select',h);};c.appendChild(b);}}catch(e){dlog('msel '+e.message);}return r;};
-var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{const h=S.hero;if(M_ON[h]){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree(h),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML=MIC[h]+' SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop',h);};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};</script></body></html>
+var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{const h=S.hero;if(M_ON[h]){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree(h),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML=MIC[h]+' SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop',h);};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};
+// v52: Android back button (called by the WebView wrapper). Returns 'exit' only on the title screen.
+window.hwBack=function(){try{const det=document.querySelector('.det.on');if(det&&ui.scr!=='play'){const x=det.querySelector('.gh,#dbgx');if(x){x.click();return 'ok';}}
+ if(ui.scr==='title')return 'exit';
+ if(ui.scr==='play'){if(G&&G.state==='play')showPause();return 'ok';}
+ if(ui.scr==='pause'){G.state='play';show('play');showPause();return 'ok';}
+ if(ui.scr==='select'||ui.scr==='result'||ui.scr==='hub'||ui.scr==='hangar'){showTitle();return 'ok';}
+ return 'ok';}catch(e){return 'ok';}};
+</script></body></html>
