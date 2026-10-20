@@ -216,7 +216,7 @@ const ITYPE={arm:'Arm',chip:'Core Chip',neural:'Neural Link',chest:'Chest Platin
 const slotOf=s=>s==='main'||s==='off'?'arm':s;
 const NAMES={chip:['Overclock Chip','Logic Core','Quantum Chip','Fusion Kernel'],neural:['Synapse Relay','Cortex Uplink','Mind Bus','Neural Link'],chest:['Bulwark Carapace','Aegis Plate','Titan Hull','Chest Plating'],legs:['Strider Actuators','Hydraulic Legs','Gyro Struts','Leg Servos'],thrust:['Ion Thrusters','Vector Jets','Plasma Boosters','Phase Drive']};
 const AFF=['crit','rate','dmg','spd','regen','hp','xp','ward','armor','dash'];
-const AFFL={crit:v=>'+'+Math.round(v*100)+'% crit',rate:v=>'+'+Math.round(v*100)+'% attack rate',dmg:v=>'+'+Math.round(v*100)+'% damage',spd:v=>'+'+Math.round(v*100)+'% move speed',regen:v=>'+'+v.toFixed(1)+' HP/s',hp:v=>'+'+Math.round(v)+' HP',xp:v=>'+'+Math.round(v*100)+'% XP',ward:v=>'+'+Math.round(v*100)+'% vs shields',armor:v=>'+'+Math.round(v*100)+'% armor',dash:v=>'-'+Math.round(v*100)+'% dash cooldown'};
+const AFFL={crit:v=>'+'+Math.round(v*100)+'% crit',rate:v=>'+'+Math.round(v*100)+'% attack rate',dmg:v=>'+'+Math.round(v*100)+'% damage',spd:v=>'+'+Math.round(v*100)+'% move speed',regen:v=>'+'+v.toFixed(1)+' HP/s',hp:v=>'+'+Math.round(v)+' HP',xp:v=>'+'+Math.round(v*100)+'% Cash',ward:v=>'+'+Math.round(v*100)+'% vs shields',armor:v=>'+'+Math.round(v*100)+'% armor',dash:v=>'-'+Math.round(v*100)+'% dash cooldown'};
 const AFFW={crit:300,rate:300,dmg:300,spd:250,regen:20,hp:1.2,xp:120,ward:120,armor:400,dash:150};
 function affVal(k,m,p){return {crit:.04*m,rate:.06*m,dmg:.07*m,spd:.04*m,regen:.5*m*p,hp:12*m*p,xp:.06*m,ward:.25*m,armor:.03*m,dash:.06*m}[k]*rnd(.85,1.15);}
 // v44 rarity pacing. Level = current round (G.d is fixed at 1 in Haywire runs). Each tier unlocks at RGATE and ramps
@@ -245,9 +245,9 @@ function makeItem(kind,d,rar,type,wave){rar=rar==null?rollRar(lootLvl()):rar;if(
  return it;}
 function armKind(it){return it&&it.slot==='arm'?WEAP[it.type].k:null;}
 // stat lines (label,value,fmt) used for compare deltas
-function itemStats(it){const o={};if(!it)return o;if(it.bt){const d=botDef(it);if(d.fire)o['Bot DPS']=+(d.fire.dmg*d.fire.rate).toFixed(1);if(d.regen)o['HP/s']=d.regen;if(d.armor)o['Armor %']=d.armor*100;if(d.crit)o['Crit %']=d.crit*100;if(d.xp)o['XP %']=d.xp*100;if(d.spd)o['Speed %']=d.spd*100;if(d.dmgB)o['Damage %']=d.dmgB*100;return o;}
+function itemStats(it){const o={};if(!it)return o;if(it.bt){const d=botDef(it);if(d.fire)o['Bot DPS']=+(d.fire.dmg*d.fire.rate).toFixed(1);if(d.regen)o['HP/s']=d.regen;if(d.armor)o['Armor %']=d.armor*100;if(d.crit)o['Crit %']=d.crit*100;if(d.xp)o['Cash %']=d.xp*100;if(d.spd)o['Speed %']=d.spd*100;if(d.dmgB)o['Damage %']=d.dmgB*100;return o;}
  if(it.slot==='arm'){const w=WEAP[it.type];if(w.k==='shield'){o['Block arc']=Math.round(w.arc*57);o['Armor %']=Math.round(w.armor*100);}else if(w.k==='melee'){o['DPS']=+(it.dmg*it.rate).toFixed(1);o['Damage']=it.dmg;o['Swings/s']=it.rate;o['Blade length']=it.len||w.range;}else{o['DPS']=+(it.dmg*it.rate*(w.count||1)).toFixed(1);o['Damage']=it.dmg;o['Shots/s']=it.rate;if(w.chain)o['Chain targets']=w.chain;if(w.hitscan)o['Range']=w.reach;if(w.bounce)o['Bounces']=w.bounce;if(w.pierce)o['Pierce']=w.hitscan==='beam'?99:w.pierce;if(w.splash)o['Splash']=w.splash;if(w.spinup)o['Spin-up s']=w.spinup;if(w.flame)o['Range']=Math.round(w.spd*w.range);}}
- if(it.hp)o['HP']=it.hp;if(it.armor)o['Armor %']=Math.round(it.armor*100);if(it.dmgB)o['Damage %']=Math.round(it.dmgB*100);if(it.critB)o['Crit %']=Math.round(it.critB*100);if(it.xpB)o['XP %']=Math.round(it.xpB*100);if(it.spdB)o['Speed %']=Math.round(it.spdB*100);if(it.dashB)o['Dash CD -%']=Math.round(it.dashB*100);
+ if(it.hp)o['HP']=it.hp;if(it.armor)o['Armor %']=Math.round(it.armor*100);if(it.dmgB)o['Damage %']=Math.round(it.dmgB*100);if(it.critB)o['Crit %']=Math.round(it.critB*100);if(it.xpB)o['Cash %']=Math.round(it.xpB*100);if(it.spdB)o['Speed %']=Math.round(it.spdB*100);if(it.dashB)o['Dash CD -%']=Math.round(it.dashB*100);
  for(const k in it.aff)o[AFFL[k](it.aff[k]).replace(/^[-+][\d.]+%? ?/,'')+'*']=+(['regen','hp'].includes(k)?it.aff[k]:it.aff[k]*100).toFixed(1);
  return o;}
 function itemScore(it){if(!it)return 0;if(it.bt)return it.bt==='medic'?60:400;if(it.slot==='neural')return nShield(it).cap*4/nShield(it).cd;let s=0;if(it.slot==='arm'){const w=WEAP[it.type];s=w.k==='shield'?w.arc*30+w.armor*500:it.dmg*it.rate*(w.count||1)*(w.pierce?1.4:1)*(it.type==='scatter'?.7:1)*(w.splash?1.4:1)*({arc:1.6,beam:1.5,disc:1.2,flamer:.9,gatling:.85}[it.type]||1);}
@@ -255,7 +255,7 @@ function itemScore(it){if(!it)return 0;if(it.bt)return it.bt==='medic'?60:400;if
  for(const k in it.aff)s+=it.aff[k]*AFFW[k];return s;}
 function itemDesc0(it){if(it.bt){const r=it.bt==='medic'?0:Math.min(4,it.rar||3);return 'Neural Link · turns into a '+PREF[r>=3?5:r]+' Shield Link when the next round starts';} /* v50: Haywire converts bots (hwMigItem) */const w=it.slot==='arm'?WEAP[it.type]:null;let a=[];
  if(w){a.push(w.k==='gun'?clsLabel(it):w.k==='melee'?({paxe:'Plasma axe',lwhip:'Energy whip'}[it.type]||'Laser sword'):'Shield');if(w.k==='shield')a.push('blocks '+Math.round(w.arc*57)+'° front');else if(w.k==='melee')a.push('SWORD button','blade '+(it.len||w.range));else a.push('DMG '+it.dmg+(w.count>1?' x'+w.count:''),it.rate.toFixed(1)+'/s');if(w.chain)a.push('chains x'+w.chain);if(w.bounce)a.push('bounces x'+w.bounce);if(w.pierce)a.push('pierce');if(w.splash)a.push('splash');if(w.cd2)a.push(w.cd2);if(it.perk)a.push('★ '+(it.perk==='pierce'?'+1 pierce':'acid x1.5'));}
- if(it.slot==='neural'&&!it.bt){const z=nShield(it);a.push('Shield '+z.cap,'refills '+z.cd.toFixed(1)+'s after the last hit');}if(it.hp)a.push('+'+it.hp+' HP');if(it.armor)a.push(Math.round(it.armor*100)+'% armor');if(it.dmgB)a.push('+'+Math.round(it.dmgB*100)+'% dmg');if(it.critB)a.push('+'+Math.round(it.critB*100)+'% crit');if(it.xpB)a.push('+'+Math.round(it.xpB*100)+'% XP');if(it.spdB)a.push('+'+Math.round(it.spdB*100)+'% speed');if(it.dashB)a.push('-'+Math.round(it.dashB*100)+'% dash CD');
+ if(it.slot==='neural'&&!it.bt){const z=nShield(it);a.push('Shield '+z.cap,'refills '+z.cd.toFixed(1)+'s after the last hit');}if(it.hp)a.push('+'+it.hp+' HP');if(it.armor)a.push(Math.round(it.armor*100)+'% armor');if(it.dmgB)a.push('+'+Math.round(it.dmgB*100)+'% dmg');if(it.critB)a.push('+'+Math.round(it.critB*100)+'% crit');if(it.xpB)a.push('+'+Math.round(it.xpB*100)+'% Cash');if(it.spdB)a.push('+'+Math.round(it.spdB*100)+'% speed');if(it.dashB)a.push('-'+Math.round(it.dashB*100)+'% dash CD');
  for(const k in it.aff)a.push(AFFL[k](it.aff[k]));return a.join(' · ');}
 // save + migration from v1 (weapon/chassis/mod)
 const SKEY='corebreach_v1';let S=null;const INV_CAP=60;
@@ -873,7 +873,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v50';
+const VER='haywire v51';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -950,7 +950,7 @@ function showHangar(){const ps=pstats(),n=invCount();let items=S.inv.filter(i=>(
  const full=n>=INV_CAP?'<span style="color:#ff3d6e;font-weight:900"> FULL: the weakest unlocked item gets auto-scrapped</span>':n>=INV_CAP-5?'<span style="color:#ffd23f;font-weight:800"> almost full</span>':'';
  $('hangar').innerHTML=`<div class="row" style="width:100%;max-width:980px;justify-content:space-between"><div class="row" style="gap:10px"><div class="ttl" style="font-size:28px">GEAR</div><div class="gsb">GS <b>${gsNow()}</b>${G&&G.wave?`<i>enemies tuned to GS ${Math.round(gsExp(G.wave+1))} expected</i>`:""}</div></div><div class="st">Inventory <b>${n}/${INV_CAP}</b>${full}</div><span>${IV.inRun&&G&&isBossWave(G.wave)?'<span class="btn sm yl" id="hx">EXTRACT ⇪</span>':''}<span class="btn sm${IV.inRun?' pk':''}" id="hb">${IV.inRun?'NEXT WAVE ▶':'◀ BACK'}</span></span></div>
  <div class="gw"><div class="doll pn"><canvas id="dollc" width="320" height="320"></canvas><div class="sls">${SLOTS.map(slotTile).join('')}</div>
-  ${setLine()}<div class="st" style="margin-top:6px">HP <b>${ps.hp}</b> · Shield <b>${(nShield(S.eq.neural)||{cap:0}).cap}</b>${S.eq.neural?' / '+nShield(S.eq.neural).cd.toFixed(1)+'s':''} · Armor <b>${Math.round(ps.armor*100)}%</b> · Crit <b>${Math.round(ps.crit*100)}%</b> · Speed <b>${Math.round(ps.spd)}</b><br>Main <b>${ps.main?ps.main.dmg.toFixed(1)+' '+(ps.main.k):'—'}</b> · Off <b>${ps.off?ps.off.dmg.toFixed(1)+' '+ps.off.k:'—'}</b>${ps.xp?' · XP +'+Math.round(ps.xp*100)+'%':''}${ps.ward?' · vs shields +'+Math.round(ps.ward*100)+'%':''}</div>
+  ${setLine()}<div class="st" style="margin-top:6px">HP <b>${ps.hp}</b> · Shield <b>${(nShield(S.eq.neural)||{cap:0}).cap}</b>${S.eq.neural?' / '+nShield(S.eq.neural).cd.toFixed(1)+'s':''} · Armor <b>${Math.round(ps.armor*100)}%</b> · Crit <b>${Math.round(ps.crit*100)}%</b> · Speed <b>${Math.round(ps.spd)}</b><br>Main <b>${ps.main?ps.main.dmg.toFixed(1)+' '+(ps.main.k):'—'}</b> · Off <b>${ps.off?ps.off.dmg.toFixed(1)+' '+ps.off.k:'—'}</b>${ps.xp?' · Cash +'+Math.round(ps.xp*100)+'%':''}${ps.ward?' · vs shields +'+Math.round(ps.ward*100)+'%':''}</div>
     <div class="st" style="opacity:.75">${S.swap?'Left':'Right'} stick fires guns in both arms (Off Arm guns at 60% rate and 75% damage, unless both arms hold the same gun) · Main Arm hits apply acid (damage over time) · tap the ${S.swap?'left':'right'} stick to swing your sword · tap the ${S.swap?'right':'left'} stick to dash · shields block bullets in front</div></div>
  <div class="ivr"><div class="tabs" style="flex-wrap:wrap">${FILT.map(([k,l])=>`<span class="btn sm ${IV.f===k?'pk':'gh'}" data-f="${k}">${l}</span>`).join('')}</div>
   <div class="tabs" style="flex-wrap:wrap">${[[0,'All'],[1,'Rare+'],[2,'Epic+'],[4,'Ultimate+'],[5,'Legendary+']].map(([i,l])=>`<span class="btn sm ${IV.r===i?'yl':'gh'}" data-r="${i}">${l}</span>`).join('')}<span class="btn sm gh" id="srt">Sort: ${IV.sort}</span></div>
@@ -1036,14 +1036,15 @@ function newRun(hero){const H=HEROES[hero];S.hero=hero;S.lvl=1;S.xp=0;S.inv=[];S
  S.eq={main:makeItem('arm',1,0,H.wpn),off:H.twin?makeItem('arm',1,0,H.wpn):H.shield?makeItem('arm',1,0,H.shield):null,chip:null,neural:null,chest:null,legs:null,thrust:null};S.eq.main.aff={};if(S.eq.off)S.eq.off.aff={};
  S.eq.neural=makeItem('neural',1,0);S.eq.neural.aff={};S.eq.neural.shR=1;if(hero==='heavy')S.eq.main.dmg=92;giveTestSet();const L=H.look();S.look=L;RUN={gren:3,gMax:3,gDmg:1,cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};}
 function pstats(){const H=HEROES[S.hero]||HEROES.agile,B=RUN.b,E=S.eq,A={};for(const k of AFF)A[k]=0;let hp=0,armor=0,dmgB=0,crit=0,spd=0,dash=0,slow=0;
- for(const sl of SLOTS){const it=E[sl];if(!it)continue;for(const k in it.aff)A[k]+=it.aff[k];hp+=it.hp||0;armor+=it.armor||0;dmgB+=it.dmgB||0;crit+=it.critB||0;spd+=it.spdB||0;dash+=it.dashB||0;
+ let xpI=0; /* v51: the old XP bonus is a Cash bonus in Haywire */
+ for(const sl of SLOTS){const it=E[sl];if(!it)continue;for(const k in it.aff)A[k]+=it.aff[k];xpI+=it.xpB||0;hp+=it.hp||0;armor+=it.armor||0;dmgB+=it.dmgB||0;crit+=it.critB||0;spd+=it.spdB||0;dash+=it.dashB||0;
   if(it.slot==='arm'&&WEAP[it.type].k==='shield'){armor+=WEAP[it.type].armor;slow+=WEAP[it.type].slow||0;}}
  const dm=1+B.dmg+dmgB+A.dmg,rm=1+B.rate+A.rate,tw=H.twin&&E.off&&E.main&&E.off.type===E.main.type;
- const st={hp:Math.round(H.hp+B.hp+hp+A.hp),armor:Math.min(.7,H.armor+B.armor+armor+A.armor),spd:H.spd*Math.max(.5,1+B.spd+spd+A.spd-slow),crit:.06+B.crit+crit+A.crit,regen:A.regen,xp:0,ward:A.ward,dash:Math.min(.7,H.dash+B.dash+dash+A.dash),dm,rm,
+ const st={hp:Math.round(H.hp+B.hp+hp+A.hp),armor:Math.min(.7,H.armor+B.armor+armor+A.armor),spd:H.spd*Math.max(.5,1+B.spd+spd+A.spd-slow),crit:.06+B.crit+crit+A.crit,regen:A.regen,xp:A.xp+xpI,ward:A.ward,dash:Math.min(.7,H.dash+B.dash+dash+A.dash),dm,rm,
   main:armStats(E.main,dm*ACIDM,rm),off:armStats(E.off,dm*(tw?1:.75),rm*(tw?1:.6))};
  const m=st.main||{wt:'blaster',k:'gun',dmg:0,rate:1,w:WEAP.blaster};st.wt=m.wt;st.dmg=m.dmg;st.rate=m.rate;return st;}
 function lookEq(){const L=S.look||{},o={};for(const k of SLOTS)o[k]=S.eq[k]||(k==='main'||k==='off'?null:L[k]||null);return o;}
-function gainXP(n){if(!G)return;const v=Math.max(1,Math.round(n*(1+.06*G.wave)*DF().cash));RUN.cash+=v;RUN.earned+=v;}
+function gainXP(n){if(!G)return;const v=Math.max(1,Math.round(n*(1+.06*G.wave)*DF().cash*(1+((G.ps&&G.ps.xp)||0))));RUN.cash+=v;RUN.earned+=v;}
 function recBest(){if(G){S.bestD=S.bestD||{};const k=S.diff||'normal';if(G.wave>(S.bestD[k]||0)){S.bestD[k]=G.wave;G.newBest=1;}if(G.wave>(S.best||0))S.best=G.wave;}saveGame();}
 function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=null;const r=G.wave,sw=isSwarm(r);
  G.wDur=45;G.wLeft=45;G.medHealed=0;RUN.gren=RUN.gMax||3;G.queue=1e9;G.wMul=(1+.1*(r-1)+(r>12?.08*(r-12):0))*(sw?.6:1);G.wDmg=1+.05*(r-1);
@@ -1055,7 +1056,7 @@ function spawnBoss(){G.bossOn=true;const pd=G.D.pads.slice().sort((a,b)=>Math.hy
 function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wave;sfx('clear');
  for(const e of G.en)if(!e.dead){burst(e.x,e.y,e.col,6,200);e.dead=true;}G.bul=G.bul.filter(b=>b.pl);
  for(const d of G.drops)if(d.k==='xp'){gainXP(d.v);d.dead=true;}G.drops=[];
- const bonus=Math.round((20+G.wave*8+(isBossWave(G.wave)?400:0))*DF().cash);RUN.cash+=bonus;RUN.earned+=bonus;G.lastBonus=bonus;recBest();
+ const bonus=Math.round((20+G.wave*8+(isBossWave(G.wave)?400:0))*DF().cash*(1+((G.ps&&G.ps.xp)||0)));RUN.cash+=bonus;RUN.earned+=bonus;G.lastBonus=bonus;recBest();
  G.state='loot';G.loot=1;G.lootAt=.6;RUN.offers=null;RUN.rr=0;RUN.picks=null;G.banner={t:1,txt:'ROUND '+G.wave+' CLEAR',sub:'+$'+bonus+' bonus'};dlog('roundCleared '+G.wave);}
 function endRun(win){recBest();clearRun();}
 function price(b){return Math.round(b*(1+.18*((G?G.wave:1)-1)));}
