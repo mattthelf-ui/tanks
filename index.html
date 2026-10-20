@@ -1791,7 +1791,7 @@ var _mKill=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_mKill.ap
 // ---- results summary ----
 var _mRes=showResult;showResult=function(){const r=_mRes.apply(this,arguments);try{if(M_ON[S.hero]){const g=G.mx||{xp:0,r:0,b:0,lv0:mLvl()},L=mLvl(),x=mData().xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo);
  const d=document.createElement('div');d.className='pn mres';d.innerHTML=`<div class="st" style="color:#19e3ff;font-weight:900;font-style:italic">⚡ ${HEROES[S.hero].n} MASTERY</div><div class="st"><b style="color:#fff;font-size:20px">+${g.xp} XP</b> · rounds +${g.r} · bosses +${g.b}${S.diff==='hard'?' · Hard x1.5':''}</div>
- <div class="st">LV ${g.lv0}${L>g.lv0?' → <b style="color:#ffd23f">LV '+L+'</b> · +'+(L-g.lv0)+' skill point'+(L-g.lv0>1?'s':''):' '+'(LV '+L+')'}${mFree()>0?' · <b style="color:#ffd23f">'+mFree()+' unspent</b>':''}</div><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX':(x-lo)+' / '+(hi-lo)+' XP'}</span></div>`;
+ <div class="st">LV ${g.lv0}${L>g.lv0?' → <b style="color:#ffd23f">LV '+L+'</b> · +'+(L-g.lv0)+' skill point'+(L-g.lv0>1?'s':''):''}${mFree()>0?' · <b style="color:#ffd23f">'+mFree()+' unspent</b>':''}</div><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX':(x-lo)+' / '+(hi-lo)+' XP'}</span></div>`;
  const pn=$('result').querySelector('.pn');if(pn)pn.after(d);else $('result').appendChild(d);}}catch(e){dlog('mres '+e.message);}return r;};
 // ---- tree screen ----
 var MT={sel:null,from:'select'};
