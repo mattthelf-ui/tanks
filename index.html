@@ -88,8 +88,20 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 .r6.sc,.r6.pcard{clip-path:none!important;border-radius:12px!important;overflow:visible;animation:cardIn .35s ease-out both,solarG 1.4s infinite!important}
 @media (orientation:portrait) and (max-width:520px){.hwsel .ttl{font-size:26px!important}.hwsel #dfr{position:static;background:none}.hwsel .hs{gap:8px}.hwsel .hc{flex:none;width:100%;max-width:440px;display:grid;grid-template-columns:40% 1fr;column-gap:8px;align-items:center;text-align:left;padding:6px}.hwsel .hc>*:not(.hpw){grid-column:2}.hwsel .hc .hpw{grid-column:1;grid-row:1/span 9;height:100%;min-height:130px;margin:0}.hwsel .hc>.ds{display:none}.hwsel .hc .nm{font-size:17px;line-height:1.1}.hwsel .hc .sb{font-size:9px;margin:1px 0}.hwsel .hc .sb span{width:52px}.hwsel .hc .sb i{height:6px}.hwsel .hc .btn{margin:4px 0 0;font-size:15px;padding:4px 16px;min-height:36px;justify-self:start}.hwsel #sb{margin-top:6px}}
 @media (orientation:landscape) and (max-height:500px){.hwsel .ttl{font-size:22px!important;margin:0}.hwsel #dfr{position:static;background:none}.hwsel .btn.sm{min-height:34px}.hwsel .hc>.ds{display:none}.hwsel .hc .hpw{height:84px}.hwsel .hc .nm{font-size:16px}.hwsel .hc .sb{font-size:9px}.hwsel .hc .btn{min-height:32px;margin:3px 0 0;padding:3px 14px;font-size:14px}.hwsel .hc{padding:4px}}
+#tree{background:radial-gradient(ellipse at 50% -10%,rgba(25,227,255,.22),transparent 60%),linear-gradient(180deg,#0b0b10f5,#050507f8);justify-content:flex-start;gap:6px}
+.mhd{width:100%;max-width:520px;text-align:center}.mlv{display:flex;align-items:center;gap:8px;justify-content:center;font-weight:900;font-style:italic;color:#19e3ff;font-size:15px;margin-top:4px}
+.mxb{flex:1;max-width:240px;height:16px;background:#05060a;border:2px solid #19e3ff66;border-radius:8px;position:relative;overflow:hidden;margin:4px auto}.mxb i{display:block;height:100%;background:linear-gradient(90deg,#19e3ff,#7fe8ff)}.mxb span{position:absolute;inset:0;text-align:center;font-size:10px;font-weight:900;line-height:12px;color:#fff;text-shadow:1px 1px 0 #000}
+.mtree{display:flex;gap:6px;width:100%;max-width:520px}.mc{flex:1;min-width:0;border:2px solid var(--bc);border-radius:8px;background:rgba(5,6,10,.6);padding:4px 3px;box-shadow:0 0 10px -4px var(--bc)}
+.mh{font-weight:900;font-style:italic;font-size:12px;color:var(--bc);text-align:center;letter-spacing:1px}.mh i{display:block;font-size:9px;color:#9aa6c0;font-style:normal;letter-spacing:0}
+.mt{border-top:1px dashed #ffffff22;padding:3px 0;margin-top:3px}.ml{display:block;font-size:8px;color:#9aa6c0;text-align:center;font-weight:800;letter-spacing:.5px}.mrow{display:flex;gap:4px;justify-content:center;margin-top:3px}
+.mn{width:46px;height:52px;border:2px solid var(--bc);border-radius:8px;background:#0e1430;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative}.mn.fin{width:58px;height:58px;border-width:3px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);border-radius:0}
+.mn.lk{opacity:.4;filter:grayscale(.8)}.mn.mx{background:color-mix(in srgb,var(--bc) 30%,#0e1430)}.mn.on{box-shadow:0 0 0 2px #fff,0 0 14px var(--bc)}.mi{font-size:20px;line-height:1;color:var(--bc)}.mr{font-size:10px;font-weight:900;color:#fff}
+.mdet{width:100%;max-width:520px;min-height:96px;border:2px solid #19e3ff55;border-radius:8px;background:rgba(5,6,10,.75);padding:6px 8px;box-sizing:border-box}.mdh{font-weight:900;font-style:italic;font-size:15px}.mdh i{font-size:10px;color:#9aa6c0;font-style:normal}.mdd{font-size:12px;color:#dfe8ff;margin:3px 0}.mdn{font-size:12px;color:#9aa6c0;text-align:center;padding-top:28px}
+.btn.mplus{font-size:15px;padding:4px 16px;min-height:36px}.mft{position:static;background:none}
+.mskb{position:absolute;left:4px;bottom:4px;background:rgba(5,6,10,.85);border:2px solid #19e3ff;color:#19e3ff;font-weight:900;font-style:italic;font-size:10px;padding:3px 6px;border-radius:4px;cursor:pointer;z-index:2}.mskb b{background:#ffd23f;color:#111;border-radius:6px;padding:0 4px;margin-left:2px}
+.mres{margin-top:8px;min-width:260px;text-align:center}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
-<div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div>
+<div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div><div id="tree" class="scr"></div>
 <script>
 'use strict';
 // ---------- procedural anime battle music + sfx (Web Audio) ----------
@@ -860,7 +872,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v47';
+const VER='haywire v48';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1009,8 +1021,8 @@ const STATS={dmg:{n:'Damage',ic:'✦',v:.10,f:v=>'+'+Math.round(v*100)+'% damage
  spd:{n:'Speed',ic:'➤',v:.05,f:v=>'+'+Math.round(v*100)+'% move speed'},armor:{n:'Armour',ic:'⬢',v:.035,f:v=>'+'+(v*100).toFixed(1)+'% armour'},crit:{n:'Crit',ic:'✸',v:.04,f:v=>'+'+Math.round(v*100)+'% crit chance'},dash:{n:'Dash',ic:'⚡',v:.08,f:v=>'-'+Math.round(v*100)+'% dash cooldown'}};
 const PICKM=[1,1.5,2.2,2.5,2.8,3.2,4.2];
 let RUN={gren:3,gMax:3,gDmg:1,cash:0,earned:0,b:{dmg:0,rate:0,hp:0,spd:0,armor:0,crit:0,dash:0},offers:null,picks:null};
-function saveGame(){try{localStorage.setItem(TKEY,JSON.stringify({mute:S.mute,music:S.music!==false,sfx:S.sfx!==false,aim:S.aim,dashBtn:S.dashBtn!==false,swap:!!S.swap,diff:S.diff||'normal',bestD:S.bestD||{},best:S.best||0,medicGiven:1}));}catch(e){}}
-function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}catch(e){}S={v:1,mute:!!o.mute,aim:o.aim||'soft',dashBtn:o.dashBtn!==false,swap:!!o.swap,diff:DIFF[o.diff]?o.diff:'normal',bestD:o.bestD||{normal:o.best||0},best:o.best||0,lvl:1,xp:0,inv:[],eq:{},nid:0,runs:0,kills:0,bestW:{},hero:'agile',medicGiven:1,maxD:1,selD:1};S.music=o.music!=null?!!o.music:!o.mute;S.sfx=o.sfx!=null?!!o.sfx:!o.mute;S.mute=!S.music&&!S.sfx;auCfg(S.music,S.sfx);}
+function saveGame(){try{localStorage.setItem(TKEY,JSON.stringify({mute:S.mute,music:S.music!==false,sfx:S.sfx!==false,aim:S.aim,dashBtn:S.dashBtn!==false,swap:!!S.swap,diff:S.diff||'normal',bestD:S.bestD||{},best:S.best||0,medicGiven:1,mast:S.mast||{}}));}catch(e){}}
+function loadGame(){let o={};try{o=JSON.parse(localStorage.getItem(TKEY))||{};}catch(e){}S={v:1,mute:!!o.mute,aim:o.aim||'soft',dashBtn:o.dashBtn!==false,swap:!!o.swap,diff:DIFF[o.diff]?o.diff:'normal',bestD:o.bestD||{normal:o.best||0},best:o.best||0,lvl:1,xp:0,inv:[],eq:{},nid:0,runs:0,kills:0,bestW:{},hero:'agile',medicGiven:1,maxD:1,selD:1};S.mast=(o.mast&&typeof o.mast==='object'&&!Array.isArray(o.mast))?o.mast:{};S.music=o.music!=null?!!o.music:!o.mute;S.sfx=o.sfx!=null?!!o.sfx:!o.mute;S.mute=!S.music&&!S.sfx;auCfg(S.music,S.sfx);}
 function isBossWave(w){return w===12;}
 var CASH_K=1.2,BOOM_SILLY=true,BOOM_MAX=5,ELEC_MAX=3; // v31 tunables: income x0.85; BOOM_SILLY: 5th Bigger Boom stack = x10 radius (set false to revert)
 function boomR(){const n=gdn();return n>=5&&BOOM_SILLY?900:90*(1+.08*Math.min(4,n));}
@@ -1307,7 +1319,7 @@ function hwFire(){const p=G.p;if(G.state!=='play'||(G.hw||0)<100||G.sp||(G.hwUse
 function hwSpecTick(dt){G.hwImm=(G.hwImm||0)-dt;if(IN.hwm){IN.hwm=false;hwFire();}if(window.__RC&&__RC.bot&&!__RC.noHwAuto&&(G.hw||0)>=100&&!G.sp&&G.en.some(e=>!e.dead&&e.spawn<=0&&Math.hypot(e.x-G.p.x,e.y-G.p.y)<260))hwFire();
  hwBladeTick(dt);voltTick(dt);const s=G.sp;if(!s)return;const p=G.p,ux=Math.cos(s.a),uy=Math.sin(s.a),B=hwBase();s.t+=dt;G.hwT=Math.max(0,s.T-s.t);
  if(s.k==='agile'){// v37: 5s lightning storm on the spot (no dash), player keeps control; peaks at ~2s
-  if(!s.dm){s.dm=new Map();s.pT=0;}s.pT-=dt;if(s.pT<=0&&s.t<s.T){s.pT+=rnd(.15,.25);voltPulse(p.x,p.y,s.lv||1,B,voltI(s.t),s);}
+  if(!s.dm){s.dm=new Map();s.pT=0;}s.pT-=dt;if(s.pT<=0&&s.t<s.T){s.pT+=rnd(.15,.25);voltPulse(p.x,p.y,s.lv||1,B*(typeof mskStorm==='function'?mskStorm():1),voltI(s.t),s);}
   G.hwImm=Math.max(G.hwImm,.3);if(s.t>=s.T){G.sp=null;burst(p.x,p.y,'#7fe8ff',16,300,3);sfx('zap',.8);}}
  else if(s.k==='heavy'){// v40: 5s Aegis Dome centred on Bastion, follows him; damages + shoves anything touching it, blocks enemy bullets
   domeTick(dt,s,B);G.hwImm=Math.max(G.hwImm,.3);if(s.t>=s.T){G.sp=null;p.inv=Math.max(p.inv||0,.5);/* v46: 0.5s invuln after dome */burst(p.x,p.y,'#FF8A00',24,380,3);sfx('boom',.8);}}
@@ -1464,7 +1476,7 @@ var VLV=[null,{m:2.5,n:9,fk:2,R:200,j:110,sp:.28,w:1.2},{m:1.35,n:13,fk:3,R:260,
 function vJag(x0,y0,x1,y1,amp){const pts=[x0,y0],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,n=Math.max(3,Math.round(L/22));for(let i=1;i<n;i++){const k=i/n,o=rnd(-1,1)*amp*Math.sin(k*Math.PI);pts.push(x0+dx*k+nx*o,y0+dy*k+ny*o);}pts.push(x1,y1);return pts;}
 var VOLT_T=5,VOLT_PK=2,VOLT_D=.12,VOLT_CAP=2.6;
 function voltI(t){return t<VOLT_PK?.3+.7*(t/VOLT_PK):Math.max(.15,1-.85*((t-VOLT_PK)/(VOLT_T-VOLT_PK)));}
-function voltPulse(x,y,lv,B,I,sp){const V0=VLV[lv],V={m:V0.m,n:Math.max(2,Math.round(V0.n*(.25+.75*I))),fk:Math.max(1,Math.round(V0.fk*(.4+.6*I))),R:V0.R*(.55+.45*I),j:V0.j*(.7+.3*I),sp:.12,w:V0.w*(.6+.5*I)},dmg=B*VOLT_D*V.m*(.4+.6*I),hit=new Set(),segs=[],ev=[];
+function voltPulse(x,y,lv,B,I,sp){const V0=VLV[lv],V={m:V0.m,n:Math.max(2,Math.round(V0.n*(.25+.75*I))),fk:Math.max(1,Math.round((V0.fk+(VSK.fk||0))*(.4+.6*I))),R:V0.R*(VSK.R||1)*(.55+.45*I),j:V0.j*(.7+.3*I),sp:.12,w:V0.w*(.6+.5*I)},dmg=B*VOLT_D*V.m*(.4+.6*I),hit=new Set(),segs=[],ev=[];
  const near=G.en.filter(e=>!e.dead&&e.spawn<=0&&Math.hypot(e.x-x,e.y-y)<V.R+e.r).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y));
  const seg=(ax,ay,bx,by,t0,w)=>{segs.push({p:vJag(ax,ay,bx,by,10+6*lv),t0,w,life:.45+.12*lv});if(R()<.6+.1*lv){const k=rnd(.3,.7),mx=ax+(bx-ax)*k,my=ay+(by-ay)*k,a=Math.atan2(by-ay,bx-ax)+rnd(-1.3,1.3),l=rnd(20,45)*(1+.25*lv);segs.push({p:vJag(mx,my,mx+Math.cos(a)*l,my+Math.sin(a)*l,6),t0:t0+.02,w:w*.6,life:.32+.08*lv});}};
  const zap=(e,t0)=>{hit.add(e);ev.push({t:t0,e,x:e.x,y:e.y});};
@@ -1477,7 +1489,7 @@ function voltPulse(x,y,lv,B,I,sp){const V0=VLV[lv],V={m:V0.m,n:Math.max(2,Math.r
  // anyone left inside reach gets a short arc from the nearest struck point
  for(const e of near){if(hit.has(e))continue;segs.push({p:vJag(x,y,e.x,e.y,14),t0:V.sp,w:V.w*1.6,life:.3});zap(e,V.sp+.03);}
  G.hwVb=(G.hwVb||[]).concat(segs.map(s2=>Object.assign(s2,{t:0,lv,life:s2.life*.7})));G.hwVe=(G.hwVe||[]).concat(ev.map(v=>Object.assign(v,{dmg,lv,dm:sp.dm,cap:B*VOLT_CAP*V.m})));
- if(I>.85){G.vFl=Math.max(G.vFl||0,.05+.05*lv*I);}G.shake=Math.max(G.shake,(3+3*lv)*I);sfx('zap',.5+.5*I);burst(x,y,'#19e3ff',Math.round((6+4*lv)*I),300+60*lv,2+lv*.5);if(I>.95&&!sp.pk){sp.pk=1;part({k:'ring',x,y,life:.4,col:'#fff',sz:V.R*1.8});sfx('boom',.8+.2*lv);addTxt(x,y-50,'PEAK!','#fff',20+3*lv,.8);}}
+ if(I>.85){G.vFl=Math.max(G.vFl||0,.05+.05*lv*I);}G.shake=Math.max(G.shake,(3+3*lv)*I);sfx('zap',.5+.5*I);burst(x,y,'#19e3ff',Math.round((6+4*lv)*I),300+60*lv,2+lv*.5);if(I>.95&&!sp.pk){sp.pk=1;if(typeof mThunder==='function')mThunder(x,y,V.R,B);part({k:'ring',x,y,life:.4,col:'#fff',sz:V.R*1.8});sfx('boom',.8+.2*lv);addTxt(x,y-50,'PEAK!','#fff',20+3*lv,.8);}}
 function segDist(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,L=dx*dx+dy*dy||1,k=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/L));return Math.hypot(px-ax-dx*k,py-ay-dy*k);}
 function voltTick(dt){G.vFl=(G.vFl||0)-dt;if(G.state==='loot'||G.state==='win'||G.state==='prepick'){G.hwVb=[];G.hwVe=[];return;}
  if(G.hwVb&&G.hwVb.length){for(const b of G.hwVb)b.t+=dt;G.hwVb=G.hwVb.filter(b=>b.t<b.t0+b.life);}
@@ -1722,4 +1734,82 @@ function wsPickHud(c){const q=G&&G.pickT;if(!q)return;q.t-=1/60;if(q.t<=0){G.pic
  c.textAlign='left';c.textBaseline='middle';c.font='italic 900 11px system-ui';c.fillStyle='#fff';c.fillText('NEW WEAPON',tx,y+17);c.font='bold 13px system-ui';c.fillStyle=col;
  c.fillText(q.nm,tx,y+35);c.font='10px system-ui';c.fillStyle='#aab';c.fillText(q.sub,tx,y+50);c.restore();}
 wsPreload();
+// ================= v48 BOT MASTERY + VOLT RUNNER SKILL TREE =================
+// Mastery is saved per bot in S.mast[hero] = {xp, sk:{id:rank}, rs:respecs}. Only VOLT RUNNER ('agile') earns XP for now.
+// XP: 10 per round survived, 25 per boss/mini-boss kill, x1.5 on Hard; kept on death. Level n costs 50+25n XP; cap 15; 1 point per level.
+var M_ON={agile:1},M_CAP=15,M_ROUND=10,M_BOSS=25,M_T=[0,5,10],M_RESPEC=500;
+var MBR=[{n:'STORM',c:'#19e3ff',d:'Lightning & special damage, chain hits'},{n:'OVERCLOCK',c:'#ffd23f',d:'Fire rate, special charge, move speed'},{n:'CONDUCTOR',c:'#5dff9a',d:'Shields, HP, survival'}];
+var MSK=[
+ {id:'st1',b:0,t:0,ic:'⚡',n:'Charged Storm',max:5,v:.05,f:r=>'+'+Math.round(5*r)+'% Overload Storm damage'},
+ {id:'st2',b:0,t:0,ic:'〰',n:'Live Wire',max:3,v:.04,f:r=>Math.round(4*r)+'% chance on gun hits to arc to a nearby enemy for 35% of the hit'},
+ {id:'st3',b:0,t:1,ic:'⑂',n:'Forked Lightning',max:3,v:1,f:r=>'+'+r+' storm chain fork'+(r===1?'':'s')+', +'+(5*r)+'% storm reach'},
+ {id:'stF',b:0,t:2,ic:'☈',n:'THUNDERHEAD',max:1,fin:1,f:r=>'At the storm\'s 2s peak, a thunderclap hits every enemy in reach for 60% of special base damage (bosses take 35%). Once per storm.'},
+ {id:'oc1',b:1,t:0,ic:'≫',n:'Hair Trigger',max:5,v:.03,f:r=>'+'+Math.round(3*r)+'% fire rate'},
+ {id:'oc2',b:1,t:0,ic:'➤',n:'Quick Feet',max:3,v:.03,f:r=>'+'+Math.round(3*r)+'% move speed'},
+ {id:'oc3',b:1,t:1,ic:'◔',n:'Capacitor',max:5,v:.05,f:r=>'+'+Math.round(5*r)+'% HAYWIRE meter charge'},
+ {id:'ocF',b:1,t:2,ic:'🔥',n:'AFTERBURNER',max:1,fin:1,f:r=>'While the storm is up and for 2s after: +25% fire rate and +15% move speed.'},
+ {id:'cd1',b:2,t:0,ic:'♥',n:'Insulated Plating',max:5,v:.04,f:r=>'+'+Math.round(4*r)+'% max HP'},
+ {id:'cd2',b:2,t:0,ic:'⛨',n:'Grounding',max:3,v:.02,f:r=>'+'+Math.round(2*r)+'% armor'},
+ {id:'cd3',b:2,t:1,ic:'◈',n:'Static Skin',max:5,v:.03,f:r=>'-'+Math.round(3*r)+'% damage taken'},
+ {id:'cdF',b:2,t:2,ic:'⚚',n:'LIGHTNING ROD',max:1,fin:1,f:r=>'Once per round, a hit that would kill you leaves you at 1 HP instead: 1.5s invulnerable plus a free LV1 storm burst. Phoenix revives are used first.'}];
+var MSKI={};for(const s of MSK)MSKI[s.id]=s;
+function mCost(n){return 50+25*n;}
+function mCum(n){let t=0;for(let i=1;i<=n;i++)t+=mCost(i);return t;}
+function mData(h){h=h||S.hero;if(!S.mast||typeof S.mast!=='object')S.mast={};let d=S.mast[h];if(!d||typeof d!=='object')d=S.mast[h]={xp:0,sk:{},rs:0};d.xp=Math.max(0,+d.xp||0);if(!d.sk||typeof d.sk!=='object')d.sk={};d.rs=d.rs|0;return d;}
+function mLvl(h){const x=mData(h).xp;let n=0;while(n<M_CAP&&x>=mCum(n+1))n++;return n;}
+function mSpent(h,b){const d=mData(h);let t=0;for(const id in d.sk){const s=MSKI[id];if(s&&(b==null||s.b===b))t+=d.sk[id]|0;}return t;}
+function mFree(h){return mLvl(h)-mSpent(h);}
+function sk(id){if(!S||S.hero!=='agile'||!M_ON.agile)return 0;const d=S.mast&&S.mast.agile;return d&&d.sk?(d.sk[id]|0):0;}
+function mCan(id){const s=MSKI[id],d=mData('agile');return s&&(d.sk[id]|0)<s.max&&mFree('agile')>0&&mSpent('agile',s.b)>=M_T[s.t];}
+function mGain(n,why){if(!G||!M_ON[S.hero])return;const v=Math.round(n*(S.diff==='hard'?1.5:1)),d=mData(),l0=mLvl();d.xp+=v;G.mx=G.mx||{xp:0,r:0,b:0,lv0:l0};G.mx.xp+=v;G.mx[why]+=v;const l1=mLvl();
+ if(l1>l0&&G.p){addTxt(G.p.x,G.p.y-60,'MASTERY LV'+l1+'! +1 SKILL POINT','#19e3ff',20,1.6);sfx('level');}saveGame();}
+// ---- stat hooks ----
+var _mPst=pstats;pstats=function(){const st=_mPst.apply(this,arguments);if(S.hero!=='agile')return st;
+ const ab=sk('ocF')&&G&&G.abT>0,rm=1+.03*sk('oc1')+(ab?.25:0),sm=1+.03*sk('oc2')+(ab?.15:0);
+ for(const a of[st.main,st.off])if(a)a.rate*=rm;st.rate*=rm;st.spd*=sm;st.hp=Math.round(st.hp*(1+.04*sk('cd1')));st.armor=Math.min(.7,st.armor+.02*sk('cd2'));return st;};
+function mskStorm(){return 1+.05*sk('st1');}
+var VSK={fk:0,R:1};
+var _mGain=hwGain;hwGain=function(b){const g=_mGain.apply(this,arguments);return S.hero==='agile'?g*(1+.05*sk('oc3')):g;};
+var _mAbs=shAbsorb;shAbsorb=function(d){if(S.hero==='agile'&&d>0)d*=1-.03*sk('cd3');return _mAbs.call(this,d);};
+var _mRev=hwRevive;hwRevive=function(src){if(_mRev.apply(this,arguments))return true;if(!sk('cdF')||!G||G.rodR===G.wave)return false;const p=G.p;G.rodR=G.wave;p.hp=1;p.inv=1.5;p.flash=.3;G.shake=Math.max(G.shake,12);G.hitstop=.1;
+ sfx('zap',1.3);sfx('boom',1);burst(p.x,p.y,'#19e3ff',30,400,3);part({k:'ring',x:p.x,y:p.y,life:.6,col:'#7fe8ff',sz:160});try{for(let i=0;i<3;i++)voltPulse(p.x,p.y,1,hwBase(),1,{dm:new Map(),pk:1});}catch(e){}
+ addTxt(p.x,p.y-30,'LIGHTNING ROD!','#7fe8ff',24,1.4);G.banner={t:1.2,txt:'LIGHTNING ROD',sub:'grounded at 1 HP · once per round',pc:'#19e3ff'};return true;};
+var _mHit=hitEnemy;hitEnemy=function(e,b){const r=_mHit.apply(this,arguments);if(S.hero==='agile'&&b&&!b.melee&&!b.hwbl&&!b.lw&&G&&G.state==='play'){const k=sk('st2');
+ if(k&&R()<.04*k){let nb=null,nd=160;for(const o of G.en){if(o===e||o.dead||o.spawn>0)continue;const d=Math.hypot(o.x-e.x,o.y-e.y);if(d<nd){nd=d;nb=o;}}
+  if(nb){_mHit(nb,{dmg:(b.dmg||0)*.35,crit:0,vx:nb.x-e.x||1,vy:nb.y-e.y,x:nb.x,y:nb.y,col:'#19e3ff',hwbl:1,lw:1,kb:0});G.lwN=(G.lwN||0)+1;(G.hwVb=G.hwVb||[]).push({p:vJag(e.x,e.y,nb.x,nb.y,10),t0:0,t:0,w:1.1,life:.22,lv:1});}}}return r;};
+function mThunder(x,y,Rr,B){if(!sk('stF'))return;const d0=B*.6;G.thN=(G.thN||0)+1;part({k:'ring',x,y,life:.5,col:'#e8fdff',sz:Rr*2});G.shake=Math.max(G.shake,14);G.vFl=Math.max(G.vFl||0,.25);sfx('boom',1.2);
+ for(const e of G.en){if(e.dead||e.spawn>0||Math.hypot(e.x-x,e.y-y)>Rr+e.r)continue;const boss=e.type==='boss'||e.type==='mboss';(G.hwVb=G.hwVb||[]).push({p:vJag(e.x,e.y-260,e.x,e.y,22),t0:0,t:0,w:2.2,life:.35,lv:3});
+  _mHit(e,{dmg:e.type==='drone'?Math.max(d0,99):boss?d0*.35:d0,crit:0,vx:(e.x-x)||1,vy:e.y-y,x:e.x,y:e.y,col:'#e8fdff',melee:1,hwbl:1,kb:boss?0:120});}
+ addTxt(x,y-70,'THUNDERHEAD!','#e8fdff',24,1);}
+// afterburner timer (storm + 2s); refresh stats when it flips
+var _mSpT=hwSpecTick;hwSpecTick=function(dt){const was=!!(G.abT>0);if(sk('ocF')&&G.sp&&G.sp.k==='agile')G.abT=(G.sp.T-G.sp.t)+2;else G.abT=(G.abT||0)-dt;
+ if(!!(G.abT>0)!==was&&sk('ocF')){const k=G.p.hp/G.ps.hp;G.ps=pstats();G.p.hp=Math.min(G.ps.hp,Math.max(1,G.p.hp));}
+ VSK.fk=sk('st3');VSK.R=1+.05*sk('st3');return _mSpT.apply(this,arguments);};
+// ---- XP sources ----
+var _mWc=waveCleared;waveCleared=function(){const st=G&&G.state;const r=_mWc.apply(this,arguments);if(st==='play'&&G.state==='loot')mGain(M_ROUND,'r');return r;};
+var _mKill=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_mKill.apply(this,arguments);if(e&&!was&&e.dead&&(e.type==='boss'||e.type==='mboss')&&G&&G.state!=='dead')mGain(M_BOSS,'b');return r;};
+// ---- results summary ----
+var _mRes=showResult;showResult=function(){const r=_mRes.apply(this,arguments);try{if(M_ON[S.hero]){const g=G.mx||{xp:0,r:0,b:0,lv0:mLvl()},L=mLvl(),x=mData().xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo);
+ const d=document.createElement('div');d.className='pn mres';d.innerHTML=`<div class="st" style="color:#19e3ff;font-weight:900;font-style:italic">⚡ ${HEROES[S.hero].n} MASTERY</div><div class="st"><b style="color:#fff;font-size:20px">+${g.xp} XP</b> · rounds +${g.r} · bosses +${g.b}${S.diff==='hard'?' · Hard x1.5':''}</div>
+ <div class="st">LV ${g.lv0}${L>g.lv0?' → <b style="color:#ffd23f">LV '+L+'</b> · +'+(L-g.lv0)+' skill point'+(L-g.lv0>1?'s':''):' '+'(LV '+L+')'}${mFree()>0?' · <b style="color:#ffd23f">'+mFree()+' unspent</b>':''}</div><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX':(x-lo)+' / '+(hi-lo)+' XP'}</span></div>`;
+ const pn=$('result').querySelector('.pn');if(pn)pn.after(d);else $('result').appendChild(d);}}catch(e){dlog('mres '+e.message);}return r;};
+// ---- tree screen ----
+var MT={sel:null,from:'select'};
+function mRespecCost(){return G&&RUN?price(M_RESPEC*(1+mData('agile').rs)):0;}
+function showTree(from){if(from)MT.from=from;const h='agile',d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
+ const node=s=>{const r=d.sk[s.id]|0,lock=mSpent(h,s.b)<M_T[s.t],c=MBR[s.b].c;return `<div class="mn${s.fin?' fin':''}${lock?' lk':''}${r>=s.max?' mx':''}${MT.sel===s.id?' on':''}" data-sk="${s.id}" style="--bc:${c}"><div class="mi">${lock?'🔒':s.ic}</div><div class="mr">${r}/${s.max}</div></div>`;};
+ const col=b=>{const B=MBR[b],sp=mSpent(h,b);return `<div class="mc" style="--bc:${B.c}"><div class="mh">${B.n}<i>${sp} pts</i></div>${[0,1,2].map(t=>`<div class="mt"><span class="ml">${t?'TIER '+(t+1)+' · '+M_T[t]+' pts':'TIER 1'}</span><div class="mrow">${MSK.filter(s=>s.b===b&&s.t===t).map(node).join('')}</div></div>`).join('')}</div>`;};
+ const S1=MSKI[MT.sel];let det='<div class="mdn">Tap a skill to see what it does.</div>';
+ if(S1){const r=d.sk[S1.id]|0,lock=mSpent(h,S1.b)<M_T[S1.t];det=`<div class="mdh" style="color:${MBR[S1.b].c}">${S1.ic} ${S1.n} <i>${r}/${S1.max} · ${MBR[S1.b].n}${S1.fin?' FINAL':''}</i></div><div class="mdd">${r?'Now: '+S1.f(r):'Not learned'}${r<S1.max&&!S1.fin?'<br>Next: '+S1.f(r+1):S1.fin&&!r?'<br>'+S1.f(1):''}</div>${lock?`<div class="mdd" style="color:#ff6a7a">Spend ${M_T[S1.t]} points in ${MBR[S1.b].n} to unlock (${mSpent(h,S1.b)}/${M_T[S1.t]})</div>`:''}<span class="btn mplus${mCan(S1.id)?'':' dis'}" id="mplus">+ LEARN</span>`;}
+ $('tree').innerHTML=`<div class="mhd"><div class="ttl" style="font-size:24px">VOLT RUNNER · SKILLS</div><div class="mlv"><b>LV ${L}</b><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX LEVEL':(x-lo)+' / '+(hi-lo)+' XP'}</span></div><b style="color:${fr?'#ffd23f':'#9aa6c0'}">${fr} PT${fr===1?'':'S'}</b></div></div>
+ <div class="mtree">${[0,1,2].map(col).join('')}</div><div class="mdet">${det}</div>
+ <div class="row mft"><span class="btn gh sm" id="mback">◀ BACK</span><span class="btn sm${inShop&&mSpent(h)&&RUN.cash>=mRespecCost()?'':' dis'}" id="mresp">${inShop?'RESPEC $'+mRespecCost():'RESPEC · in shop'}</span></div>`;
+ show('tree');const T=$('tree');T.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{MT.sel=b.dataset.sk;sfx('click');showTree();});
+ const pl=$('mplus');if(pl)pl.onclick=()=>{if(!mCan(MT.sel))return;d.sk[MT.sel]=(d.sk[MT.sel]|0)+1;saveGame();mRefresh();sfx('item');showTree();};
+ $('mback').onclick=()=>{sfx('click');if(MT.from==='shop'&&G&&G.state==='loot')showShop();else showSelect();};
+ $('mresp').onclick=()=>{if(!inShop){toast('Respec is available in the shop between rounds');return;}const c=mRespecCost();if(!mSpent(h)||RUN.cash<c)return;RUN.cash-=c;d.sk={};d.rs++;saveGame();mRefresh();sfx('item');toast('Skills reset · '+mLvl(h)+' points refunded');showTree();};}
+function mRefresh(){if(G&&G.p&&G.ps){const k=G.p.hp/G.ps.hp;G.ps=pstats();G.p.hp=Math.max(1,Math.min(G.ps.hp,Math.round(G.ps.hp*k)));}}
+var _mShow=show;show=function(id){const r=_mShow.apply(this,arguments);const t=$('tree');if(t)t.classList.toggle('on',id==='tree');return r;};
+var _mSel=showSelect;showSelect=function(){const r=_mSel.apply(this,arguments);try{const c=document.querySelector('#select .hc[data-hero="agile"] .hpw');if(c){const L=mLvl('agile'),fr=mFree('agile'),b=document.createElement('span');b.className='mskb';b.innerHTML=`⚡ MASTERY LV${L} · SKILLS${fr?' <b>'+fr+'</b>':''}`;b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select');};c.appendChild(b);}}catch(e){dlog('msel '+e.message);}return r;};
+var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{if(S.hero==='agile'){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree('agile'),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML='⚡ SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop');};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};
 </script></body></html>
