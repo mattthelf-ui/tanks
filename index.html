@@ -914,7 +914,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v57';
+const VER='haywire v58';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1400,10 +1400,10 @@ function hwBtnDraw(t){if(!G||G.state!=='play')return;const b=ui.HW,c=cx,full=(G.
  if(G.vFl>0){c.fillStyle='rgba(200,245,255,'+Math.min(.55,G.vFl*2.2)+')';c.fillRect(0,0,W,H);}
  // v55: LV/pips readout moved to the HUD panel bar
  if(full){c.globalAlpha=HWB_RM?.45:.35+.25*Math.sin(t*8);c.fillStyle='#ff2e88';c.beginPath();c.arc(b.x,b.y,b.r+10,0,6.283);c.fill();c.globalAlpha=1;}
- c.fillStyle=full?'rgba(255,46,136,.92)':'rgba(40,40,60,.7)';c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,b.r,0,6.283);c.fill();c.stroke();if(!full&&!G.sp&&f>0)hwBtnFill(c,b,f,t);
+ c.fillStyle=full?'rgba(255,46,136,.92)':'rgba(40,40,60,.7)';c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,b.r,0,6.283);c.fill();c.stroke();if(!full)hwBtnFill(c,b,G.sp?0:f,t);
  // v55: no % ring on the button (meter lives in the HUD panel)
  if(G.sp&&(G.sp.k==='agile'||G.sp.k==='heavy')){const k=Math.max(0,1-G.sp.t/G.sp.T);c.strokeStyle=G.sp.k==='heavy'?'#FF8A00':'#19e3ff';c.lineWidth=5;c.beginPath();c.arc(b.x,b.y,b.r-3,-1.571,-1.571+6.283*k);c.stroke();c.font='italic 900 15px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#e8fdff';c.fillText((G.sp.T-G.sp.t).toFixed(1)+'s',b.x,b.y);c.restore();return;}
- c.font='italic 900 '+(full?11:10)+'px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle=full?'#fff':'#ff7ab8';c.font='italic 900 '+(full?15:12)+'px system-ui';c.fillText(full?'GO!':'HW',b.x,b.y+1);c.restore();}
+ c.font='italic 900 '+(full?11:10)+'px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.font='italic 900 '+(full?15:12)+'px system-ui';c.fillText(full?'GO!':'HW',b.x,b.y+1);c.restore();}
 // ---- v25 anime art pass ----
 var HSEC={agile:'SEC-7',melee:'SEC-9',heavy:'SEC-12'};
 // v41 select art (16:9) framing: keep visor + weapon in view on narrow/short cards
@@ -2005,7 +2005,9 @@ function hwBarFlash(c,L,T){if(!G||!G.hwbFull)return;const hc=S.hero==='heavy'?'#
  c.restore();}
 // ================= v57: HW special button shows its charge as an energy fill; moved above the aim stick (mirrors Dash) =================
 function hwBtnFill(c,b,f,t){const hc=S.hero==='heavy'?'#FF8A00':S.hero==='melee'?'#c45cff':'#19e3ff',r=b.r-2,top=b.y+r-2*r*f;c.save();c.beginPath();c.arc(b.x,b.y,r,0,6.283);c.clip();
- const g=c.createLinearGradient(0,b.y+r,0,top);g.addColorStop(0,hc);g.addColorStop(1,'rgba(255,255,255,.85)');c.globalAlpha=.8;c.fillStyle=g;c.beginPath();c.moveTo(b.x-r,b.y+r);
+ // v58: solid dim base in the bot colour so the button never looks empty
+ c.fillStyle=hc;c.fillRect(b.x-r,b.y-r,2*r,2*r);c.fillStyle='rgba(5,6,10,.5)';c.fillRect(b.x-r,b.y-r,2*r,2*r);if(f<=0){c.restore();return;}
+ const g=c.createLinearGradient(0,b.y+r,0,top);g.addColorStop(0,hc);g.addColorStop(1,'rgba(255,255,255,.9)');c.globalAlpha=.6+.4*f;c.fillStyle=g;c.beginPath();c.moveTo(b.x-r,b.y+r);
  const amp=HWB_RM||f>.97?0:2.2;for(let x=-r;x<=r;x+=3)c.lineTo(b.x+x,top+amp*Math.sin(x*.28+t*6));c.lineTo(b.x+r,b.y+r);c.closePath();c.fill();c.restore();}
 var _u57Lay=layout;layout=function(){_u57Lay.apply(this,arguments);try{
  const Lx=ui.L.x,Rx=ui.R.x,inw=Math.sign(Lx-Rx)||-1,g=ui.grab;
