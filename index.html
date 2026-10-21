@@ -914,7 +914,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v56';
+const VER='haywire v57';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1399,8 +1399,8 @@ function hwFxDraw(t){hwBladeDraw(t);voltDraw(t);domeDraw(t);const f=G.fx;if(!f)r
 function hwBtnDraw(t){if(!G||G.state!=='play')return;const b=ui.HW,c=cx,full=(G.hw||0)>=100&&(G.hwUses||0)<HW_MAXU,f=(G.hw||0)/100;c.save();
  if(G.vFl>0){c.fillStyle='rgba(200,245,255,'+Math.min(.55,G.vFl*2.2)+')';c.fillRect(0,0,W,H);}
  // v55: LV/pips readout moved to the HUD panel bar
- if(full){c.globalAlpha=.35+.25*Math.sin(t*8);c.fillStyle='#ff2e88';c.beginPath();c.arc(b.x,b.y,b.r+10,0,6.283);c.fill();c.globalAlpha=1;}
- c.fillStyle=full?'rgba(255,46,136,.92)':'rgba(40,40,60,.7)';c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,b.r,0,6.283);c.fill();c.stroke();
+ if(full){c.globalAlpha=HWB_RM?.45:.35+.25*Math.sin(t*8);c.fillStyle='#ff2e88';c.beginPath();c.arc(b.x,b.y,b.r+10,0,6.283);c.fill();c.globalAlpha=1;}
+ c.fillStyle=full?'rgba(255,46,136,.92)':'rgba(40,40,60,.7)';c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,b.r,0,6.283);c.fill();c.stroke();if(!full&&!G.sp&&f>0)hwBtnFill(c,b,f,t);
  // v55: no % ring on the button (meter lives in the HUD panel)
  if(G.sp&&(G.sp.k==='agile'||G.sp.k==='heavy')){const k=Math.max(0,1-G.sp.t/G.sp.T);c.strokeStyle=G.sp.k==='heavy'?'#FF8A00':'#19e3ff';c.lineWidth=5;c.beginPath();c.arc(b.x,b.y,b.r-3,-1.571,-1.571+6.283*k);c.stroke();c.font='italic 900 15px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#e8fdff';c.fillText((G.sp.T-G.sp.t).toFixed(1)+'s',b.x,b.y);c.restore();return;}
  c.font='italic 900 '+(full?11:10)+'px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillStyle=full?'#fff':'#ff7ab8';c.font='italic 900 '+(full?15:12)+'px system-ui';c.fillText(full?'GO!':'HW',b.x,b.y+1);c.restore();}
@@ -2003,4 +2003,17 @@ function hwBarFlash(c,L,T){if(!G||!G.hwbFull)return;const hc=S.hero==='heavy'?'#
  const ft=G.t-(G.hwbAt||0);if(full&&ft<1.6){const al=Math.min(1,(1.6-ft)*2.5),blink=HWB_RM||Math.floor(ft*8)%2===0;
   if(blink){c.globalAlpha=al;c.fillStyle='rgba(5,6,10,.85)';c.fillRect(L-2,T+52,190,30);c.font='italic 900 18px system-ui';c.textAlign='left';c.fillStyle=hc;c.fillText('HAYWIRE',L+4,T+67);c.fillStyle='#fff';c.fillText('READY!',L+4+c.measureText('HAYWIRE ').width,T+67);c.globalAlpha=1;}}
  c.restore();}
+// ================= v57: HW special button shows its charge as an energy fill; moved above the aim stick (mirrors Dash) =================
+function hwBtnFill(c,b,f,t){const hc=S.hero==='heavy'?'#FF8A00':S.hero==='melee'?'#c45cff':'#19e3ff',r=b.r-2,top=b.y+r-2*r*f;c.save();c.beginPath();c.arc(b.x,b.y,r,0,6.283);c.clip();
+ const g=c.createLinearGradient(0,b.y+r,0,top);g.addColorStop(0,hc);g.addColorStop(1,'rgba(255,255,255,.85)');c.globalAlpha=.8;c.fillStyle=g;c.beginPath();c.moveTo(b.x-r,b.y+r);
+ const amp=HWB_RM||f>.97?0:2.2;for(let x=-r;x<=r;x+=3)c.lineTo(b.x+x,top+amp*Math.sin(x*.28+t*6));c.lineTo(b.x+r,b.y+r);c.closePath();c.fill();c.restore();}
+var _u57Lay=layout;layout=function(){_u57Lay.apply(this,arguments);try{
+ const Lx=ui.L.x,Rx=ui.R.x,inw=Math.sign(Lx-Rx)||-1,g=ui.grab;
+ // HW mirrors Dash: same offset from its stick, mirrored horizontally
+ ui.HW.r=Math.max(ui.HW.r,28);ui.HW.x=Rx-(ui.D.x-Lx);ui.HW.y=ui.D.y+(ui.R.y-ui.L.y);
+ // melee: inward of the aim stick at stick height; grenade: diagonal up-inward between them
+ ui.M.x=Rx+inw*(g+ui.M.r+6);ui.M.y=ui.R.y;
+ const k=(g+ui.N.r+8)/Math.SQRT2;ui.N.x=Rx+inw*k;ui.N.y=ui.R.y-k;
+}catch(e){}};
+layout();
 </script></body></html>
