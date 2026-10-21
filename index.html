@@ -914,7 +914,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v58';
+const VER='haywire v59';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2015,7 +2015,9 @@ var _u57Lay=layout;layout=function(){_u57Lay.apply(this,arguments);try{
  ui.HW.r=Math.max(ui.HW.r,28);ui.HW.x=Rx-(ui.D.x-Lx);ui.HW.y=ui.D.y+(ui.R.y-ui.L.y);
  // melee: inward of the aim stick at stick height; grenade: diagonal up-inward between them
  ui.M.x=Rx+inw*(g+ui.M.r+6);ui.M.y=ui.R.y;
- const k=(g+ui.N.r+8)/Math.SQRT2;ui.N.x=Rx+inw*k;ui.N.y=ui.R.y-k;
+ // v59: grenade centred between Dash and HW, staggered lower (V look)
+ ui.N.x=(ui.D.x+ui.HW.x)/2;ui.N.y=Math.min((ui.D.y+ui.HW.y)/2+50,H-SAFE.b-ui.N.r-8);
+ if(Math.hypot(ui.M.x-ui.N.x,ui.M.y-ui.N.y)<ui.M.r+ui.N.r+8){ui.M.y=Math.min(H-SAFE.b-ui.M.r-6,ui.N.y+ui.M.r+ui.N.r+8);}
 }catch(e){}};
 layout();
 </script></body></html>
