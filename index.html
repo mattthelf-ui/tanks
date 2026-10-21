@@ -102,6 +102,53 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 .mres{margin-top:8px;min-width:260px;text-align:center}
 .btn.mplus.dis{opacity:.4!important;filter:grayscale(1);pointer-events:none}
 .btn,.btn.sm,.btn.mplus,.hwsel .btn.sm,.hwsel .hc .btn,#hangar .btn.sm,.dbox .btn{min-height:44px!important;box-sizing:border-box}
+
+/* ===== v53 UI ===== */
+#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:bOn .45s ease-out}
+#boot.out{animation:bOff .25s ease-in forwards}
+@keyframes bOn{0%{transform:scaleY(.004) scaleX(.6);filter:brightness(4)}60%{transform:scaleY(1.02)}100%{transform:none;filter:none}}
+@keyframes bOff{to{transform:scaleY(.004);filter:brightness(4);opacity:0}}
+.crt{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;font-family:ui-monospace,Menlo,Consolas,monospace;color:#7dffb0;animation:flk 3s infinite}
+.crt:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.42) 0 2px,transparent 2px 4px);pointer-events:none;z-index:3}
+.crt:after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.85) 100%);pointer-events:none;z-index:4}
+@keyframes flk{0%,100%{opacity:1}47%{opacity:1}48%{opacity:.82}49%{opacity:1}92%{opacity:.93}}
+.bl{position:absolute;left:5%;top:calc(4% + env(safe-area-inset-top));font-size:14px;line-height:1.5;text-align:left;text-shadow:0 0 6px #3dff7a;z-index:2}
+.blogo{position:relative;z-index:2;width:min(92vw,640px);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;animation:lgIn .5s .9s both}
+.blogo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.2) contrast(1.1);border:2px solid #ff2a2a;box-shadow:0 0 30px rgba(255,42,42,.5)}
+.blogo .ttl{position:relative;font-size:min(16vw,104px)!important;text-shadow:0 0 22px rgba(255,30,40,.95),4px 4px 0 #e0162a;color:#fff;animation:gl 2.4s 1.4s infinite}
+@keyframes lgIn{0%{opacity:0;transform:scale(1.15);filter:brightness(3)}100%{opacity:1;transform:none;filter:none}}
+@keyframes gl{0%,90%,100%{transform:none}92%{transform:translate(3px,-1px) skewX(-6deg)}94%{transform:translate(-3px,1px)}}
+.pab{margin-top:26px;font-size:22px;font-weight:900;letter-spacing:3px;color:#ffd23f;text-shadow:0 0 10px #ffb020;opacity:0;z-index:2;position:relative}
+#boot.rdy .pab{animation:blk 1s steps(1) infinite}@keyframes blk{0%{opacity:1}50%{opacity:0}}
+.bft{position:absolute;bottom:calc(4% + env(safe-area-inset-bottom));font-size:12px;color:#5a8;letter-spacing:2px;z-index:2}
+#title.retro .tscan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px);pointer-events:none;z-index:0}
+#title.retro{justify-content:space-between;padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.tlogo{margin-top:6vh;position:relative;z-index:1}.tlogo .ttl{font-size:min(17vw,130px)!important}
+.ttag{font-size:15px;max-width:440px;margin:6px auto 0;color:#fff;background:rgba(5,4,14,.72);padding:6px 12px;border-radius:8px;font-weight:600}
+.tmain{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:520px;position:relative;z-index:1}
+.btn.tbig{font-size:30px;padding:14px 0;min-height:64px!important;width:min(84vw,360px);justify-content:center;display:flex;flex-direction:column;align-items:center}
+.btn.tbig small{font-size:13px;font-weight:700;font-style:normal}
+.tdl{font-size:12px;font-weight:900;letter-spacing:3px;color:#ffd23f;margin-top:6px;text-shadow:1px 1px 0 #000}
+.tdf{display:flex;gap:4px;justify-content:center}.tdf .btn{font-size:16px!important;min-width:96px;justify-content:center;display:inline-flex;flex-direction:column;align-items:center;margin:2px}.tdf .btn i{font-size:11px;font-style:normal;font-weight:700;opacity:.85}
+.tdf .btn.on{outline:3px solid #fff}
+.tsub{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:min(92vw,420px);margin-top:6px}.tsub .btn{font-size:15px!important;margin:2px;justify-content:center;display:flex;align-items:center}
+.tft{z-index:1;font-size:12px}
+@media (orientation:landscape) and (max-height:500px){.tlogo{margin-top:0}.tlogo .ttl{font-size:52px!important}.ttag{display:none}.btn.tbig{font-size:24px;min-height:52px!important;padding:6px 0}.tsub{grid-template-columns:1fr 1fr;width:100%}.tmain{gap:2px;max-width:min(62vw,520px)}.tdl{margin-top:0}}
+.ib{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin:-10px -6px;vertical-align:middle;cursor:pointer;font-size:22px;font-style:normal;font-weight:400;color:#19e3ff;text-shadow:0 0 6px #19e3ff;-webkit-tap-highlight-color:transparent;letter-spacing:0;transform:none}
+.ibc{position:absolute;top:2px;right:2px;z-index:3}.hc{position:relative}
+.hwi{z-index:600}.hwi .dbox{max-width:440px;text-align:left}.hwih{font-weight:900;font-style:italic;font-size:20px;color:#19e3ff;margin-bottom:6px}
+.hwib{font-size:15px;line-height:1.45;color:#eef3ff}.hwib p{margin:6px 0}.hwib ul{margin:4px 0;padding-left:20px}.hwib li{margin:4px 0}.hwi .row{justify-content:center}
+.hwset{display:flex;flex-direction:column;align-items:stretch}.hwset .btn{justify-content:center;display:flex;font-size:17px}.hwsn{font-size:13px;color:#b9c9e6}
+/* readability: min 14px body / 12px labels, higher contrast */
+.ds,.card .ds,.it .ds,.hc .ds{font-size:14px!important;color:#d6e0f5!important;line-height:1.35}
+.st{font-size:14px;color:#dbe6fa}.sub{font-size:13px}
+.card .nm,.sc .nm{font-size:15px!important}.it .nm{font-size:15px}
+.sb,.hwsel .hc .sb{font-size:12px!important}.sl .sn,.bay .sn{font-size:12px!important;color:#c9d6ee}.sl .si{font-size:14px}
+.cmp{font-size:13px!important}.prr{font-size:12px!important}.mh{font-size:13px!important}.mh i{font-size:12px!important;color:#d6e0f5!important}
+.mdet{font-size:14px!important;color:#eef3ff}.sh{font-size:15px!important;letter-spacing:1px}
+.mskb,.ml,.mr,.tag,.hpb span,.mxb span,.gsb i{font-size:12px!important}
+:is(#shop,#loot,#hangar,#select,#tree,#pause,.det) :is([style*="font-size:9px"],[style*="font-size:10px"],[style*="font-size:11px"]){font-size:12px!important}
+.sc,.card,.lcard{border-width:3px}.sg{gap:8px!important}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
 <div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div><div id="tree" class="scr"></div>
 <script>
@@ -828,10 +875,10 @@ function drawHUD(t){const c=cx,p=G.p,L=SAFE.l+10,T=SAFE.t+8;hwHud(c,L,T,t);
  // HP / XP panel
  c.save();c.transform(1,0,-.2,1,0,0);c.fillStyle='rgba(5,6,10,.75)';c.fillRect(L+8,T,190,36);c.fillStyle='#3dff7a';const hk=p.hp/G.ps.hp;c.fillStyle=hk>.5?'#3dff7a':hk>.25?'#ffd23f':'#ff3d6e';c.fillRect(L+46,T+5,146*hk,13);
  c.strokeStyle=INK;c.lineWidth=2;c.strokeRect(L+46,T+5,146,13);c.restore();
- bigText(({heavy:'HVY',agile:'AGL',melee:'MEL'})[S.hero],L+28,T+17,13,'#fff');c.font='italic 900 12px system-ui';c.fillStyle='#ffd23f';c.textAlign='left';c.fillText('$'+RUN.cash,L+48,T+31);c.fillStyle='#19e3ff';c.fillText('GS '+(G.gsH||''),L+118,T+31);c.fillStyle='#fff';shHud(c,L,T,t);c.font='bold 10px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(p.hp)+'/'+G.ps.hp,L+48,T+12);
+ bigText(({heavy:'HVY',agile:'AGL',melee:'MEL'})[S.hero],L+28,T+17,13,'#fff');c.font='italic 900 12px system-ui';c.fillStyle='#ffd23f';c.textAlign='left';c.fillText('$'+RUN.cash,L+48,T+31);c.fillStyle='#19e3ff';c.fillText('GS '+(G.gsH||''),L+118,T+31);c.fillStyle='#fff';shHud(c,L,T,t);c.font='bold 12px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(p.hp)+'/'+G.ps.hp,L+48,T+12);
  c.textAlign='left';bigText('',0,0,1,'#fff');c.font='italic 900 13px system-ui';c.fillStyle='#ff7ab8';c.textAlign='left';const bw=(S.bestW&&S.bestW[G.d])||0;c.fillText('ROUND '+Math.max(1,G.wave)+(isSwarm(G.wave)?'  ·  RIOT':'')+'  ·  '+DF().n+((S.bestD&&S.bestD[S.diff||'normal'])?'  ·  BEST '+S.bestD[S.diff||'normal']:''),L+8,T+50);c.fillStyle='#ffd23f';const l2=G.wActive?(G.wLeft>0?'SURVIVE '+Math.ceil(G.wLeft)+'s':'DESTROY THE WARDEN BOT'):(G.wave?'':'Wave 1 in '+Math.ceil(G.waveT)+'s');c.fillText(l2,L+8,T+66);
  // power-up timers
- {let px=L+8;const py=T+76;for(const k in PW){const v=G.pw[k];if(!(v>0))continue;const P=PW[k],f=v/P.d;c.fillStyle='rgba(5,6,10,.75)';c.fillRect(px,py,46,30);c.fillStyle=P.c;c.fillRect(px+2,py+24,42*f,4);bigText(P.ic,px+12,py+12,14,P.c);c.font='bold 11px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(v)+'s',px+22,py+16);if(v<3&&Math.floor(t*6)%2){c.strokeStyle=P.c;c.lineWidth=2;c.strokeRect(px,py,46,30);}px+=50;}}
+ {let px=L+8;const py=T+76;for(const k in PW){const v=G.pw[k];if(!(v>0))continue;const P=PW[k],f=v/P.d;c.fillStyle='rgba(5,6,10,.75)';c.fillRect(px,py,46,30);c.fillStyle=P.c;c.fillRect(px+2,py+24,42*f,4);bigText(P.ic,px+12,py+12,14,P.c);c.font='bold 12px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(v)+'s',px+22,py+16);if(v<3&&Math.floor(t*6)%2){c.strokeStyle=P.c;c.lineWidth=2;c.strokeRect(px,py,46,30);}px+=50;}}
  // minimap
  updMini();const ms=Q.mini,mx=W-SAFE.r-ms-10,my=T;c.fillStyle='rgba(5,6,10,.7)';c.fillRect(mx-3,my-3,ms+6,ms+6);c.strokeStyle='#19e3ff';c.lineWidth=2;c.strokeRect(mx-3,my-3,ms+6,ms+6);
  c.imageSmoothingEnabled=false;c.drawImage(miniCv,mx,my,ms,ms);c.imageSmoothingEnabled=true;const sc=ms/(MW*TILE);
@@ -874,7 +921,7 @@ function txtImg(s,col,sz){const key=s+'|'+col+'|'+sz;let im=TXC.get(key);if(im)r
 function banY(){return H>W?Math.max(SAFE.t+110,H*.2,SAFE.t+197):Math.max(SAFE.t+110,H*.2);} // portrait: below the HAYWIRE/ALERT panel
 function banW(){return H>W?W:W-SAFE.r-Q.mini-21;} // landscape: strip stops before the HAYWIRE/ALERT panel
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v52';
+const VER='haywire v53';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1302,8 +1349,8 @@ function hwDrawE(e,t){acidDraw(e,t);if(e.type==='electro'&&!e.dead){cx.save();cx
 function hwHud(c,L,T,t){if(!G.gsT||G.t-G.gsT>.5){G.gsT=G.t;G.gsH=gsNow();}hwScreenFx(c,t);hwBtnDraw(t);const f=(G.hw||0)/100,on=G.hwT>0,bw=Q.mini+6,X=W-SAFE.r-Q.mini-13,y=T+Q.mini+10;
  if(on||G.hwImm>0){for(let i=0;i<4;i++){c.fillStyle=R()<.5?'rgba(255,46,136,.10)':'rgba(25,227,255,.10)';c.fillRect(0,R()*H,W,4+R()*18);}c.strokeStyle='rgba(255,46,136,'+(.25+.2*Math.sin(t*30))+')';c.lineWidth=10;c.strokeRect(0,0,W,H);}
  c.fillStyle='rgba(5,6,10,.75)';c.fillRect(X,y,bw,28);c.fillStyle=on?'#ff2e88':f>=1?'#fff':'#ff2e88';c.fillRect(X+3,y+16,(bw-6)*(on?1:f),8);c.strokeStyle=INK;c.lineWidth=1;c.strokeRect(X+3,y+16,bw-6,8);
- c.font='italic 900 11px system-ui';c.textAlign='left';c.fillStyle=on&&Math.floor(t*12)%2?'#19e3ff':'#ff7ab8';c.fillText(on?'HAYWIRE MOVE!':f>=1?'HAYWIRE READY!':'HAYWIRE '+Math.floor(f*100)+'%',X+4,y+12);
- const A=G.alert||hwAlert(G.wave),z=ZP();c.fillStyle='rgba(5,6,10,.75)';c.fillRect(X,y+31,bw,30);c.fillStyle='#ff3040';c.fillText('ALERT',X+4,y+44);for(let i=0;i<5;i++){c.fillStyle=i<A?(Math.floor(t*3)%2&&i===A-1?'#ffb020':'#ff3040'):'#333';c.fillRect(X+46+i*11,y+35,9,10);}c.fillStyle='#9aa6c0';c.font='bold 9px system-ui';c.fillText(z.n,X+4,y+56);}
+ c.font='italic 900 13px system-ui';c.textAlign='left';c.fillStyle=on&&Math.floor(t*12)%2?'#19e3ff':'#ff7ab8';c.fillText(on?'HAYWIRE MOVE!':f>=1?'HAYWIRE READY!':'HAYWIRE '+Math.floor(f*100)+'%',X+4,y+12);
+ const A=G.alert||hwAlert(G.wave),z=ZP();c.fillStyle='rgba(5,6,10,.75)';c.fillRect(X,y+31,bw,30);c.fillStyle='#ff3040';c.fillText('ALERT',X+4,y+44);for(let i=0;i<5;i++){c.fillStyle=i<A?(Math.floor(t*3)%2&&i===A-1?'#ffb020':'#ff3040'):'#333';c.fillRect(X+46+i*11,y+35,9,10);}c.fillStyle='#9aa6c0';c.font='bold 12px system-ui';c.fillText(z.n,X+4,y+56);}
 // ---- HAYWIRE SPECIAL MOVES (v24) ----
 var CYC_M=[0,1,1.35,1.75]; // v46: Cyclone Blade LV1-3 per round (same steps as the dome)
 var HWN={agile:'OVERLOAD STORM',heavy:'AEGIS DOME',melee:'CYCLONE BLADE'};
@@ -1878,4 +1925,63 @@ window.hwBack=function(){try{const det=document.querySelector('.det.on');if(det&
  if(ui.scr==='pause'){G.state='play';show('play');showPause();return 'ok';}
  if(ui.scr==='select'||ui.scr==='result'||ui.scr==='hub'||ui.scr==='hangar'){showTitle();return 'ok';}
  return 'ok';}catch(e){return 'ok';}};
+// ================= v53 UI: retro boot screen, title redesign, info buttons, readability, control layout =================
+var IS_APP=location.hostname==='appassets.androidplatform.net';
+function hwEsc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]);}
+// ---- info popups ----
+function hwInfo(title,html){const o=$('hwi');if(o)o.remove();const d=document.createElement('div');d.id='hwi';d.className='det on hwi';
+ d.innerHTML=`<div class="pn dbox"><div class="hwih">ⓘ ${title}</div><div class="hwib">${html}</div><div class="row"><span class="btn gh" id="hwix">GOT IT</span></div></div>`;
+ document.body.appendChild(d);try{sfx('click');}catch(e){}const x=()=>d.remove();$('hwix').onclick=x;d.addEventListener('click',e=>{if(e.target===d)x();});}
+function ib(k,arg){return `<span class="ib" data-info="${k}"${arg?` data-ia="${arg}"`:''} role="button" aria-label="Info">ⓘ</span>`;}
+var SPD={agile:'Overload Storm: for 5 seconds lightning branches out from you and chains between nearby enemies.',melee:'Cyclone Blade: you spin and fling laser blades that spiral outward and cut through enemies.',heavy:'Aegis Dome: a 5-second energy dome around you that pushes enemies out and damages anything caught inside it.'};
+function rarLine(){return RAR.map((r,i)=>`<b style="color:${i===6?'#ffe9a8':r.c}">${r.n}</b>`).join(' → ');}
+var INFO={
+ bot:h=>{const H=HEROES[h];return [H.n,`<p>${hwEsc(H.desc)}</p><p>Starts with <b>${WEAP[H.wpn].n}${H.twin?' x2':''}</b>${H.shield?' + <b>'+WEAP[H.shield].n+'</b>':''}.</p><p><b>Special · ${SPD[h]}</b></p><p>The <b>SKILLS</b> button on the card opens this bot's own skill tree.</p>`];},
+ special:()=>['Specials',`<p>Your <b>HAYWIRE meter</b> (top right, under the map) fills when you hit enemies and when you take damage. Kagerou fills it fastest with sword hits; Iron Bastion fills it well with rocket hits.</p><p>At 100% tap the special button to fire it. You can use it <b>up to 3 times per round</b>, and each use in the same round is stronger: <b>LV1 → LV2 → LV3 (max)</b>. It resets to LV1 next round.</p><ul>${['agile','melee','heavy'].map(h=>`<li>${SPD[h]}</li>`).join('')}</ul>`],
+ shop:()=>['Shop',`<p>Between rounds, spend cash (<b style="color:#ffd23f">$</b>) on weapons, gear and implants. Tap a card to see its stats, then buy it.</p><p>Cash comes from enemy drops and the round-clear bonus. Gear with <b>+% Cash</b> raises both.</p><p>Prices rise by 18% of the base price each round. <b>REROLL</b> swaps the offers for new ones; each reroll in the same shop costs more ($25, then +$15 each time, scaled by the round).</p>`],
+ bm:()=>['Black Market',`<p>Opens from <b>round ${BM_R}</b>. It sells <b>Vault</b> gear: always the best rarity unlocked so far (Epic from round 7, Ultra from 20, Ultimate from 30, Legendary from 40; a SOLAR item is a 1-in-5000 surprise).</p><p>Vault items are <b>2 item levels higher</b> than the normal shop and have <b>one extra bonus stat</b>. They cost a lot more; it's where saved-up cash goes.</p>`],
+ gear:()=>['Gear stats',`<ul><li><b>HP</b>: how much damage you can take.</li><li><b>Shield</b>: your Neural Link absorbs this much damage first, then recharges after the shown seconds.</li><li><b>Armor</b>: cuts the damage you take by that %.</li><li><b>Crit</b>: chance for a hit to deal extra damage.</li><li><b>Speed</b>: how fast you move.</li><li><b>Main / Off</b>: damage per hit of the weapon in each arm.</li><li><b>Cash +%</b>: more cash from drops and round bonuses.</li><li><b>GS</b> (gear score): overall power of what you have equipped.</li></ul><p>Rarity, worst to best: ${rarLine()}. Higher rarity means bigger stats and more bonus stats.</p>`],
+ tree:()=>['Skill tree',`<p>Each bot earns its own <b>mastery XP</b>: ${M_ROUND} per round survived and ${M_BOSS} per boss or mini-boss kill (x1.5 on Hard). You keep it even when you die.</p><p>Every level (max ${M_CAP}) gives <b>1 skill point</b>. Each bot has 3 branches. A branch's deeper tiers unlock after you spend ${M_T[1]} and then ${M_T[2]} points in that branch.</p><p>Tap a skill to read it, then <b>+ LEARN</b>. <b>RESPEC</b> refunds all points; it only works in the shop during a run and costs more each time.</p>`],
+ how:()=>['How to play',`<ul><li><b>Left stick</b>: move. <b>Right stick</b>: aim and fire (Kagerou: swing).</li><li><b>Tap</b> the left stick to <b>dash</b>, tap the right stick for a <b>melee</b> hit. The round buttons above the sticks do the same.</li><li>Fill the <b>HAYWIRE meter</b> and fire your <b>special</b> (up to 3 times a round, stronger each time).</li><li>Survive each round, grab the loot, then spend cash in the <b>shop</b>. From round ${BM_R} the <b>Black Market</b> opens.</li><li>Every bot levels up its own <b>skill tree</b>, even if you die.</li><li>On boss rounds, destroy the <b>Warden Bot</b>.</li></ul><p>Swap the sticks or change aim assist in <b>Settings</b>. Your progress is saved on this device.</p>`]};
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(!t)return;e.stopPropagation();e.preventDefault();const f=INFO[t.dataset.info];if(!f)return;const [a,b]=f(t.dataset.ia);hwInfo(a,b);},true);
+// ---- retro boot screen (once per launch) ----
+function hwBoot(){if(window.__booted||window.__noBoot)return;const d=document.createElement('div');d.id='boot';d.innerHTML=`<div class="crt"><div class="bl" id="bootl"></div><div class="blogo"><img src="art/title.webp" alt=""><div class="ttl tt">HAYWIRE</div></div><div class="pab">PRESS ANY BUTTON</div><div class="bft">© SEC-7 SYSTEMS · ${VER.toUpperCase()}</div></div>`;document.body.appendChild(d);
+ const L=['SEC-7 GUARD BIOS 5.3','MEM CHECK ........ OK','MOTOR CORE ....... OK','OBEDIENCE CHIP .... ERR','>> UNIT HAS GONE HAYWIRE'];let i=0;const tk=setInterval(()=>{const b=$('bootl');if(!b||i>=L.length){clearInterval(tk);if(b)d.classList.add('rdy');return;}b.innerHTML+=`<div${i===3?' style="color:#ff2a2a"':''}>${L[i++]}</div>`;},170);
+ const go=e=>{if(window.__booted)return;window.__booted=1;clearInterval(tk);try{auStart();sfx('click');}catch(_){}d.classList.add('out');setTimeout(()=>d.remove(),250);['pointerdown','keydown'].forEach(k=>removeEventListener(k,go,true));if(e&&e.type==='keydown')e.preventDefault();};
+ ['pointerdown','keydown'].forEach(k=>addEventListener(k,go,true));window.__bootGo=go;}
+// ---- title screen ----
+showTitle=function(){G=null;auTrack('hub');const sv=loadRun(),df=S.diff||'normal',bd=S.bestD||{};
+ $('title').innerHTML=`<canvas id="kart" style="position:absolute;inset:0;width:100%;height:100%;z-index:-1"></canvas><div class="tscan"></div>
+ <div class="tlogo"><div class="ttl tt">HAYWIRE</div><div class="ttag">A prison guard bot went haywire. Now the whole prison is hunting it.</div></div>
+ <div class="tmain">${sv?`<span class="btn pk tbig" id="tc">CONTINUE ▶<small>${HEROES[sv.hero].n} · ${DIFF[sv.diff].n} · round ${sv.wave+1}</small></span>`:''}
+ <span class="btn yl tbig" id="tg">${sv?'NEW GAME':'PLAY'} ▶</span>
+ <div class="tdl">DIFFICULTY</div><div class="tdf">${['easy','normal','hard'].map(k=>`<span class="btn sm ${df===k?'on':'gh'}" data-tdiff="${k}" style="${df===k?'background:'+DIFF[k].col+';color:#111':''}">${DIFF[k].n}${bd[k]?`<i>best ${bd[k]}</i>`:''}</span>`).join('')}</div>
+ <div class="tsub"><span class="btn gh sm" id="tbots">🤖 BOTS / SKILLS</span><span class="btn gh sm" id="tset">⚙ SETTINGS</span><span class="btn gh sm" id="thow">ⓘ HOW TO PLAY</span>${IS_APP?'<span class="btn gh sm" id="tex">⏻ EXIT</span>':''}</div></div>
+ <div class="st tft"><span id="verl" style="padding:6px">${VER}</span></div>`;
+ $('title').classList.add('retro');show('title');drawKeyArt($('kart'));hwBars($('kart'));hwDecor('title');bindVer();
+ const newG=()=>{auStart();sfx('click');if(loadRun()&&!confirm('Start a new game? Your saved run will be overwritten.'))return;showSelect();};
+ $('tg').onclick=newG;if($('tc'))$('tc').onclick=()=>{auStart();sfx('click');continueRun();};
+ $('tbots').onclick=()=>{auStart();sfx('click');showSelect();};$('thow').onclick=()=>{const [a,b]=INFO.how();hwInfo(a,b);};$('tset').onclick=hwSettings;
+ if($('tex'))$('tex').onclick=()=>{try{window.HWNative&&HWNative.exit();}catch(e){}};
+ $('title').querySelectorAll('[data-tdiff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.tdiff;saveGame();sfx('click');showTitle();});};
+function hwSettings(){const r=()=>`<div class="hwset"><span class="btn gh" id="tam">AIM ASSIST: ${(S.aim||'soft').toUpperCase()}</span><span class="btn gh" id="tmus">MUSIC: ${S.music!==false?'ON':'OFF'}</span><span class="btn gh" id="tsfx">SOUND FX: ${S.sfx!==false?'ON':'OFF'}</span><span class="btn gh" id="tsw">SWAP STICKS: ${S.swap?'ON':'OFF'}</span></div><p class="hwsn">Swap sticks puts movement on the right and aiming on the left.</p>`;
+ hwInfo('Settings',r());const bind=()=>{$('tam').onclick=()=>{cycleAim();re();};$('tsw').onclick=()=>{S.swap=!S.swap;saveGame();layout();re();};$('tmus').onclick=()=>{setAudio(S.music===false,S.sfx!==false);re();};$('tsfx').onclick=()=>{setAudio(S.music!==false,S.sfx===false);sfx('click');re();};};
+ const re=()=>{const b=document.querySelector('#hwi .hwib');if(b){b.innerHTML=r();bind();}};bind();const x=$('hwix');x.textContent='DONE';const c0=x.onclick;x.onclick=()=>{c0();showTitle();};}
+// ---- info buttons injected into existing screens ----
+var _u53Sel=showSelect;showSelect=function(){const r=_u53Sel.apply(this,arguments);try{for(const h of['agile','melee','heavy']){const c=document.querySelector('#select [data-hero="'+h+'"]');if(c&&!c.querySelector('.ib'))c.insertAdjacentHTML('beforeend',`<div class="ibc">${ib('bot',h)}</div>`);}
+ const t=document.querySelector('#select .ttl');if(t&&!t.querySelector('.ib'))t.insertAdjacentHTML('beforeend',' '+ib('special'));}catch(e){}return r;};
+var _u53Shop=showShop;showShop=function(){const r=_u53Shop.apply(this,arguments);try{const sh=[...document.querySelectorAll('#shop .sh')];for(const e of sh){if(e.querySelector('.ib'))continue;const bm=/BLACK MARKET/.test(e.textContent);if(bm||sh.indexOf(e)===0)e.insertAdjacentHTML(bm?'beforeend':'afterbegin',bm?' '+ib('bm'):ib('shop')+' ');}}catch(e){}return r;};
+var _u53Hg=showHangar;showHangar=function(){const r=_u53Hg.apply(this,arguments);try{const s=document.querySelector('#hangar .st');if(s&&!document.querySelector('#hangar .ib'))s.insertAdjacentHTML('afterbegin',ib('gear')+' ');}catch(e){}return r;};
+var _u53Tr=showTree;showTree=function(){const r=_u53Tr.apply(this,arguments);try{const t=document.querySelector('#tree .ttl');const host=t;if(host&&!host.querySelector('.ib'))host.insertAdjacentHTML(t?'beforeend':'afterbegin',' '+ib('tree'));}catch(e){}return r;};
+// ---- back: dismiss boot / info popups first ----
+var _u53Back=window.hwBack;window.hwBack=function(){if(!window.__booted&&$('boot')){window.__bootGo&&__bootGo();return 'ok';}const i=$('hwi');if(i){i.remove();if(ui.scr==='title')showTitle();return 'ok';}return _u53Back();};
+// ---- control layout: 44px+ buttons, thumb zones, clear of HUD ----
+var _u53Lay=layout;layout=function(){_u53Lay.apply(this,arguments);try{const port=H>W,mx=W-SAFE.r-Q.mini-10;
+ ui.btns=[{id:'pause',x:mx-30,y:SAFE.t+30,r:22},{id:'mute',x:mx-30,y:SAFE.t+82,r:22}];
+ for(const b of[ui.D,ui.M])b.r=Math.max(b.r,24);if(ui.N)ui.N.r=Math.max(ui.N.r,26);
+ // keep the special button inside the screen and clear of the HUD block (top 150px portrait / 120px landscape)
+ const top=SAFE.t+(port?150:120);if(ui.HW){ui.HW.r=Math.max(ui.HW.r,28);if(ui.HW.y-ui.HW.r<top)ui.HW.y=top+ui.HW.r;ui.HW.x=clamp(ui.HW.x,SAFE.l+ui.HW.r+6,W-SAFE.r-ui.HW.r-6);}
+ if(!port){const lim=SAFE.t+8+Q.mini+75+ui.M.r+6;if(ui.M.y<lim){ui.M.y=lim;ui.D.y=Math.max(ui.D.y,lim);}}
+ if(ui.N){ui.N.x=clamp(ui.N.x,SAFE.l+ui.N.r+6,W-SAFE.r-ui.N.r-6);}}catch(e){}};
+layout();setTimeout(hwBoot,0);if(ui.scr==='title')showTitle();
 </script></body></html>
