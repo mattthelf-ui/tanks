@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v64';
+const VER='haywire v65';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2064,4 +2064,80 @@ function bossLootFx(c,d,col,t,Y){const lite=(G.blN||0)>8,r=d.it.rar,k=1+r*.35,pl
  const g=c.createLinearGradient(0,Y,0,Y-H);g.addColorStop(0,col);g.addColorStop(1,'rgba(255,255,255,0)');c.globalAlpha=(.35+.08*r)*pl;c.fillStyle=g;c.fillRect(d.x-5*k,Y-H,10*k,H);
  c.globalAlpha=.55*pl;if(!lite){c.shadowColor=col;c.shadowBlur=14+6*r;}else c.lineWidth=3;c.strokeStyle=col;c.lineWidth=2+r*.4;c.beginPath();c.ellipse(d.x,Y+6,14*k,5*k,0,0,6.283);c.stroke();
  if(r>=3&&!lite){c.globalAlpha=.25*pl;c.fillStyle=col;c.beginPath();c.arc(d.x,Y-3,20+r*3,0,6.283);c.fill();}c.restore();}
+// ================= v65: boss skill points, HAYWIRE branch (all bots), phone-friendly tree screen =================
+var M_BOSS_PTS=2,HWB={n:'HAYWIRE',c:'#ff2e88',d:'HAYWIRE special: charge, power, duration'};
+for(const h in MBRH)MBRH[h]=MBRH[h].concat([HWB]);
+var MSK_HW=[
+ {id:'hw1',b:3,t:0,ic:'◔',n:'Overcharge',max:5,f:r=>'+'+Math.round(4*r)+'% HAYWIRE meter charge rate'},
+ {id:'hw2',b:3,t:0,ic:'✹',n:'Amplifier',max:3,f:r=>'+'+Math.round(5*r)+'% HAYWIRE special damage'},
+ {id:'hw3',b:3,t:1,ic:'⏱',n:'Sustain',max:5,f:r=>'+'+Math.round(6*r)+'% HAYWIRE special duration'},
+ {id:'hwF',b:3,t:2,ic:'♾',n:'FEEDBACK LOOP',max:1,fin:1,f:r=>'Kills during your special feed it back: each kill refunds 4% HAYWIRE meter (up to 40% per activation), so specials can chain back-to-back.'}];
+for(const s of MSK_HW){s.h='*';MSK.push(s);MSKI[s.id]=s;}
+var _v65sk=sk;sk=function(id){const s=MSKI[id];if(s&&s.h==='*'){if(!S||!M_ON[S.hero])return 0;const d=S.mast&&S.mast[S.hero];return d&&d.sk?(d.sk[id]|0):0;}return _v65sk(id);};
+function mHome(s,h){return s.h==='*'?(h||MT.h||S.hero):s.h;}
+mCan=function(id){const s=MSKI[id];if(!s)return false;const h=mHome(s),d=mData(h);return (d.sk[id]|0)<s.max&&mFree(h)>0&&mSpent(h,s.b)>=M_T[s.t];};
+// skill points = mastery levels (cap 15, unchanged) + boss bonus points (uncapped; the tree's node maxes are the only limit)
+function mBonus(h){const d=mData(h);d.bp=Math.max(0,d.bp|0);return d.bp;}
+mFree=function(h){h=h||S.hero;return mLvl(h)+mBonus(h)-mSpent(h);};
+var _v65k=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_v65k.apply(this,arguments);try{if(e&&!was&&e.dead&&(e.type==='boss'||e.type==='mboss')&&G&&G.state!=='dead'&&M_ON[S.hero]){const d=mData();d.bp=mBonus(S.hero)+M_BOSS_PTS;G.bpts=(G.bpts||0)+M_BOSS_PTS;if(G.p)addTxt(G.p.x,G.p.y-80,'+'+M_BOSS_PTS+' SKILL POINTS','#ffd23f',20,1.6);saveGame();}}catch(err){}return r;};
+// effects
+var _v65g=hwGain;hwGain=function(b){return _v65g.apply(this,arguments)*(1+.04*sk('hw1'));};
+var _v65b=hwBase;hwBase=function(){return _v65b.apply(this,arguments)*(1+.05*sk('hw2'));};
+var _v65f=hwFire;hwFire=function(){const s0=G.sp;const r=_v65f.apply(this,arguments);if(G.sp&&G.sp!==s0){const k=1+.06*sk('hw3');if(k>1){const dT=G.sp.T*(k-1);G.sp.T+=dT;G.hwT+=dT;G.hwImm+=dT;}G.sp.fb=0;}return r;};
+var _v65k2=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_v65k2.apply(this,arguments);if(e&&!was&&e.dead&&G&&G.state==='play'&&G.sp&&sk('hwF')&&(G.sp.fb||0)<40){const a=Math.min(4,40-(G.sp.fb||0));G.sp.fb=(G.sp.fb||0)+a;G.hw=Math.min(100,(G.hw||0)+a);G.fbN=(G.fbN||0)+1;}return r;};
+// respec refunds everything (bonus points are part of the pool, so resetting sk returns them)
+// ---- tree screen (redesign) ----
+showTree=function(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.hero||'agile',BR=MBRH[h],d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),bp=mBonus(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
+ const mine=s=>s.h===h||s.h==='*';
+ const st=s=>{const r=d.sk[s.id]|0;return mSpent(h,s.b)<M_T[s.t]?'lk':r>=s.max?'own':r>0?'part':fr>0?'av':'na';};
+ const node=s=>{const r=d.sk[s.id]|0,k=st(s);return `<button class="tn ${k}${s.fin?' fin':''}${MT.sel===s.id?' sel':''}" data-sk="${s.id}"><span class="ti">${k==='lk'?'🔒':s.ic}</span><span class="tnm">${s.n}</span><span class="tr">${r}/${s.max}</span></button>`;};
+ const col=b=>{const B=BR[b];return `<div class="tc" style="--bc:${B.c}"><div class="th"><b>${B.n}</b><i>${mSpent(h,b)} pts</i></div>${[0,1,2].map(t=>{const un=mSpent(h,b)>=M_T[t];return `${t?`<div class="tl${un?' un':''}"></div>`:''}<div class="tt${un?' un':''}"><span class="tlab">${t===2?'CAPSTONE':'TIER '+(t+1)}${t?' · '+M_T[t]+' pts':''}</span>${MSK.filter(s=>mine(s)&&s.b===b&&s.t===t).map(node).join('')}</div>`;}).join('')}</div>`;};
+ const S1=MSKI[MT.sel]&&mine(MSKI[MT.sel])?MSKI[MT.sel]:null;let det='<div class="tdn">Tap a skill to see what it does.</div>';
+ if(S1){const r=d.sk[S1.id]|0,lock=mSpent(h,S1.b)<M_T[S1.t],B=BR[S1.b];det=`<div class="tdh" style="color:${B.c}"><span class="tdi">${S1.ic}</span><span>${S1.n}<i>${B.n} · ${S1.fin?'CAPSTONE':'TIER '+(S1.t+1)} · ${r}/${S1.max}</i></span></div><div class="tdd">${r?'<b>Now:</b> '+S1.f(r):'<b>Not learned.</b>'}${r<S1.max&&!S1.fin?'<br><b>Next:</b> '+S1.f(r+1):S1.fin&&!r?'<br>'+S1.f(1):''}</div>${lock?`<div class="tdd" style="color:#ff6a7a">🔒 Spend ${M_T[S1.t]} points in ${B.n} to unlock (${mSpent(h,S1.b)}/${M_T[S1.t]})</div>`:''}<span class="btn mplus${mCan(S1.id)?'':' dis'}" id="mplus">${r>=S1.max?'MAXED':'+ LEARN'}</span>`;}
+ $('tree').innerHTML=`<div class="thd"><div class="ttl">${HEROES[h].n} · SKILLS</div><div class="tpts${fr?' has':''}"><b>${fr}</b><span>POINT${fr===1?'':'S'}<br>AVAILABLE</span></div><div class="tlv"><b>MASTERY LV ${L}</b><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX LEVEL':(x-lo)+' / '+(hi-lo)+' XP'}</span></div><span class="tbp">+${bp} from bosses</span></div></div>
+ <div class="tbody"><div class="ttree">${[0,1,2,3].map(col).join('')}</div><div class="tside"><div class="tdet">${det}</div><div class="tkey"><span class="k av">available</span><span class="k own">owned</span><span class="k lk">locked</span></div>
+ <div class="row mft"><span class="btn gh sm" id="mback">◀ BACK</span><span class="btn sm${inShop&&mSpent(h)&&RUN.cash>=mRespecCost()?'':' dis'}" id="mresp">${inShop?'RESPEC $'+mRespecCost():'RESPEC · in shop'}</span></div></div></div>`;
+ show('tree');const T=$('tree');T.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{MT.sel=b.dataset.sk;sfx('click');showTree();});
+ const pl=$('mplus');if(pl)pl.onclick=()=>{if(!mCan(MT.sel))return;d.sk[MT.sel]=(d.sk[MT.sel]|0)+1;saveGame();mRefresh();sfx('item');showTree();};
+ $('mback').onclick=()=>{sfx('click');if(MT.from==='shop'&&G&&G.state==='loot')showShop();else showSelect();};
+ $('mresp').onclick=()=>{if(!inShop){toast('Respec is available in the shop between rounds');return;}const c=mRespecCost();if(!mSpent(h)||RUN.cash<c)return;RUN.cash-=c;d.sk={};d.rs++;saveGame();mRefresh();sfx('item');toast('Skills reset · '+mFree(h)+' points refunded');showTree();};};
+(function(){const c=document.createElement('style');c.textContent=`
+#tree.on{overflow-y:auto;overflow-x:hidden;padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));box-sizing:border-box;gap:8px}
+.thd{width:100%;max-width:760px;display:grid;grid-template-columns:1fr auto;grid-template-areas:"t p" "l p";gap:4px 10px;align-items:center}
+.thd .ttl{grid-area:t;font-size:22px;font-weight:900;font-style:italic;color:#fff;text-align:left;margin:0}
+.tpts{grid-area:p;display:flex;align-items:center;gap:6px;border:3px solid #556;border-radius:12px;padding:6px 12px;background:#05060a;color:#9aa6c0}
+.tpts b{font-size:34px;line-height:1;font-weight:900}.tpts span{font-size:12px;font-weight:900;line-height:1.1}
+.tpts.has{border-color:#ffd23f;color:#ffd23f;box-shadow:0 0 16px #ffd23f88;animation:tpP 1.4s ease-in-out infinite}
+@keyframes tpP{50%{box-shadow:0 0 4px #ffd23f44}}
+.tlv{grid-area:l;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#19e3ff;font-size:13px;font-style:italic}
+.tlv .mxb{min-width:120px;margin:0}.tbp{font-size:12px;color:#ffd23f;font-weight:800}
+.tbody{width:100%;max-width:760px;display:flex;flex-direction:column;gap:8px}
+.ttree{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.tc{border:2px solid var(--bc);border-radius:10px;background:rgba(5,6,10,.7);padding:0 3px 6px;min-width:0;display:flex;flex-direction:column;align-items:center}
+.th{width:calc(100% + 6px);background:var(--bc);color:#05060a;text-align:center;border-radius:7px 7px 0 0;padding:4px 0 3px;margin-bottom:4px}
+.th b{display:block;font-size:13px;font-weight:900;font-style:italic;letter-spacing:.5px}.th i{display:block;font-size:12px;font-style:normal;font-weight:800;opacity:.8}
+.tt{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:8px;padding:3px 0}
+.tlab{font-size:12px;font-weight:900;color:#9aa6c0;letter-spacing:.3px;text-align:center}.tt.un .tlab{color:var(--bc)}
+.tl{width:4px;height:14px;background:#334;border-radius:2px}.tl.un{background:var(--bc);box-shadow:0 0 8px var(--bc)}
+.tn{all:unset;box-sizing:border-box;width:100%;max-width:120px;min-height:64px;border:2px solid var(--bc);border-radius:10px;background:#0e1430;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 2px;cursor:pointer;position:relative;text-align:center}
+.tn,.tn *{letter-spacing:0!important;word-spacing:0;text-transform:none}.tn .tnm{overflow-wrap:break-word;hyphens:auto}
+.tn .ti{font-size:24px;line-height:1.1;color:var(--bc)}.tn .tnm{font-size:12px;font-weight:800;color:#e6ecff;line-height:1.05;}
+.tn .tr{font-size:12px;font-weight:900;color:#fff;background:#0009;border-radius:6px;padding:0 5px;margin-top:2px}
+.tn.lk{opacity:.45;filter:grayscale(.9);border-style:dashed}
+.tn.na{opacity:.8}
+.tn.av{box-shadow:0 0 0 2px #ffd23f inset,0 0 10px #ffd23f88}.tn.av .tr{background:#ffd23f;color:#111}
+.tn.part{background:color-mix(in srgb,var(--bc) 22%,#0e1430)}
+.tn.own{background:color-mix(in srgb,var(--bc) 45%,#0e1430)}.tn.own .tr{background:var(--bc);color:#05060a}
+.tn.fin{border-width:3px;min-height:72px}.tn.fin .tnm{color:#fff}
+.tn.sel{outline:3px solid #fff;outline-offset:1px}
+.tside{display:flex;flex-direction:column;gap:6px}
+.tdet{border:2px solid #ffffff33;border-radius:10px;background:rgba(5,6,10,.85);padding:8px 10px;min-height:110px;box-sizing:border-box}
+.tdh{display:flex;gap:8px;align-items:center;font-weight:900;font-style:italic;font-size:18px}.tdi{font-size:30px}
+.tdh i{display:block;font-size:12px;color:#c8d2ea;font-style:normal;font-weight:700}
+.tdd{font-size:14px;color:#eef3ff;margin:6px 0;line-height:1.3}.tdn{font-size:14px;color:#9aa6c0;text-align:center;padding-top:36px}
+.tkey{display:flex;gap:10px;justify-content:center}.k{font-size:12px;font-weight:800;color:#c8d2ea;display:flex;align-items:center;gap:4px}
+.k:before{content:'';width:14px;height:14px;border-radius:4px;border:2px solid #19e3ff;background:#0e1430}.k.av:before{box-shadow:0 0 0 2px #ffd23f inset}.k.own:before{background:#19e3ff}.k.lk:before{opacity:.45;border-style:dashed}
+@media (orientation:landscape) and (max-height:600px){.tbody{flex-direction:row;align-items:flex-start}.ttree{flex:1}.tside{width:250px;flex:none;position:sticky;top:0}.thd .ttl{font-size:18px}.tpts b{font-size:26px}
+ .tn{min-height:50px}}
+`;document.head.appendChild(c);})();
 </script></body></html>
