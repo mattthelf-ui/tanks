@@ -2047,6 +2047,8 @@ function bossLootBurst(e){const lv=lootLvl(),top=maxRar(lv),items=[];
  const rr=()=>rollRar(lv,0,{boss:1,drop:1});
  for(let i=0;i<BOSS_LOOT_W;i++){let r=rr();if(i===0&&r<6)r=Math.min(top,r+1);items.push(makeItem('arm',G.d,r,null,G.wave));}
  for(let i=BOSS_LOOT_W;i<BOSS_LOOT_N;i++){items.push(rollNeural(G.d+4)?makeNeural():makeItem(pick(IKINDS),G.d,rr(),null,G.wave));}
+ if(typeof TEST_SET!=='undefined'&&TEST_SET){ // TEMP test mode: every burst item Epic..Legendary (round gates ignored), first 3 weapons SOLAR
+  for(let i=0;i<items.length;i++){const r=2+(Math.random()*4|0);items[i]=makeItem(i<BOSS_LOOT_W?'arm':(items[i].slot==='neural'?pick(IKINDS):items[i].slot),G.d,r,null,G.wave);if(items[i].rar<2)items[i].rar=r;}}
  if(typeof TEST_SET!=='undefined'&&TEST_SET&&BOSS_LOOT_TEST_SOLAR>0)for(let i=0;i<Math.min(BOSS_LOOT_TEST_SOLAR,BOSS_LOOT_W);i++)items[i]=makeItem('arm',G.d,6,null,G.wave);
  items.forEach((it,i)=>{const a=-Math.PI/2+(i-(items.length-1)/2)*.55+rnd(-.12,.12),sp=rnd(150,230);
   G.drops.push({k:'item',bl:1,x:e.x,y:e.y,vx:Math.cos(a)*sp*1.4,vy:rnd(-40,90),z:0,vz:rnd(380,470)+i*12,it,t:0});});
