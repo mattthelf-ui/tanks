@@ -646,8 +646,8 @@ function update(dt){
   if(d.k==='pw'){d.x+=d.vx*dt;d.y+=d.vy*dt;d.vx*=Math.pow(.01,dt);d.vy*=Math.pow(.01,dt);if(hitsWall(d.x,d.y,8)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}if(d.t>20)d.dead=true;if(d.t>.4&&dd<p.r+16){d.dead=true;gainPw(d.pw);}}
   else if(d.k==='xp'||d.k==='hp'){if(d.t>.35&&dd<150){const s=520/Math.max(dd,20);d.vx+=dx*s*dt*8;d.vy+=dy*s*dt*8;}d.vx*=Math.pow(.02,dt);d.vy*=Math.pow(.02,dt);d.x+=d.vx*dt;d.y+=d.vy*dt;
    if(dd<p.r+8){d.dead=true;if(d.k==='xp'){gainXP(d.v);sfx('xp');}else{p.hp=Math.min(ps.hp,p.hp+ps.hp*.25);sfx('pick');addTxt(p.x,p.y-24,'+HP','#5f5',18);}}}
-  else if(d.k==='item'){d.vx*=Math.pow(.01,dt);d.vy*=Math.pow(.01,dt);d.x+=d.vx*dt;d.y+=d.vy*dt;if(hitsWall(d.x,d.y,6)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}
-   if(d.t>.5&&dd<p.r+14){d.dead=true;const scr=addItem(d.it);G.items.push(d.it);sfx('item');addTxt(p.x,p.y-30,d.it.name,RAR[d.it.rar].c,15,1.6);if(typeof wsPickup==='function')wsPickup(d.it);if(scr)addTxt(p.x,p.y-52,d.it.bt?'NEURAL LINK BOTS MAXED (3) · '+scr.name:'INVENTORY FULL · auto-scrapped '+scr.name,'#ff3d6e',13,2);if(d.it.rar>=2){G.shake=6;part({k:'ring',x:p.x,y:p.y,life:.5,col:RAR[d.it.rar].c,sz:110});}}}
+  else if(d.k==='item'){if(d.vz!=null){d.vz-=900*dt;d.z=Math.max(0,d.z+d.vz*dt);if(d.z<=0&&d.vz<0){d.z=0;d.vz=null;}}d.vx*=Math.pow(d.z>0?.5:.01,dt);d.vy*=Math.pow(.01,dt);d.x+=d.vx*dt;d.y+=d.vy*dt;if(hitsWall(d.x,d.y,6)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}
+   if(d.t>.5&&d.vz==null&&dd<p.r+14){d.dead=true;const scr=addItem(d.it);G.items.push(d.it);sfx('item');addTxt(p.x,p.y-30,d.it.name,RAR[d.it.rar].c,15,1.6);if(typeof wsPickup==='function')wsPickup(d.it);if(scr)addTxt(p.x,p.y-52,d.it.bt?'NEURAL LINK BOTS MAXED (3) · '+scr.name:'INVENTORY FULL · auto-scrapped '+scr.name,'#ff3d6e',13,2);if(d.it.rar>=2){G.shake=6;part({k:'ring',x:p.x,y:p.y,life:.5,col:RAR[d.it.rar].c,sz:110});}}}
   else if(d.k==='chest'&&!d.open&&dd<p.r+22){d.open=true;d.dead=true;sfx('pick');burst(d.x,d.y,'#ffd23f',20,260,3);part({k:'star',x:d.x,y:d.y,life:.25,col:'#ffd23f',sz:70,a:0});
    if(!d.boss&&R()<.5)dropPw(d.x+20,d.y);const n=d.boss?3:d.cache?2:ri(1,2);for(let i=0;i<n;i++)dropItem(d.x,d.y,d.boss?1:d.cache?1:0,d.boss);}}
  G.drops=G.drops.filter(d=>!d.dead);
@@ -840,8 +840,8 @@ function render(){
   else if(d.k==='chest'){const b=Math.sin(t*4)*2;shadow(d.x,d.y,16);poly([d.x-17,d.y-10+b,d.x+17,d.y-10+b,d.x+17,d.y+12+b,d.x-17,d.y+12+b],d.boss?'#ff2e88':'#ffd23f');c.fillStyle=INK;c.fillRect(d.x-17,d.y-1+b,34,3);c.fillStyle='#19e3ff';c.fillRect(d.x-4,d.y-4+b,8,8);}
   else if(d.k==='pw'&&d.pw==='emp'){const b=Math.sin(t*6+d.x)*3,bl=d.t>16&&Math.floor(t*8)%2;if(!bl){c.globalAlpha=.4;c.fillStyle='#8a7dff';c.beginPath();c.arc(d.x,d.y+b,18+Math.sin(t*8)*3,0,6.283);c.fill();c.globalAlpha=1;const h=[];for(let i=0;i<6;i++)h.push(d.x+Math.cos(i*1.047+.52)*13,d.y+b+Math.sin(i*1.047+.52)*13);poly(h,'#8a7dff');poly([d.x+2,d.y+b-9,d.x-5,d.y+b+1,d.x,d.y+b+1,d.x-2,d.y+b+9,d.x+5,d.y+b-1,d.x,d.y+b-1],'#fff',1.5);}}
   else if(d.k==='pw'){const P=PW[d.pw],b=Math.sin(t*6+d.x)*3,bl=d.t>16&&Math.floor(t*8)%2;if(!bl){c.globalAlpha=.4;c.fillStyle=P.c;c.beginPath();c.arc(d.x,d.y+b,16+Math.sin(t*8)*3,0,6.283);c.fill();c.globalAlpha=1;cel(d.x,d.y+b,11,P.c,'#fff');bigText(P.ic,d.x,d.y+b,13,'#05060a');}}
-  else if(d.k==='item'){const col=RAR[d.it.rar].c,b=Math.sin(t*5+d.x)*3;c.globalAlpha=.35;c.fillStyle=col;c.beginPath();c.moveTo(d.x-8,d.y);c.lineTo(d.x+8,d.y);c.lineTo(d.x+3,d.y-60);c.lineTo(d.x-3,d.y-60);c.fill();c.globalAlpha=1;
-   const s={arm:'A',chip:'C',neural:'N',chest:'P',legs:'L',thrust:'T'}[d.it.slot]||'?';poly([d.x,d.y-14+b,d.x+11,d.y-3+b,d.x,d.y+8+b,d.x-11,d.y-3+b],col);bigText(s,d.x,d.y-3+b,11,'#fff');}}
+  else if(d.k==='item'){const col=d.it.rar===6?solarCol():RAR[d.it.rar].c,b=Math.sin(t*5+d.x)*3,zz=d.z||0,Y=d.y-zz;if(d.bl)bossLootFx(c,d,col,t,Y);c.globalAlpha=.35;c.fillStyle=col;c.beginPath();c.moveTo(d.x-8,Y);c.lineTo(d.x+8,Y);c.lineTo(d.x+3,Y-60);c.lineTo(d.x-3,Y-60);c.fill();c.globalAlpha=1;
+   const s={arm:'A',chip:'C',neural:'N',chest:'P',legs:'L',thrust:'T'}[d.it.slot]||'?';poly([d.x,Y-14+b,d.x+11,Y-3+b,d.x,Y+8+b,d.x-11,Y-3+b],col);bigText(s,d.x,Y-3+b,11,'#fff');}}
  // ghosts / afterimages
  const busy=G.en.length>=22;
  for(const q of G.parts){if(busy||q.k!=='ghost')continue;c.globalAlpha=.35*(1-q.t/q.life);if(q.en){c.fillStyle=q.en.col;c.beginPath();c.arc(q.x,q.y,q.en.r,0,6.283);c.fill();}else{c.fillStyle='#19e3ff';c.beginPath();c.arc(q.x,q.y,15,0,6.283);c.fill();}}c.globalAlpha=1;
@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v61';
+const VER='haywire v62';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2038,4 +2038,26 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
 var _lkSave=saveRun;saveRun=function(){const r=_lkSave.apply(this,arguments);lkStore();return r;};
 var _lkCont=continueRun;continueRun=function(){const s=loadRun();const r=_lkCont.apply(this,arguments);try{if(s&&s.run&&s.run.lk&&RUN)RUN.lk=s.run.lk;}catch(e){}return r;};
 var _lkNew=newRun;newRun=function(){const r=_lkNew.apply(this,arguments);if(RUN)RUN.lk=null;return r;};
+// ================= v62: boss loot burst (Warden + mini-bosses) =================
+// 5 drops fountain out of the corpse; >=3 are weapons; one weapon is +1 rarity tier over its normal boss roll (capped at the
+// tier unlocked this round; SOLAR stays 1/5000 via rollRar). All rolls go through rollRar(...,{boss:1,drop:1}) so boss tier-up + pity apply.
+var BOSS_LOOT_N=5,BOSS_LOOT_W=3;
+var BOSS_LOOT_TEST_SOLAR=3; // TEMP (test mode only): while TEST_SET is on, this many of the burst's weapons are SOLAR. Remove this line + the use below to drop it.
+function bossLootBurst(e){const lv=lootLvl(),top=maxRar(lv),items=[];
+ const rr=()=>rollRar(lv,0,{boss:1,drop:1});
+ for(let i=0;i<BOSS_LOOT_W;i++){let r=rr();if(i===0&&r<6)r=Math.min(top,r+1);items.push(makeItem('arm',G.d,r,null,G.wave));}
+ for(let i=BOSS_LOOT_W;i<BOSS_LOOT_N;i++){items.push(rollNeural(G.d+4)?makeNeural():makeItem(pick(IKINDS),G.d,rr(),null,G.wave));}
+ if(typeof TEST_SET!=='undefined'&&TEST_SET&&BOSS_LOOT_TEST_SOLAR>0)for(let i=0;i<Math.min(BOSS_LOOT_TEST_SOLAR,BOSS_LOOT_W);i++)items[i]=makeItem('arm',G.d,6,null,G.wave);
+ items.forEach((it,i)=>{const a=-Math.PI/2+(i-(items.length-1)/2)*.55+rnd(-.12,.12),sp=rnd(150,230);
+  G.drops.push({k:'item',bl:1,x:e.x,y:e.y,vx:Math.cos(a)*sp*1.4,vy:rnd(-40,90),z:0,vz:rnd(380,470)+i*12,it,t:0});});
+ burst(e.x,e.y,'#ffd23f',30,420,4);part({k:'ring',x:e.x,y:e.y,life:.6,col:'#ffd23f',sz:200});G.lootBurstN=(G.lootBurstN||0)+1;return items;}
+var _blKill=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_blKill.apply(this,arguments);try{if(e&&!was&&e.dead&&!e.noLoot&&(e.type==='boss'||e.type==='mboss')&&G&&G.drops)bossLootBurst(e);}catch(err){dlog('bossLoot '+err.message);}return r;};
+// uncollected burst items are not lost when the round ends: they go to the inventory like coins are banked
+var _blClear=waveCleared;waveCleared=function(){try{if(G&&G.state==='play')for(const d of G.drops)if(d.k==='item'&&d.bl&&!d.dead){d.dead=true;addItem(d.it);G.items.push(d.it);}}catch(e){}return _blClear.apply(this,arguments);};
+// rarity-coloured glow + light beam (taller/brighter for higher tiers) so top-end weapons stand out
+function bossLootFx(c,d,col,t,Y){const r=d.it.rar,k=1+r*.35,pl=.75+.25*Math.sin(t*4+d.x*.05),H=90+r*45;c.save();
+ if(d.z>0){c.globalAlpha=.35;c.fillStyle='#000';c.beginPath();c.ellipse(d.x,d.y+4,10,4,0,0,6.283);c.fill();}
+ const g=c.createLinearGradient(0,Y,0,Y-H);g.addColorStop(0,col);g.addColorStop(1,'rgba(255,255,255,0)');c.globalAlpha=(.35+.08*r)*pl;c.fillStyle=g;c.fillRect(d.x-5*k,Y-H,10*k,H);
+ c.globalAlpha=.55*pl;c.shadowColor=col;c.shadowBlur=14+6*r;c.strokeStyle=col;c.lineWidth=2+r*.4;c.beginPath();c.ellipse(d.x,Y+6,14*k,5*k,0,0,6.283);c.stroke();
+ if(r>=3){c.globalAlpha=.25*pl;c.fillStyle=col;c.beginPath();c.arc(d.x,Y-3,20+r*3,0,6.283);c.fill();}c.restore();}
 </script></body></html>
