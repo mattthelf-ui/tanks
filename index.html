@@ -149,6 +149,8 @@ html,body{margin:0;height:100%;background:#0b0f1e;overflow:hidden;touch-action:n
 .mskb,.ml,.mr,.tag,.hpb span,.mxb span,.gsb i{font-size:12px!important}
 :is(#shop,#loot,#hangar,#select,#tree,#pause,.det) :is([style*="font-size:9px"],[style*="font-size:10px"],[style*="font-size:11px"]){font-size:12px!important}
 .sc,.card,.lcard{border-width:3px}.sg{gap:8px!important}
+.lkb{position:absolute;right:0;bottom:0;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;opacity:.75;z-index:2;-webkit-tap-highlight-color:transparent}.lkb.on{opacity:1;filter:drop-shadow(0 0 6px #ffd23f)}
+.sc.lkd{box-shadow:inset 0 0 0 3px #ffd23f,0 0 14px #ffd23f!important}.sc.dis .lkb{opacity:1}
 </style></head><body><canvas id="c"></canvas><div id="sa"></div>
 <div id="hub" class="scr"></div><div id="hangar" class="scr"></div><div id="result" class="scr"></div><div id="pause" class="scr"></div><div id="title" class="scr"></div><div id="select" class="scr"></div><div id="shop" class="scr"></div><div id="loot" class="scr"></div><div id="tree" class="scr"></div>
 <script>
@@ -914,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v60';
+const VER='haywire v61';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2020,4 +2022,20 @@ var _u57Lay=layout;layout=function(){_u57Lay.apply(this,arguments);try{
  if(Math.hypot(ui.M.x-ui.N.x,ui.M.y-ui.N.y)<ui.M.r+ui.N.r+8){ui.M.y=Math.min(H-SAFE.b-ui.M.r-6,ui.N.y+ui.M.r+ui.N.r+8);}
 }catch(e){}};
 layout();
+// ================= v61: shop item locks (persist across rerolls + rounds until bought/unlocked; saved with the run) =================
+// RUN.lk = {w:{idx:offer}, g:{...}, vw:{...}, vg:{...}, vi:offer|null}
+function lkSlot(id){const m=/^(vw|vg|w|g)(\d+)$/.exec(id);if(m){const arr=m[1][0]==='v'?(RUN.offers.v&&RUN.offers.v[m[1][1]]):RUN.offers[m[1]];return arr?arr[+m[2]]:null;}if(id==='vi')return RUN.offers.v&&RUN.offers.v.imp;return null;}
+function lkSync(){const L={w:{},g:{},vw:{},vg:{},vi:null},o=RUN.offers;if(o){for(const k of['w','g'])(o[k]||[]).forEach((x,i)=>{if(x.lk&&!x.sold)L[k][i]=x;});if(o.v){for(const k of['w','g'])(o.v[k]||[]).forEach((x,i)=>{if(x.lk&&!x.sold)L['v'+k][i]=x;});if(o.v.imp&&o.v.imp.lk&&!o.v.imp.sold)L.vi=o.v.imp;}}RUN.lk=L;lkStore();}
+function lkStore(){try{const raw=localStorage.getItem(RKEY);if(!raw)return;const s=JSON.parse(raw);if(!s||!s.run)return;s.run.lk=RUN.lk||null;localStorage.setItem(RKEY,JSON.stringify(s));}catch(e){}}
+var _lkMake=makeOffers;makeOffers=function(){const n=_lkMake.apply(this,arguments),L=RUN.lk;if(!L)return n;
+ for(const k of['w','g'])for(const i in L[k]||{})if(n[k]&&+i<n[k].length)n[k][+i]=L[k][i];
+ if(n.v){for(const k of['w','g'])for(const i in L['v'+k]||{})if(n.v[k]&&+i<n.v[k].length)n.v[k][+i]=L['v'+k][i];if(L.vi)n.v.imp=L.vi;}
+ return n;};
+var _lkBuy=buy;buy=function(id){const o=RUN.offers&&lkSlot(id);const r=_lkBuy.apply(this,arguments);if(o&&o.sold&&o.lk){o.lk=0;lkSync();}return r;};
+var _lkShop=showShop;showShop=function(){const r=_lkShop.apply(this,arguments);try{for(const c of document.querySelectorAll('#shop .sc[data-buy]')){const id=c.dataset.buy,o=lkSlot(id);if(!o||o.sold)continue;
+ c.classList.toggle('lkd',!!o.lk);c.insertAdjacentHTML('beforeend',`<span class="lkb${o.lk?' on':''}" data-lock="${id}" role="button" aria-label="${o.lk?'Unlock':'Lock'} item">${o.lk?'🔒':'🔓'}</span>`);}}catch(e){}return r;};
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-lock]');if(!t)return;e.stopPropagation();e.preventDefault();if(!RUN||!RUN.offers)return;const o=lkSlot(t.dataset.lock);if(!o||o.sold)return;o.lk=o.lk?0:1;try{sfx('click');}catch(_){}lkSync();const y=$('shop').scrollTop;showShop();$('shop').scrollTop=y;},true);
+var _lkSave=saveRun;saveRun=function(){const r=_lkSave.apply(this,arguments);lkStore();return r;};
+var _lkCont=continueRun;continueRun=function(){const s=loadRun();const r=_lkCont.apply(this,arguments);try{if(s&&s.run&&s.run.lk&&RUN)RUN.lk=s.run.lk;}catch(e){}return r;};
+var _lkNew=newRun;newRun=function(){const r=_lkNew.apply(this,arguments);if(RUN)RUN.lk=null;return r;};
 </script></body></html>
