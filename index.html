@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v67';
+const VER='haywire v68';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2143,4 +2143,8 @@ showTree=function(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.he
 @media (orientation:landscape) and (max-height:600px){.tbody{flex-direction:row;align-items:flex-start}.ttree{flex:1}.tside{width:250px;flex:none;position:sticky;top:0}.thd .ttl{font-size:18px}.tpts b{font-size:26px}
  .tn{min-height:50px}}
 `;document.head.appendChild(c);})();
+// ================= v68+: balance tweaks =================
+// v68: Kagerou (melee bots) vs the Warden: sword hits on the Warden boss deal +25% (hard-mode sims: under-geared Kagerou lost 15/19 Warden fights, TTK ~190s)
+var MEL_WARDEN_K=1.25;
+var _b68=hitEnemy;hitEnemy=function(e,b){if(b&&b.melee&&!b.hwbl&&!b.w68&&e&&e.type==='boss'&&S.hero==='melee'){b.dmg*=MEL_WARDEN_K;b.w68=1;}return _b68.apply(this,arguments);};
 </script></body></html>
