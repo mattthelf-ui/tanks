@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v69';
+const VER='haywire v70';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2152,4 +2152,18 @@ var _b68=hitEnemy;hitEnemy=function(e,b){if(b&&b.melee&&!b.hwbl&&!b.w68&&e&&e.ty
 // Bastion's dome isn't limited to 3 uses (meter still has to refill each time). Everything else keeps the 3-use cap.
 var HW_MAXU0=HW_MAXU;
 var _b69=hwSpecTick;hwSpecTick=function(dt){HW_MAXU=(S.hero==='heavy'&&S.diff==='hard'&&G&&G.boss&&!G.boss.dead)?99:HW_MAXU0;return _b69.apply(this,arguments);};
+// ================= v70: landscape bot select fits without scrolling (phone landscape only; portrait untouched) =================
+(function(){const c=document.createElement('style');c.textContent=`
+@media (orientation:landscape) and (max-height:500px){
+ #select.hwsel{overflow:hidden;justify-content:flex-start;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom));gap:0}
+ #select.hwsel .ttl{font-size:clamp(18px,5.2vh,22px)!important;line-height:1.1;margin:0 0 2px}
+ #select.hwsel .hs{flex-wrap:nowrap!important;gap:8px;width:100%;max-width:1000px;margin:2px auto 0}
+ #select.hwsel .hs .hc{flex:1 1 0!important;min-width:0;max-width:none;width:auto;padding:3px 4px}
+ #select.hwsel .hc .hpw{height:clamp(50px,17vh,84px)!important;min-height:0}
+ #select.hwsel .hc .nm{font-size:clamp(14px,4.2vh,16px);margin:1px 0}
+ #select.hwsel .hc .sb{margin:0;line-height:1.15}
+ #select.hwsel .hc .btn{min-height:44px!important;margin:2px auto 0;padding:2px 14px}
+ #select.hwsel .btn.sm{min-height:44px!important}
+ #select.hwsel #sb,#select.hwsel .row{margin-top:2px;margin-bottom:0}
+}`;document.head.appendChild(c);})();
 </script></body></html>
