@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v66';
+const VER='haywire v67';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1515,7 +1515,7 @@ function ezZap(d){const p=G.p;if(G.hwImm>0||p.dashT>0||G.state!=='play'||(window
  if(p.hp<=0&&!hwRevive()){p.hp=0;G.state='dead';G.stT=0;sfx('boom',1.4);burst(p.x,p.y,'#ffe23f',40,420,4);addTxt(p.x,p.y-26,'ELECTRIFIED','#ffe23f',22,1.2);endRun(false);}}
 
 // ---- v36 VOLT RUNNER: OVERLOAD STORM (3 levels per round, branching lightning, no box) ----
-var VLV=[null,{m:2.5,n:9,fk:2,R:200,j:110,sp:.28,w:1.2},{m:1.35,n:13,fk:3,R:260,j:130,sp:.36,w:1.6},{m:1.6,n:18,fk:4,R:330,j:150,sp:.46,w:2.1}]; // v46: LV1 x2.5, LV3 trimmed (1.75->1.6)
+var VLV=[null,{m:1.6,n:9,fk:2,R:200,j:110,sp:.28,w:1.2},{m:1.8,n:13,fk:3,R:260,j:130,sp:.36,w:1.6},{m:2.0,n:18,fk:4,R:330,j:150,sp:.46,w:2.1}]; // v67: LV1 x1.6, LV2 x1.8, LV3 x2.0
 function vJag(x0,y0,x1,y1,amp){const pts=[x0,y0],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,n=Math.max(3,Math.round(L/22));for(let i=1;i<n;i++){const k=i/n,o=rnd(-1,1)*amp*Math.sin(k*Math.PI);pts.push(x0+dx*k+nx*o,y0+dy*k+ny*o);}pts.push(x1,y1);return pts;}
 var VOLT_T=5,VOLT_PK=2,VOLT_D=.12,VOLT_CAP=2.6;
 function voltI(t){return t<VOLT_PK?.3+.7*(t/VOLT_PK):Math.max(.15,1-.85*((t-VOLT_PK)/(VOLT_T-VOLT_PK)));}
