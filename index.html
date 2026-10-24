@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v65';
+const VER='haywire v66';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2043,12 +2043,15 @@ var _lkNew=newRun;newRun=function(){const r=_lkNew.apply(this,arguments);if(RUN)
 // tier unlocked this round; SOLAR stays 1/5000 via rollRar). All rolls go through rollRar(...,{boss:1,drop:1}) so boss tier-up + pity apply.
 var BOSS_LOOT_N=5,BOSS_LOOT_W=3;
 var BOSS_LOOT_TEST_SOLAR=3,BOSS_LOOT_TEST_N=10,BOSS_LOOT_TEST_W=5; // TEMP (test mode only): while TEST_SET is on, this many of the burst's weapons are SOLAR. Remove this line + the use below to drop it.
+// v66: melee bots (Kagerou, or a melee main weapon) get melee weapons in the boss burst
+function bossLootMelee(){return S.hero==='melee'||!!(G&&G.ps&&G.ps.main&&G.ps.main.k==='melee');}
 function bossLootBurst(e){const lv=lootLvl(),top=maxRar(lv),items=[],TM=typeof TEST_SET!=='undefined'&&TEST_SET,N=TM?BOSS_LOOT_TEST_N:BOSS_LOOT_N,W=TM?BOSS_LOOT_TEST_W:BOSS_LOOT_W;
  const rr=()=>rollRar(lv,0,{boss:1,drop:1});
- for(let i=0;i<W;i++){let r=rr();if(i===0&&r<6)r=Math.min(top,r+1);items.push(makeItem('arm',G.d,r,null,G.wave));}
+ const MEL=bossLootMelee(),MW=Object.keys(WEAP).filter(k=>WEAP[k].k==='melee');
+ for(let i=0;i<W;i++){let r=rr();if(i===0&&r<6)r=Math.min(top,r+1);items.push(makeItem('arm',G.d,r,MEL?pick(MW):null,G.wave));}
  for(let i=W;i<N;i++){items.push(rollNeural(G.d+4)?makeNeural():makeItem(pick(IKINDS),G.d,rr(),null,G.wave));}
  if(TM){ // TEMP test mode: 5 guns (first 3 SOLAR) + 5 armour pieces, all others Epic..Legendary (round gates ignored)
-  const guns=Object.keys(WEAP).filter(k=>WEAP[k].k==='gun'),AR=['chest','legs','thrust'];items.length=0;
+  const guns=MEL?MW:Object.keys(WEAP).filter(k=>WEAP[k].k==='gun'),AR=['chest','legs','thrust'];items.length=0;
   for(let i=0;i<N;i++){const r=i<BOSS_LOOT_TEST_SOLAR?6:2+(Math.random()*4|0),it=i<W?makeItem('arm',G.d,r,pick(guns),G.wave):makeItem(AR[(i-W)%3],G.d,r,null,G.wave);if(it.rar<2)it.rar=r;items.push(it);}}
  const rings=N>8?[90,140,190]:[110],per=Math.ceil(N/rings.length);
  items.forEach((it,i)=>{const ri=Math.min(rings.length-1,i%rings.length),k=Math.floor(i/rings.length),a=(k/per)*6.283+ri*.6+rnd(-.08,.08);let R=rings[ri]+rnd(-10,10),tx,ty;
