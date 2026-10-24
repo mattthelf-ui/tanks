@@ -643,11 +643,11 @@ function update(dt){
  {let k=0;for(const b of G.bul){if(b.dead){if(G.bp.length<300)G.bp.push(b);}else G.bul[k++]=b;}G.bul.length=k;}G.en=G.en.filter(e=>!e.dead);
  // drops
  for(const d of G.drops){d.t+=dt;const dx=p.x-d.x,dy=p.y-d.y,dd=Math.hypot(dx,dy);
-  if(d.k==='pw'){d.x+=d.vx*dt;d.y+=d.vy*dt;d.vx*=Math.pow(.01,dt);d.vy*=Math.pow(.01,dt);if(hitsWall(d.x,d.y,8)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}if(d.t>20)d.dead=true;if(d.t>.4&&dd<p.r+16){d.dead=true;gainPw(d.pw);}}
+  if(d.k==='pw'){d.x+=d.vx*dt;d.y+=d.vy*dt;d.vx*=Math.pow(.01,dt);d.vy*=Math.pow(.01,dt);if(hitsWall(d.x,d.y,8)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}if(d.t>20)d.dead=true;if(dd<p.r+PICK_PW){d.dead=true;gainPw(d.pw);}}
   else if(d.k==='xp'||d.k==='hp'){if(d.t>.35&&dd<150){const s=520/Math.max(dd,20);d.vx+=dx*s*dt*8;d.vy+=dy*s*dt*8;}d.vx*=Math.pow(.02,dt);d.vy*=Math.pow(.02,dt);d.x+=d.vx*dt;d.y+=d.vy*dt;
    if(dd<p.r+8){d.dead=true;if(d.k==='xp'){gainXP(d.v);sfx('xp');}else{p.hp=Math.min(ps.hp,p.hp+ps.hp*.25);sfx('pick');addTxt(p.x,p.y-24,'+HP','#5f5',18);}}}
   else if(d.k==='item'){if(d.tx!=null){d.ft+=dt;const f=Math.min(1,d.ft/d.T);d.x=d.x0+(d.tx-d.x0)*f;d.y=d.y0+(d.ty-d.y0)*f;d.z=4*d.H*f*(1-f);if(f>=1){d.tx=null;d.z=0;d.vz=null;d.vx=d.vy=0;}}else if(d.vz!=null){d.vz-=900*dt;d.z=Math.max(0,d.z+d.vz*dt);if(d.z<=0&&d.vz<0){d.z=0;d.vz=null;}}d.vx*=Math.pow(d.z>0?.5:.01,dt);d.vy*=Math.pow(.01,dt);d.x+=d.vx*dt;d.y+=d.vy*dt;if(hitsWall(d.x,d.y,6)){d.x-=d.vx*dt;d.y-=d.vy*dt;d.vx=d.vy=0;}
-   if(d.t>.5&&d.vz==null&&dd<p.r+14){d.dead=true;const scr=addItem(d.it);G.items.push(d.it);sfx('item');addTxt(p.x,p.y-30,d.it.name,RAR[d.it.rar].c,15,1.6);if(typeof wsPickup==='function')wsPickup(d.it);if(scr)addTxt(p.x,p.y-52,d.it.bt?'NEURAL LINK BOTS MAXED (3) · '+scr.name:'INVENTORY FULL · auto-scrapped '+scr.name,'#ff3d6e',13,2);if(d.it.rar>=2){G.shake=6;part({k:'ring',x:p.x,y:p.y,life:.5,col:RAR[d.it.rar].c,sz:110});}}}
+   if(d.t>.5&&d.vz==null&&dd<p.r+PICK_IT){d.dead=true;const scr=addItem(d.it);G.items.push(d.it);sfx('item');addTxt(p.x,p.y-30,d.it.name,RAR[d.it.rar].c,15,1.6);if(typeof wsPickup==='function')wsPickup(d.it);if(scr)addTxt(p.x,p.y-52,d.it.bt?'NEURAL LINK BOTS MAXED (3) · '+scr.name:'INVENTORY FULL · auto-scrapped '+scr.name,'#ff3d6e',13,2);if(d.it.rar>=2){G.shake=6;part({k:'ring',x:p.x,y:p.y,life:.5,col:RAR[d.it.rar].c,sz:110});}}}
   else if(d.k==='chest'&&!d.open&&dd<p.r+22){d.open=true;d.dead=true;sfx('pick');burst(d.x,d.y,'#ffd23f',20,260,3);part({k:'star',x:d.x,y:d.y,life:.25,col:'#ffd23f',sz:70,a:0});
    if(!d.boss&&R()<.5)dropPw(d.x+20,d.y);const n=d.boss?3:d.cache?2:ri(1,2);for(let i=0;i<n;i++)dropItem(d.x,d.y,d.boss?1:d.cache?1:0,d.boss);}}
  G.drops=G.drops.filter(d=>!d.dead);
@@ -714,6 +714,8 @@ function los(x0,y0,x1,y1){const d=Math.hypot(x1-x0,y1-y0),n=Math.ceil(d/12);for(
 
 const PW={spread:{n:'SPREAD SHOT',c:'#ffe23f',d:12,ic:'S'},rapid:{n:'RAPID FIRE',c:'#ff8a1f',d:12,ic:'R'},shield:{n:'SHIELD',c:'#7affd6',d:12,ic:'O'},speed:{n:'SPEED BOOST',c:'#19e3ff',d:12,ic:'>'},dmg:{n:'DAMAGE UP',c:'#ff2e88',d:10,ic:'!'},emp:{n:'BREAKER ROUNDS',c:'#8a7dff',d:12,ic:'E'}};
 const PWW=['spread','spread','spread','rapid','rapid','shield','shield','speed','speed','dmg'];
+// v71: pickups collect as soon as the visible bot touches the visible pickup (was centre-to-centre ~p.r+16, i.e. hidden under the sprite)
+var PICK_PW=30,PICK_IT=26;
 function dropPw(x,y,k){G.drops.push({k:'pw',pw:k||pick(PWW),x,y,vx:rnd(-80,80),vy:rnd(-80,80),t:0});}
 function gainPw(k){const P=PW[k];G.pw[k]=P.d;if(k==='dmg')G.pw.rapid=0;if(k==='rapid')G.pw.dmg=0;if(k==='shield')G.shHits=3;sfx('item');sfx('level');G.pwFlash={t:.35,c:P.c};G.speedT=.3;G.shake=Math.max(G.shake,5);
  G.banner={t:1.3,txt:P.n+'!',sub:(k==='shield'?'blocks 3 hits · ':k==='emp'?'shreds purple shields · ':'')+P.d+'s',pc:P.c};part({k:'ring',x:G.p.x,y:G.p.y,life:.5,col:P.c,sz:150});part({k:'star',x:G.p.x,y:G.p.y,life:.3,col:P.c,sz:90,a:0});burst(G.p.x,G.p.y,P.c,24,360,3);}
@@ -916,7 +918,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v70';
+const VER='haywire v71';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
