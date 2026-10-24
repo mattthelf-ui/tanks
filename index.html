@@ -916,7 +916,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v68';
+const VER='haywire v69';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2147,4 +2147,9 @@ showTree=function(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.he
 // v68: Kagerou (melee bots) vs the Warden: sword hits on the Warden boss deal +25% (hard-mode sims: under-geared Kagerou lost 15/19 Warden fights, TTK ~190s)
 var MEL_WARDEN_K=1.25;
 var _b68=hitEnemy;hitEnemy=function(e,b){if(b&&b.melee&&!b.hwbl&&!b.w68&&e&&e.type==='boss'&&S.hero==='melee'){b.dmg*=MEL_WARDEN_K;b.w68=1;}return _b68.apply(this,arguments);};
+// v69: Iron Bastion on hard. Cause: v46's 3-uses-per-round special cap. Bastion beat the Warden 100% of the time before v46 by
+// chaining Aegis Domes; with the cap it runs dry mid-fight (sim: 0/8 Warden wins on hard). Fix: on hard, while the Warden is alive,
+// Bastion's dome isn't limited to 3 uses (meter still has to refill each time). Everything else keeps the 3-use cap.
+var HW_MAXU0=HW_MAXU;
+var _b69=hwSpecTick;hwSpecTick=function(dt){HW_MAXU=(S.hero==='heavy'&&S.diff==='hard'&&G&&G.boss&&!G.boss.dead)?99:HW_MAXU0;return _b69.apply(this,arguments);};
 </script></body></html>
