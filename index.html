@@ -581,7 +581,7 @@ function killEnemy(e){if(e.dead)return;e.dead=true;if(e.type==='mboss'){const c=
  if(R()<.09)G.drops.push({k:'hp',x:e.x,y:e.y,vx:0,vy:0,t:0});
  
  
- if(e.type==='boss'){G.boss=null;G.bul=G.bul.filter(b=>b.pl);G.p.inv=1.5;G.bossOn=false;{const cx2=hitsWall(e.x+50,e.y,18)?e.x:e.x+50;}G.banner={t:2.2,txt:'WARDEN BOT DOWN',sub:'Survive the timer'};auTrack('main');
+ if(e.type==='boss'){G.boss=null;G.bul=G.bul.filter(b=>b.pl);G.p.inv=1.5;G.bossOn=false;{const cx2=hitsWall(e.x+50,e.y,18)?e.x:e.x+50;}G.banner={t:2.2,txt:'WARDEN TANK DOWN',sub:'Survive the timer'};auTrack('main');
   G.en.forEach(o=>{if(!o.dead&&o!==e&&o.type==='drone'){o.dead=true;burst(o.x,o.y,o.col,10,250);}});}}
 function dropItem(x,y,minR,boss){const it=rollNeural(G.d+(boss?4:0))?makeNeural():makeItem(pick(IKINDS),G.d,rollRar(lootLvl(),minR||0,{boss,drop:1}),null,G.wave);G.drops.push({k:'item',x,y,vx:rnd(-120,120),vy:rnd(-120,120),it,t:0});}
 function roomCleared(r){r.st=2;G.cleared++;sfx('clear');addTxt(G.p.x,G.p.y-40,'ROOM CLEAR','#7affd6',22,1.1);
@@ -880,14 +880,14 @@ function drawHUD(t){const c=cx,p=G.p,L=SAFE.l+8,T=SAFE.t+6,X0=L-2;hwHud(c,L,T,t)
  c.save();c.transform(1,0,-.2,1,.2*T,0);c.fillStyle='rgba(5,6,10,.75)';c.fillRect(L+8,T,190,50);c.fillStyle='#3dff7a';const hk=p.hp/G.ps.hp;c.fillStyle=hk>.5?'#3dff7a':hk>.25?'#ffd23f':'#ff3d6e';c.fillRect(L+46,T+5,146*hk,13);
  c.strokeStyle=INK;c.lineWidth=2;c.strokeRect(L+46,T+5,146,13);c.restore();hwBar(c,L,T,t);
  bigText(({heavy:'HVY',agile:'AGL',melee:'MEL'})[S.hero],L+28,T+17,13,'#fff');c.font='italic 900 12px system-ui';c.fillStyle='#ffd23f';c.textAlign='left';c.fillText('$'+RUN.cash,L+48,T+30);c.fillStyle='#19e3ff';c.fillText('GS '+(G.gsH||''),L+118,T+30);c.fillStyle='#fff';shHud(c,L,T,t);c.font='bold 12px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(p.hp)+'/'+G.ps.hp,L+48,T+12);
- c.textAlign='left';bigText('',0,0,1,'#fff');c.font='italic 900 13px system-ui';c.fillStyle='#ff7ab8';c.textAlign='left';const bw=(S.bestW&&S.bestW[G.d])||0;c.fillText('ROUND '+Math.max(1,G.wave)+(isSwarm(G.wave)?'  ·  RIOT':'')+'  ·  '+DF().n+((S.bestD&&S.bestD[S.diff||'normal'])?'  ·  BEST '+S.bestD[S.diff||'normal']:''),X0,T+65);c.fillStyle='#ffd23f';const l2=G.wActive?(G.wLeft>0?'SURVIVE '+Math.ceil(G.wLeft)+'s':'DESTROY THE WARDEN BOT'):(G.wave?'':'Wave 1 in '+Math.ceil(G.waveT)+'s');c.fillText(l2,X0,T+80);G.l2w=l2?c.measureText(l2).width:0;G.row2=!!l2||G.revMax>0;
+ c.textAlign='left';bigText('',0,0,1,'#fff');c.font='italic 900 13px system-ui';c.fillStyle='#ff7ab8';c.textAlign='left';const bw=(S.bestW&&S.bestW[G.d])||0;c.fillText('ROUND '+Math.max(1,G.wave)+(isSwarm(G.wave)?'  ·  RIOT':'')+'  ·  '+DF().n+((S.bestD&&S.bestD[S.diff||'normal'])?'  ·  BEST '+S.bestD[S.diff||'normal']:''),X0,T+65);c.fillStyle='#ffd23f';const l2=G.wActive?(G.wLeft>0?'SURVIVE '+Math.ceil(G.wLeft)+'s':'DESTROY THE WARDEN TANK'):(G.wave?'':'Wave 1 in '+Math.ceil(G.waveT)+'s');c.fillText(l2,X0,T+80);G.l2w=l2?c.measureText(l2).width:0;G.row2=!!l2||G.revMax>0;
  // power-up timers
  {let px=X0;const py=G.row2?T+86:T+71;for(const k in PW){const v=G.pw[k];if(!(v>0))continue;const P=PW[k],f=v/P.d;c.fillStyle='rgba(5,6,10,.75)';c.fillRect(px,py,46,30);c.fillStyle=P.c;c.fillRect(px+2,py+24,42*f,4);bigText(P.ic,px+12,py+12,14,P.c);c.font='bold 12px system-ui';c.fillStyle='#fff';c.textAlign='left';c.fillText(Math.ceil(v)+'s',px+22,py+16);if(v<3&&Math.floor(t*6)%2){c.strokeStyle=P.c;c.lineWidth=2;c.strokeRect(px,py,46,30);}px+=50;}}hwBarFlash(c,L,T);
  // top buttons
  for(const b of ui.btns){c.fillStyle='rgba(5,6,10,.65)';c.strokeStyle='#19e3ff';c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,b.r,0,6.283);c.fill();c.stroke();
   c.fillStyle='#fff';if(b.id==='pause'){c.fillRect(b.x-6,b.y-7,4,14);c.fillRect(b.x+2,b.y-7,4,14);}else{c.beginPath();c.moveTo(b.x-8,b.y-3);c.lineTo(b.x-4,b.y-3);c.lineTo(b.x+2,b.y-8);c.lineTo(b.x+2,b.y+8);c.lineTo(b.x-4,b.y+3);c.lineTo(b.x-8,b.y+3);c.fill();if(S.mute){c.strokeStyle='#ff3d6e';c.lineWidth=3;c.beginPath();c.moveTo(b.x-10,b.y-10);c.lineTo(b.x+10,b.y+10);c.stroke();}}}
  // boss bar
- if(G.boss&&G.boss.spawn<=0){const b=G.boss,bw=Math.min(W*.6,420),bx=(W-bw)/2,by=W<600?bossBY():T+6;c.fillStyle=INK;c.fillRect(bx-3,by-3,bw+6,16);c.fillStyle=b.hp<b.hpMax*.5?'#ff2e88':'#b03bff';c.fillRect(bx,by,bw*Math.max(0,b.hp)/b.hpMax,10);c.fillStyle=INK;for(let q=1;q<4;q++)c.fillRect(bx+bw*q/4-1,by,2,10);bigText('WARDEN BOT  '+Math.max(0,Math.ceil(100*b.hp/b.hpMax))+'%',W/2,by+24,13,'#fff');}
+ if(G.boss&&G.boss.spawn<=0){const b=G.boss,bw=Math.min(W*.6,420),bx=(W-bw)/2,by=W<600?bossBY():T+6;c.fillStyle=INK;c.fillRect(bx-3,by-3,bw+6,16);c.fillStyle=b.hp<b.hpMax*.5?'#ff2e88':'#b03bff';c.fillRect(bx,by,bw*Math.max(0,b.hp)/b.hpMax,10);c.fillStyle=INK;for(let q=1;q<4;q++)c.fillRect(bx+bw*q/4-1,by,2,10);bigText(((b.tkS)||'WARDEN TANK')+'  '+Math.max(0,Math.ceil(100*b.hp/b.hpMax))+'%',W/2,by+24,13,'#fff');}
  // sticks
  const sl=ui.L,sr=ui.R;for(const s of[sl,sr]){c.globalAlpha=s.id!=null?.9:.5;c.fillStyle='rgba(5,6,10,.45)';c.strokeStyle=s===sl?'#19e3ff':'#ff2e88';c.lineWidth=3;c.beginPath();c.arc(s.x,s.y,ui.ring,0,6.283);c.fill();c.stroke();
   c.fillStyle=s===sl?'#19e3ff':'#ff2e88';c.beginPath();c.arc(s.x+s.kx*ui.ring,s.y+s.ky*ui.ring,22,0,6.283);c.fill();c.strokeStyle=INK;c.stroke();c.globalAlpha=1;}
@@ -918,7 +918,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v71';
+const VER='haywire v72';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1096,7 +1096,7 @@ function nextWave(){G.qT=0;G.wave++;G.wActive=true;G.wT=0;G.extract=null;G.exit=
  G.wDur=45;G.wLeft=45;G.medHealed=0;RUN.gren=RUN.gMax||3;G.queue=1e9;G.wMul=(1+.1*(r-1)+(r>12?.08*(r-12):0))*(sw?.6:1);G.wDmg=1+.05*(r-1);
  if(sw){ECAP=Math.min(90,40+3*r);G.spI=.1;G.spT=.2;}else{ECAP=Math.min(46,14+r*2);G.spI=Math.max(.22,1.15-.05*r);G.spT=.6;}ECAP=Math.round(ECAP*1.04);G.spI/=1.04;{const D=DF();G.wMul*=D.hp*hpLate(r);G.wDmg*=D.dmg*1.08*(r>12?Math.pow(1.05,r-12):1);G.spI/=D.sp;}if(S.hero==='agile'&&r>=4&&r<=7){G.wMul*=.88;G.wDmg*=S.diff==='hard'?.75:.85;} /* v46: ease Volt's rounds 4-7 (more on hard) */if(sw&&COARSE)ECAP=Math.min(ECAP,60);
  hwRound(r);if(sw)riotStart(r);if(isBossWave(r))spawnBoss();
- sfx(sw?'roar':'warp');G.banner=sw?{t:2.6,txt:'🚨 RIOT! 🚨',sub:'Round '+r+' · the cell blocks are loose · survive 45s',riot:1,boss:1,boss:1}:isBossWave(r)?{t:2.4,txt:'WARDEN BOT',sub:'Boss round · it calls reinforcements',boss:1}:{t:1.2,txt:'ROUND '+r,sub:'Survive 45s'+(r>12?' · endless':'')};if(r===2&&S.diff!=='hard')spawnMini(1);if(r>=3&&!isBossWave(r)&&(r%3===0||(sw&&r%16===8)))spawnMini();}
+ sfx(sw?'roar':'warp');G.banner=sw?{t:2.6,txt:'🚨 RIOT! 🚨',sub:'Round '+r+' · the cell blocks are loose · survive 45s',riot:1,boss:1,boss:1}:isBossWave(r)?{t:2.4,txt:'WARDEN TANK',sub:'Boss round · it calls reinforcements',boss:1}:{t:1.2,txt:'ROUND '+r,sub:'Survive 45s'+(r>12?' · endless':'')};if(r===2&&S.diff!=='hard')spawnMini(1);if(r>=3&&!isBossWave(r)&&(r%3===0||(sw&&r%16===8)))spawnMini();}
 function spawnBoss(){G.bossOn=true;const pd=G.D.pads.slice().sort((a,b)=>Math.hypot(b.x-G.p.x,b.y-G.p.y)-Math.hypot(a.x-G.p.x,a.y-G.p.y))[0];
  const b=spawnEnemy('boss',clamp(pd.x,5*TILE,(MW-5)*TILE),clamp(pd.y,5*TILE,(MH-5)*TILE),G.D.arena);b.r=80;b.ghost=1;b.spd=70;b.dmg*=1.6;b.hp=b.hpMax=(G.gsM||1)*7000*(1+.25*Math.max(0,Math.floor((G.wave-12)/12)))*DF().hp;b.dmg*=DF().dmg;b.spawn=1.4;G.boss=b;auTrack('boss');sfx('roar');G.shake=14;}
 function waveCleared(){if(G.state!=='play')return;G.wActive=false;G.cleared=G.wave;sfx('clear');
@@ -1138,7 +1138,7 @@ function showShop(){if(!G)return;G.lootAt=1e9;if(!RUN.offers)RUN.offers=makeOffe
  ${RUN.offers.v?`<div class="sh" style="color:#ffd23f">🕶 BLACK MARKET · top-tier vault gear &amp; implants</div><div class="sg">${RUN.offers.v.w.map((o,i)=>card('vw'+i,o,'VAULT · '+(WEAP[o.it.type].k==='gun'?'Gun · Main/Off Arm':WEAP[o.it.type].k==='melee'?'Melee · swings with right stick':'Shield · Off Arm'))).join('')}${RUN.offers.v.g.map((o,i)=>card('vg'+i,o,'VAULT · '+ITYPE[o.it.slot])).join('')}${(()=>{const m=RUN.offers.v.imp,c=RAR[m.rar].c;return `<div class="sc r${m.rar}${m.sold||RUN.cash<m.cost?' dis':''}" data-buy="vi" style="--rc:${c}"><div class="tag">${RAR[m.rar].n}</div><div class="nm" style="color:${c};margin-top:12px">${STATS[m.k].ic} ${RAR[m.rar].n} ${STATS[m.k].n} Implant</div><div class="ds">Permanent for this run · ${STATS[m.k].f(m.v)}</div><div class="ds">Each implant raises the next one's price (${RUN.imp||0} installed)</div><div class="pr">${m.sold?'✓ INSTALLED':'$'+m.cost}</div></div>`;})()}</div>`:''}
  <div class="sh">GRENADES (${RUN.gMax}/round · dmg x${(RUN.gDmg||1).toFixed(2)})</div><div class="sg">${[['gx','Extra grenade',gxn()>=2?'MAXED (5 per round)':'+1 grenade every round ('+gxn()+'/2)',gxc()],['gd','Bigger boom',gdn()>=BOOM_MAX?'MAXED':(gdn()===BOOM_MAX-1&&BOOM_SILLY?'Damage +12% & blast radius x10 (!!) (':'Damage +12% & blast radius +8% (')+gdn()+'/'+BOOM_MAX+')',gdc()]].map(([id,n,d,c2])=>`<div class="sc rep${RUN.cash<c2||(id==='gx'?gxn()>=2:gdn()>=BOOM_MAX)?' dis':''}" data-buy="${id}" style="--rc:#ff8a1f"><div class="nm" style="color:#ff8a1f">${n}</div><div class="ds">${d}</div><div class="pr">$${c2}</div></div>`).join('')}</div>
  <div class="sh">REPAIRS</div><div class="sg">${rp('r1','Patch kit','Repair 35% HP',rc)}${rp('r2','Full overhaul','Repair to full HP',fc)}</div>
- <div class="row foot"><span class="btn" id="inv">🛠 INVENTORY${S.inv.length?' ('+S.inv.length+')':''}</span><span class="btn pk" id="nx" style="font-size:22px">NEXT ROUND ${G.wave+1} ▶</span></div>${isSwarm(G.wave+1)?'<div class="warn">⚠ Unrest rising in the cell blocks… a riot may break out</div>':isBossWave(G.wave+1)?'<div class="warn">⚠ Next round: WARDEN BOT boss</div>':''}`;
+ <div class="row foot"><span class="btn" id="inv">🛠 INVENTORY${S.inv.length?' ('+S.inv.length+')':''}</span><span class="btn pk" id="nx" style="font-size:22px">NEXT ROUND ${G.wave+1} ▶</span></div>${isSwarm(G.wave+1)?'<div class="warn">⚠ Unrest rising in the cell blocks… a riot may break out</div>':isBossWave(G.wave+1)?'<div class="warn">⚠ Next round: WARDEN TANK boss</div>':''}`;
  show('shop');hwDecor('shop');$('shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));$('nx').onclick=()=>{sfx('click');closeShop();};$('inv').onclick=()=>{sfx('click');IV.inRun=false;IV.f='all';showHangar();};}
 function buy(id){const ps=pstats();let cost=0,ok=false;
  if(id==='rr'){const c3=rrc();if(RUN.cash<c3)return;cost=c3;RUN.rr=(RUN.rr||0)+1;RUN.offers=makeOffers();ok=true;toast('Shop rerolled');}
@@ -1937,7 +1937,7 @@ var INFO={
  bm:()=>['Black Market',`<p>Opens from <b>round ${BM_R}</b>. It sells <b>Vault</b> gear: always the best rarity unlocked so far (Epic from round 7, Ultra from 20, Ultimate from 30, Legendary from 40; a SOLAR item is a 1-in-5000 surprise).</p><p>Vault items are <b>2 item levels higher</b> than the normal shop and have <b>one extra bonus stat</b>. They cost a lot more; it's where saved-up cash goes.</p>`],
  gear:()=>['Gear stats',`<ul><li><b>HP</b>: how much damage you can take.</li><li><b>Shield</b>: your Neural Link absorbs this much damage first, then recharges after the shown seconds.</li><li><b>Armor</b>: cuts the damage you take by that %.</li><li><b>Crit</b>: chance for a hit to deal extra damage.</li><li><b>Speed</b>: how fast you move.</li><li><b>Main / Off</b>: damage per hit of the weapon in each arm.</li><li><b>Cash +%</b>: more cash from drops and round bonuses.</li><li><b>GS</b> (gear score): overall power of what you have equipped.</li></ul><p>Rarity, worst to best: ${rarLine()}. Higher rarity means bigger stats and more bonus stats.</p>`],
  tree:()=>['Skill tree',`<p>Each bot earns its own <b>mastery XP</b>: ${M_ROUND} per round survived and ${M_BOSS} per boss or mini-boss kill (x1.5 on Hard). You keep it even when you die.</p><p>Every level (max ${M_CAP}) gives <b>1 skill point</b>. Each bot has 3 branches. A branch's deeper tiers unlock after you spend ${M_T[1]} and then ${M_T[2]} points in that branch.</p><p>Tap a skill to read it, then <b>+ LEARN</b>. <b>RESPEC</b> refunds all points; it only works in the shop during a run and costs more each time.</p>`],
- how:()=>['How to play',`<ul><li><b>Left stick</b>: move. <b>Right stick</b>: aim and fire (Kagerou: swing).</li><li><b>Tap</b> the left stick (or the DASH button) to <b>dash</b>.</li><li>A <b>sword</b> swings by itself while you aim with the right stick; guns in your other arm keep firing.</li><li>Fill the <b>HAYWIRE meter</b> and fire your <b>special</b> (up to 3 times a round, stronger each time).</li><li>Survive each round, grab the loot, then spend cash in the <b>shop</b>. From round ${BM_R} the <b>Black Market</b> opens.</li><li>Every bot levels up its own <b>skill tree</b>, even if you die.</li><li>On boss rounds, destroy the <b>Warden Bot</b>.</li></ul><p>Swap the sticks or change aim assist in <b>Settings</b>. Your progress is saved on this device.</p>`]};
+ how:()=>['How to play',`<ul><li><b>Left stick</b>: move. <b>Right stick</b>: aim and fire (Kagerou: swing).</li><li><b>Tap</b> the left stick (or the DASH button) to <b>dash</b>.</li><li>A <b>sword</b> swings by itself while you aim with the right stick; guns in your other arm keep firing.</li><li>Fill the <b>HAYWIRE meter</b> and fire your <b>special</b> (up to 3 times a round, stronger each time).</li><li>Survive each round, grab the loot, then spend cash in the <b>shop</b>. From round ${BM_R} the <b>Black Market</b> opens.</li><li>Every bot levels up its own <b>skill tree</b>, even if you die.</li><li>On boss rounds, destroy the <b>Warden Tank</b>.</li></ul><p>Swap the sticks or change aim assist in <b>Settings</b>. Your progress is saved on this device.</p>`]};
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(!t)return;e.stopPropagation();e.preventDefault();const f=INFO[t.dataset.info];if(!f)return;const [a,b]=f(t.dataset.ia);hwInfo(a,b);},true);
 // ---- retro boot screen (once per launch) ----
 function hwBoot(){if(window.__booted||window.__noBoot)return;const d=document.createElement('div');d.id='boot';d.innerHTML=`<div class="crt"><div class="bl" id="bootl"></div><div class="blogo"><img src="art/title.webp" alt=""><div class="ttl tt">HAYWIRE</div></div><div class="pab">PRESS ANY BUTTON</div><div class="bft">© SEC-7 SYSTEMS · ${VER.toUpperCase()}</div></div>`;document.body.appendChild(d);
@@ -2168,4 +2168,97 @@ var _b69=hwSpecTick;hwSpecTick=function(dt){HW_MAXU=(S.hero==='heavy'&&S.diff===
  #select.hwsel .btn.sm{min-height:44px!important}
  #select.hwsel #sb,#select.hwsel .row{margin-top:2px;margin-bottom:0}
 }`;document.head.appendChild(c);})();
+// ================= v72: TANK BOSSES =================
+// Bosses (final 'boss' + mini-boss 'mboss') are wheeled armoured vehicles: a chassis that drives and turns like a vehicle and a
+// turret that rotates on its own to aim at the player. Types, HP/dmg scaling, loot, skill points and balance hooks are unchanged
+// (the game still sees type 'boss' / 'mboss'), so the Kagerou vs final-boss bonus and the Bastion hard-mode dome rule still apply.
+var VCH={ // wheeled + tracked chassis
+ scout4:{n:'4-WHEEL SCOUT',wh:2,L:1.9,Wd:1.2,wr:.42,spd:1.25,turn:2.6,shape:'wedge'},
+ car6:{n:'6-WHEEL ARMOURED CAR',wh:3,L:2.2,Wd:1.35,wr:.3,spd:1,turn:2.1,shape:'box'},
+ heavy8:{n:'8-WHEEL HEAVY',wh:4,L:2.5,Wd:1.5,wr:.28,spd:.85,turn:1.5,shape:'heavy'},
+ trackL:{n:'LIGHT TRACKED TANK',tr:1,L:2,Wd:1.3,spd:.95,turn:2.4,shape:'box'},
+ heavyT:{n:'TRACKED HEAVY TANK',tr:1,L:2.5,Wd:1.55,spd:.8,turn:1.7,shape:'heavy'}};
+var VTU={cannon:{n:'HEAVY CANNON'},gatling:{n:'TWIN GATLING'},missile:{n:'MISSILE POD'},flame:{n:'FLAMETHROWER'},mortar:{n:'MORTAR'},beam:{n:'BEAM LASER'}};
+var VCALL={mboss:{scout4:'RAZORBACK',car6:'BULLDOG',trackL:'GRIZZLY'},boss:{heavy8:'WARDEN',heavyT:'WARDEN'}};
+var VMINI=[['scout4','gatling'],['car6','missile'],['car6','flame'],['scout4','flame'],['car6','gatling'],['scout4','missile'],['trackL','gatling'],['trackL','missile'],['trackL','flame']];
+var VBOSS=[['heavy8','cannon'],['heavy8','mortar'],['heavy8','beam'],['heavyT','cannon'],['heavyT','mortar'],['heavyT','beam']];
+RNAME.boss='WARDEN TANK';RNAME.mboss='ASSAULT TANK';rosterBossName=function(){return G&&G.boss&&G.boss.tkN||'WARDEN TANK';};
+function vSetup(e){if(!e||e.vc||(e.type!=='boss'&&e.type!=='mboss'))return;const f=window.__vForce&&window.__vForce[e.type];const c=f||pick(e.type==='boss'?VBOSS:VMINI);
+ e.vc=c[0];e.vt=c[1];e.hd=R()*6.283;e.ta=e.hd;e.wrl=0;e.fT=1;e.fT2=2;e.ph=0;e.pT=3;e.tele=0;e.spin=0;e.cd=1;e.cd2=3;
+ e.tkS=VCALL[e.type][e.vc]+' · '+VTU[e.vt].n;e.tkN=VCALL[e.type][e.vc]+' · '+VCH[e.vc].n+' · '+VTU[e.vt].n;}
+var _v72sp=spawnEnemy;spawnEnemy=function(){const e=_v72sp.apply(this,arguments);try{vSetup(e);}catch(err){}return e;};
+// stay on reachable floor (enemies on unreachable tiles are culled without loot by the round logic)
+function vOk(e){if(!G.reach)return true;const i=Math.floor(e.y/TILE)*MW+Math.floor(e.x/TILE);return G.reach[i]>=0;}
+function angD(a,b){return ((b-a+9.42478)%6.28318)-3.14159;}
+// drive like a vehicle toward (gx,gy); rev<0 = reverse away
+function vDrive(e,dt,dx,dy,k){const C=VCH[e.vc],want=Math.atan2(dy,dx),df=angD(e.hd,want);e.hd+=Math.max(-C.turn*dt,Math.min(C.turn*dt,df));
+ const v=e.spd*C.spd*k*Math.max(.25,Math.cos(df));const mx=Math.cos(e.hd)*v*dt,my=Math.sin(e.hd)*v*dt;const ox=e.x,oy=e.y;let hit=moveC(e,mx,my);if(!vOk(e)){e.x=ox;e.y=oy;hit=true;}e.wrl+=Math.hypot(mx,my);if(hit)e.hd+=1.2*dt*(df>0?1:-1)*6;return hit;}
+function vAim(e,dt,rate){const p=G.p,a=Math.atan2(p.y-e.y,p.x-e.x);e.ta+=Math.max(-rate*dt,Math.min(rate*dt,angD(e.ta,a)));e.ang=e.ta;return Math.abs(angD(e.ta,a));}
+function vMuz(e){const L=e.r*(e.vt==='cannon'?1.55:e.vt==='mortar'?.9:1.25);return {x:e.x+Math.cos(e.ta)*L,y:e.y+Math.sin(e.ta)*L};}
+function vShot(e,a,sp,dm,big,o){const m=vMuz(e);G.bul.push(nb(Object.assign({x:m.x,y:m.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,dmg:e.dmg*dm,r:big?8:5,life:3,pl:0,col:'#ff3d6e',fac:'sec'},o||{})));e.rc=1;}
+function vLob(e,tx,ty,dm,T){const m=vMuz(e);G.bul.push(nb({x:m.x,y:m.y,vx:(tx-m.x)/T,vy:(ty-m.y)/T,dmg:e.dmg*dm,r:7,life:T,l0:T,pl:0,col:'#ffd23f',lob:1,tx,ty,wm:1}));e.rc=1;}
+// turret weapon patterns (each fits its weapon); rg = rage/aggression
+function vFire(e,dt,d,rg){const p=G.p,a=e.ta,off=vAim.last;e.fT-=dt;if(e.fT>0)return;
+ switch(e.vt){
+  case 'gatling':if(e.gb>0){e.gb-=1;e.fT=.075;for(const s of[-1,1]){const m=vMuz(e),px=-Math.sin(a)*6*s,py=Math.cos(a)*6*s;G.bul.push(nb({x:m.x+px,y:m.y+py,vx:Math.cos(a+rnd(-.07,.07))*380,vy:Math.sin(a+rnd(-.07,.07))*380,dmg:e.dmg*.32,r:4,life:2.2,pl:0,col:'#ff3d6e',fac:'sec'}));}e.rc=1;sfx('shoot',.35);}else{e.gb=rg?26:20;e.fT=rg?1:1.4;}break;
+  case 'cannon':vShot(e,a,430,1.7,1);if(rg){vShot(e,a-.22,380,.8,0);vShot(e,a+.22,380,.8,0);}e.fT=rg?.8:1.1;G.shake=Math.max(G.shake,4);sfx('boom',.5);break;
+  case 'missile':{const n=rg?6:4;for(let k=0;k<n;k++){const ox=rnd(-70,70),oy=rnd(-70,70);vLob(e,p.x+ox,p.y+oy,.8,1.1+k*.08);}e.fT=rg?1.7:2.3;sfx('shoot');break;}
+  case 'mortar':{const T=1.4,vx=(p.x-(e.lpx??p.x))/Math.max(dt,1e-3),vy=(p.y-(e.lpy??p.y))/Math.max(dt,1e-3);for(let k=-1;k<=1;k++)vLob(e,p.x+Math.max(-200,Math.min(200,vx*T*.5))+k*60,p.y+Math.max(-200,Math.min(200,vy*T*.5))+k*40,1.1,T);e.fT=rg?1.3:1.8;sfx('boom',.4);break;}
+  case 'flame':if(d<300){for(let k=0;k<2;k++)vShot(e,a+rnd(-.32,.32),rnd(240,320),.28,0,{life:rnd(.5,.7),col:'#ff8a1f',r:6});e.fT=.05;if(R()<.2)sfx('shoot',.2);}else e.fT=.15;break;
+  case 'beam':{const m=vMuz(e),L=620;(G.lw=G.lw||[]).push({x1:m.x,y1:m.y,x2:m.x+Math.cos(a)*L,y2:m.y+Math.sin(a)*L,t:0,arm:.75,life:1.6,dmg:e.dmg*1.25});e.fT=rg?1.6:2.2;sfx('warp',.6);break;}}}
+// mini-boss (type mboss): keeps its distance band, turret fires its weapon, still calls SWAT reinforcements
+mbossTick=function(e,dt){vSetup(e);const p=G.p,dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;
+ const want=e.vt==='flame'?150:250;let gx=dx,gy=dy,k=1;if(d<want-60){gx=-dx;gy=-dy;k=.7;}else if(d<want+40){gx=-dy;gy=dx;k=.6;}vDrive(e,dt,gx,gy,k*(e.lite?.9:1));
+ const off=vAim(e,dt,3.2);if(off<.35&&d<760)vFire(e,dt*(e.lite?.75:1),d,0);e.lpx=p.x;e.lpy=p.y;e.rc=Math.max(0,(e.rc||0)-dt*5);
+ e.cd3=(e.cd3==null?3:e.cd3)-dt;if(e.cd3<=0){e.cd3=e.lite?14:9;if(hwAlive()<ECAP){const n=e.lite?1:2;for(let i=0;i<n;i++){const a=R()*6.283,m=hwSpawn('swat',e.x+Math.cos(a)*(e.r+30),e.y+Math.sin(a)*(e.r+30),.5);m.sqd=1;}addTxt(e.x,e.y-e.r-30,'SWAT, MOVE IN!','#2f6bff',16,1.1);sfx('warp',.6);}}
+ if(d<e.r+p.r)hurtPlayer(e.dmg*1.2);};
+// final boss (type boss): primary turret weapon, hull machine-gun sweep, mortar/lockdown barrage, and a telegraphed ram (replaces the baton slam)
+bossAI=function(e,dt,d,ang,ux,uy){vSetup(e);const p=G.p,rage=e.hp<e.hpMax*.5;if(rage&&!e.rg){e.rg=1;const s=freeSpot(G.D.arena,80);dropPw(s.x,s.y);addTxt(e.x,e.y-90,'WARDEN OVERDRIVE!','#ff2e88',26,1.2);}
+ e.pT-=dt;e.spin+=dt*(rage?2.4:1.6);e.rc=Math.max(0,(e.rc||0)-dt*5);
+ if(e.pT<=0){e.ph=(e.ph+1)%4;e.pT=e.ph===3?1.8:rage?2.8:3.4;e.cd=0;e.lwT=0;if(e.ph===3){e.ca=Math.atan2(p.y-e.y,p.x-e.x);e.tele=.8;e.slam=0;addTxt(e.x,e.y-e.r-20,'RAM!','#ffd23f',20,.8);}if(e.ph===2)addTxt(e.x,e.y-e.r-20,'BARRAGE!','#ff3dd2',20,1);}
+ e.cd-=dt;const dx=p.x-e.x,dy=p.y-e.y;
+ if(e.ph===3){vAim(e,dt,2.2);if(e.tele>0){e.tele-=dt;const df=angD(e.hd,e.ca);e.hd+=Math.max(-4*dt,Math.min(4*dt,df));}
+  else if(!e.slam){e.hd=e.ca;const ox=e.x,oy=e.y;let hit=moveC(e,Math.cos(e.ca)*560*dt,Math.sin(e.ca)*560*dt);if(!vOk(e)){e.x=ox;e.y=oy;hit=true;}e.wrl+=560*dt;if(R()<.8)part({k:'ghost',x:e.x,y:e.y,a:e.ca,f:e.ca,life:.18,en:e});
+   if(hit||Math.hypot(p.x-e.x,p.y-e.y)<e.r+50||e.pT<.5){e.slam=1;G.shake=14;e.pT=Math.min(e.pT,.3);for(let k=0;k<16;k++)ebul(e,k*.3927,240,1);part({k:'ring',x:e.x,y:e.y,life:.5,col:'#ffd23f',sz:e.r*5});burst(e.x,e.y,'#ffd23f',30,420,4);sfx('boom',1.2);addTxt(e.x,e.y-e.r-10,'CRASH','#ffd23f',20,.8);}}}
+ else{const want=e.ph===2?260:140,dd=Math.hypot(dx,dy)||1;let gx=dx,gy=dy,k=.8;if(dd<want-60){gx=-dx;gy=-dy;k=.6;}else if(dd<want+60){gx=-dy;gy=dx;k=.55;}vDrive(e,dt,gx,gy,k);
+  const off=vAim(e,dt,2.4);
+  if(e.ph===0||e.ph===1){if(off<.3)vFire(e,dt,dd,rage);
+   if(e.ph===1&&e.cd<=0){e.cd=rage?.55:.8;const ha=e.hd;for(let k=-2;k<=2;k++)ebul(e,Math.atan2(dy,dx)+k*.18,320,1);sfx('shoot');}} // hull MG
+  else{e.lwT-=dt;if(e.lwT<=0){e.lwT=rage?1.1:1.5;if(e.vt==='beam'){const a=R()*3.14,L=110,cx2=p.x+rnd(-40,40),cy2=p.y+rnd(-40,40);(G.lw=G.lw||[]).push({x1:cx2-Math.cos(a)*L,y1:cy2-Math.sin(a)*L,x2:cx2+Math.cos(a)*L,y2:cy2+Math.sin(a)*L,t:0,arm:.8,life:2.6,dmg:e.dmg});sfx('warp',.5);}
+    else{for(let k=0;k<3;k++)vLob(e,p.x+rnd(-80,80),p.y+rnd(-80,80),1,1.2+k*.1);sfx('boom',.4);}}}}
+ e.lpx=p.x;e.lpy=p.y;if(d<e.r+p.r)hurtPlayer(e.dmg*1.4);};
+// ---------- drawing (existing style: light armour plates, ink outlines, accent stripe) ----------
+function vPoly(c,pts,f,lw){c.beginPath();c.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)c.lineTo(pts[i],pts[i+1]);c.closePath();c.fillStyle=f;c.fill();c.lineWidth=lw||2;c.strokeStyle=INK;c.stroke();}
+function vDraw(c,e,fl){const C=VCH[e.vc]||VCH.car6,r=e.r,L=r*C.L,Wd=r*C.Wd,boss=e.type==='boss',A=fl?'#fff':boss?'#ffd23f':'#2f6bff',B=fl?'#fff':boss?'#e4e7ee':'#2a3350',BS=fl?'#fff':boss?'#8b93a6':'#151b2e',WH=fl?'#fff':'#1b1d24';
+ // world space at enemy centre (caller translated); chassis rotates with heading
+ c.save();c.rotate(e.hd||0);c.globalAlpha=.25;c.fillStyle='#000';c.beginPath();c.ellipse(4,6,L*.56,Wd*.62,0,0,6.283);c.fill();c.globalAlpha=1;
+ if(C.tr){const tw=r*(boss?.42:.36),tl=L*1.02,ph=((e.wrl||0)%10)/10;for(const s of[-1,1]){const y=s*(Wd/2+tw*.1);c.fillStyle=WH;c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.roundRect?c.roundRect(-tl/2,y-tw/2,tl,tw,tw*.45):c.rect(-tl/2,y-tw/2,tl,tw);c.fill();c.stroke();
+   if(!fl){c.strokeStyle='#5a6070';c.lineWidth=1.6;const nk=Math.round(tl/7);for(let q=0;q<nk;q++){const tx=-tl/2+3+((q+ph)/nk)*(tl-6);c.beginPath();c.moveTo(tx,y-tw/2+2);c.lineTo(tx,y+tw/2-2);c.stroke();}
+    c.fillStyle='#9aa3b5';for(let q=0;q<(boss?5:4);q++){const wx=-tl/2+tw*.5+q*(tl-tw)/((boss?5:4)-1);c.beginPath();c.arc(wx,y,tw*.2,0,6.283);c.fill();}}}}
+ else{ const n=C.wh,sp=L*.8/(n-1||1),wl=Math.min(r*C.wr*2.2,sp*.72),ww=r*(boss?.36:.32),ph=((e.wrl||0)%12)/12;
+ for(let i=0;i<n;i++){const x=-L*.4+i*sp;for(const s of[-1,1]){const y=s*(Wd/2+ww*.12);c.fillStyle=WH;c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.ellipse(x,y,wl/2,ww/2,0,0,6.283);c.fill();c.stroke();
+   if(!fl){c.strokeStyle='#5a6070';c.lineWidth=1.4;for(let q=0;q<3;q++){const tx=x-wl/2+((q/3+ph)%1)*wl,hh=ww/2*Math.sqrt(Math.max(0,1-Math.pow((tx-x)/(wl/2),2)));c.beginPath();c.moveTo(tx,y-hh+1);c.lineTo(tx,y+hh-1);c.stroke();}
+    c.fillStyle='#9aa3b5';c.beginPath();c.arc(x,y,ww*.16,0,6.283);c.fill();}}}}
+ const h=Wd/2,l=L/2;
+ if(C.shape==='wedge')vPoly(c,[l,-h*.55,l*.55,-h,-l,-h*.9,-l,h*.9,l*.55,h,l,h*.55],B);
+ else if(C.shape==='heavy'){vPoly(c,[l,-h*.7,l*.8,-h,-l*.9,-h,-l,-h*.8,-l,h*.8,-l*.9,h,l*.8,h,l,h*.7],B,2.5);vPoly(c,[l*.7,-h*.75,-l*.75,-h*.75,-l*.75,h*.75,l*.7,h*.75],BS);c.fillStyle=A;c.fillRect(-l*.9,-h*.96,l*1.6,h*.18);c.fillRect(-l*.9,h*.78,l*1.6,h*.18);}
+ else{vPoly(c,[l,-h*.8,l*.7,-h,-l,-h,-l,h,l*.7,h,l,h*.8],B);c.fillStyle=A;c.fillRect(-l*.2,-h,l*.25,h*2);}
+ if(!fl){c.fillStyle='#ffe9a8';c.fillRect(l-4,-h*.6,4,5);c.fillRect(l-4,h*.6-5,4,5);c.fillStyle='#ff3040';c.fillRect(-l,-h*.7,3,4);c.fillRect(-l,h*.7-4,3,4);}
+ c.restore();
+ // turret (independent rotation)
+ c.save();c.rotate(e.ta||0);const tr=r*(boss?.62:.55),rc=(e.rc||0)*r*.18,TB=fl?'#fff':boss?'#d4d8e2':'#3a4566';
+ const bar=(x0,len,w,y)=>{c.fillStyle=fl?'#fff':'#c8ccd6';c.strokeStyle=INK;c.lineWidth=2;c.fillRect(x0-rc,y-w/2,len,w);c.strokeRect(x0-rc,y-w/2,len,w);};
+ switch(e.vt){case 'cannon':bar(tr*.4,r*1.25,r*.26,0);c.fillStyle=INK;c.fillRect(tr*.4+r*1.25-rc-6,-r*.18,6,r*.36);break;
+  case 'gatling':for(const s of[-1,1])bar(tr*.3,r*.95,r*.14,s*r*.15);break;
+  case 'missile':break;
+  case 'flame':bar(tr*.3,r*.8,r*.22,0);c.fillStyle=fl?'#fff':'#ff8a1f';c.beginPath();c.arc(tr*.3+r*.8-rc,0,r*.15,0,6.283);c.fill();c.stroke();vPoly(c,[-tr*1.2,-tr*.5,-tr*.6,-tr*.5,-tr*.6,tr*.5,-tr*1.2,tr*.5],fl?'#fff':'#ff8a1f');break;
+  case 'mortar':c.fillStyle=fl?'#fff':'#c8ccd6';c.beginPath();c.arc(tr*.35,0,r*.3,0,6.283);c.fill();c.lineWidth=2;c.stroke();c.fillStyle=INK;c.beginPath();c.arc(tr*.35,0,r*.17,0,6.283);c.fill();break;
+  case 'beam':bar(tr*.3,r*1.1,r*.18,0);for(const s of[-1,1])bar(tr*.5,r*.6,r*.08,s*r*.2);c.fillStyle=fl?'#fff':'#ff3dd2';c.beginPath();c.arc(tr*.3+r*1.1-rc,0,r*.11,0,6.283);c.fill();break;}
+ c.beginPath();if(boss){for(let i=0;i<6;i++){const q=i/6*6.283+.52;c.lineTo(Math.cos(q)*tr,Math.sin(q)*tr);}c.closePath();}else c.arc(0,0,tr,0,6.283);c.fillStyle=TB;c.fill();c.lineWidth=2.5;c.strokeStyle=INK;c.stroke();
+ if(e.vt==='missile')for(const sd of[-1,1]){const y0=sd*tr*.95;vPoly(c,[-tr*.55-rc,y0-tr*.42,tr*.95-rc,y0-tr*.42,tr*.95-rc,y0+tr*.42,-tr*.55-rc,y0+tr*.42],TB);c.fillStyle=fl?'#fff':'#ff3040';for(let i=0;i<3;i++){c.beginPath();c.arc(tr*.75-rc,y0+(i-1)*tr*.25,tr*.1,0,6.283);c.fill();}}
+ c.fillStyle=A;c.beginPath();c.arc(-tr*.25,0,tr*.28,0,6.283);c.fill();c.lineWidth=1.5;c.stroke();if(!fl){c.fillStyle='#ff3040';c.fillRect(tr*.2,-tr*.12,tr*.3,tr*.24);}
+ c.restore();
+ if(boss&&e.ph===3&&e.tele>0&&Math.floor(G.t*10)%2){c.strokeStyle='#ffd23f';c.lineWidth=3;c.beginPath();c.arc(0,0,e.r+10,0,6.283);c.stroke();}}
+var _v72db=drawBot;drawBot=function(e,t,fl){if(e.type==='boss'||e.type==='mboss'){vSetup(e);vDraw(cx,e,fl);return true;}return _v72db.apply(this,arguments);};
+mbossBar=function(e){const c=cx,w=150,y=-e.r-34;c.fillStyle=INK;c.fillRect(-w/2-2,y-2,w+4,10);c.fillStyle='#2f6bff';c.fillRect(-w/2,y,w*Math.max(0,e.hp/e.hpMax),6);bigText((e.lite?'MK-I ':'')+(VCALL.mboss[e.vc]||'ASSAULT TANK'),0,y-10,12,'#9fc0ff');};
 </script></body></html>
