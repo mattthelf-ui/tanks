@@ -926,7 +926,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v78';
+const VER='haywire v79';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2402,10 +2402,10 @@ var _sp77st=hwSpecTick;hwSpecTick=function(dt){G.ksC=(G.ksC||0)+dt;return _sp77s
 // Host simulates the guest bot as a second player (G.p2) by swapping the player context (G.p/G.ps/S.hero/S.eq) around guest steps.
 // Nothing here runs unless a co-op game is started, so single-player is unchanged.
 var CO={on:false,role:null,conn:null,peer:null,mult:2,shared:true,nick:'',nick2:'',hero2:null,eq2:null,look2:null,ps2:null,in2:{mx:0,my:0,ax:0,ay:0,amag:0},cash2:0,st:null,cur:1,sw:false,snapT:0,inT:0,snap:null,last:0,bon:0};
-var COOP_PEER_JS='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',COOP_PFX='haywire-coop-v78-';
+var COOP_PEER_JS=['vendor/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'],COOP_PFX='haywire-coop-v78-';
 function coNick(){return (localStorage.getItem('hw_nick')||'').slice(0,14);}
 function coStats0(){return {kills:0,boss:0,dmg:0,money:0,downs:0,rounds:0};}
-function coLoadPeer(){return new Promise((ok,no)=>{if(window.Peer)return ok();const s=document.createElement('script');s.src=COOP_PEER_JS;s.onload=()=>ok();s.onerror=()=>no(new Error('could not load PeerJS (offline?)'));document.head.appendChild(s);});}
+function coLoadPeer(){return new Promise((ok,no)=>{if(window.Peer)return ok();let k=0;const tryN=()=>{if(k>=COOP_PEER_JS.length)return no(new Error('Could not load the co-op library. Check your internet connection.'));const s=document.createElement('script');s.src=COOP_PEER_JS[k++];s.onload=()=>window.Peer?ok():tryN();s.onerror=()=>{s.remove();tryN();};document.head.appendChild(s);};tryN();});}
 function coCode(){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=A[Math.floor(Math.random()*A.length)];return s;}
 function coSend(m){try{if(CO.conn&&CO.conn.open)CO.conn.send(m);}catch(e){}}
 // ---- serialise the map (typed arrays survive JSON) ----
@@ -2420,10 +2420,10 @@ function coLobby(msg){CO.nick=coNick();const h=CO.myHero||S.hero||'agile';CO.myH
  <div>NICKNAME <input id="conick" maxlength="14" value="${CO.nick.replace(/"/g,'')}" style="font-size:18px;padding:6px;border-radius:6px;width:180px"></div>
  <div class="st">YOUR BOT</div>${coHeroBtns(h)}
  <span class="btn yl" id="cohost">HOST A ROOM</span>
- <div><input id="cocode" maxlength="5" placeholder="ROOM CODE" style="font-size:20px;padding:6px;border-radius:6px;width:150px;text-transform:uppercase"> <span class="btn" id="cojoin">JOIN</span></div>
+ <div><input id="cocode" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="ROOM CODE" style="font-size:20px;padding:6px;border-radius:6px;width:150px;text-transform:uppercase"> <span class="btn" id="cojoin">JOIN</span></div>
  <div class="st" id="comsg" style="color:#ff8aa0">${msg||''}</div><span class="btn gh sm" id="coback">◀ BACK</span>`);
  const d=document.getElementById('coop');d.querySelectorAll('[data-coh]').forEach(b=>b.onclick=()=>{CO.myHero=b.dataset.coh;coSaveNick();coLobby();});
- $('coback').onclick=()=>{coLeave();showTitle();};$('cohost').onclick=()=>{if(!coSaveNick())return;coHost();};$('cojoin').onclick=()=>{if(!coSaveNick())return;coJoin(($('cocode').value||'').trim().toUpperCase());};}
+ $('coback').onclick=()=>{coLeave();showTitle();};$('cohost').onclick=()=>{if(!coSaveNick())return;coHost();};$('cojoin').onclick=()=>{if(!coSaveNick())return;coJoin(coCleanCode($('cocode').value));};}
 function coSaveNick(){const n=($('conick').value||'').trim().slice(0,14);if(!n){$('comsg').textContent='Enter a nickname first.';return false;}localStorage.setItem('hw_nick',n);CO.nick=n;return true;}
 function coHostRoom(){const o=(v,t)=>`<span class="btn sm ${CO.mult===v?'yl':'gh'}" data-com="${v}">${t}</span>`;
  coUI(`<div class="ttl" style="font-size:30px">ROOM <span style="color:#ffd23f;letter-spacing:4px" id="coroom">${CO.code}</span></div><div class="st">Tell your partner this code.</div>
@@ -2433,18 +2433,59 @@ function coHostRoom(){const o=(v,t)=>`<span class="btn sm ${CO.mult===v?'yl':'gh
  <span class="btn ${CO.nick2?'pk':'gh'}" id="costart">START CO-OP ▶</span><span class="btn gh sm" id="coback">◀ CANCEL</span>`);
  document.querySelectorAll('[data-com]').forEach(b=>b.onclick=()=>{CO.mult=+b.dataset.com;coHostRoom();});$('coshare').onclick=()=>{CO.shared=!CO.shared;coHostRoom();};
  $('coback').onclick=()=>{coLeave();coLobby();};$('costart').onclick=()=>{if(CO.nick2&&CO.ps2)coStartHost();};}
-// ================= NETWORK =================
-async function coHost(){try{coUI('<div class="ttl" style="font-size:26px">Creating room…</div>');await coLoadPeer();}catch(e){return coLobby(e.message);}
- CO.role='host';CO.code=coCode();CO.nick2='';CO.ps2=null;const peer=new Peer(COOP_PFX+CO.code);CO.peer=peer;
- peer.on('open',()=>coHostRoom());peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();coHost();}else coLobby('Connection error: '+e.type);});
- peer.on('connection',c=>{if(CO.conn&&CO.conn.open){c.on('open',()=>{c.send({t:'full'});setTimeout(()=>c.close(),300);});return;}CO.conn=c;c.on('data',coHostMsg);c.on('close',()=>coLost());});}
-async function coJoin(code){if(code.length<4)return coLobby('Enter the 5-letter room code.');try{coUI('<div class="ttl" style="font-size:26px">Joining '+code+'…</div>');await coLoadPeer();}catch(e){return coLobby(e.message);}
- CO.role='guest';const peer=new Peer();CO.peer=peer;let to=setTimeout(()=>{coLeave();coLobby('Could not reach room '+code+'. Check the code; some networks block direct connections.');},15000);
- peer.on('error',e=>{clearTimeout(to);coLeave();coLobby(e.type==='peer-unavailable'?'No room with code '+code+'.':'Connection error: '+e.type);});
- peer.on('open',()=>{const c=peer.connect(COOP_PFX+code,{reliable:true,serialization:'json'});CO.conn=c;c.on('open',()=>{clearTimeout(to);const h=CO.myHero;newRun(h);const ps=pstats();c.send({t:'hello',nick:CO.nick,hero:h,eq:S.eq,look:S.look,ps});coUI(`<div class="ttl" style="font-size:26px">Joined room ${code}</div><div class="st">Waiting for the host to start…</div><span class="btn gh sm" id="coback">◀ LEAVE</span>`);$('coback').onclick=()=>{coLeave();coLobby();};});
-  c.on('data',coGuestMsg);c.on('close',()=>coLost());});}
-function coLeave(){try{CO.conn&&CO.conn.close();}catch(e){}try{CO.peer&&CO.peer.destroy();}catch(e){}CO.conn=CO.peer=null;CO.on=false;CO.role=null;coBoard(false);const b=document.getElementById('cosb');if(b)b.remove();}
-function coLost(){if(!CO.on){if(CO.role)coLobby('Connection closed.');return;}if(CO.role==='host'){CO.on=false;G&&(G.p2=null);typeof toast==='function'&&toast((CO.nick2||'Partner')+' disconnected · playing solo');try{CO.peer.destroy();}catch(e){}}else{CO.on=false;coGuestEnd('Connection to the host was lost.');}}
+// ================= NETWORK (v79: TURN + STUN list, step-by-step join status, heartbeat, full teardown) =================
+// Free TURN: PeerJS's community TURN (UDP + TCP). For phones on carrier NAT a dedicated TURN is the reliable fix: set COOP_TURN_API to a
+// Metered / Open Relay credentials URL (free account, 20GB/month) and its iceServers are fetched and used first.
+var COOP_TURN_API='';
+var COOP_ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun2.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:'stun:global.stun.twilio.com:3478'},
+ {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478','turn:eu-0.turn.peerjs.com:3478?transport=tcp','turn:us-0.turn.peerjs.com:3478?transport=tcp'],username:'peerjs',credential:'peerjsp'}];
+var CO_HB=1000,CO_TIMEOUT=4500,CO_JOIN_T=20000;
+async function coIce(){let s=COOP_ICE.slice();if(COOP_TURN_API){try{const r=await fetch(COOP_TURN_API);const j=await r.json();if(Array.isArray(j)&&j.length)s=j.concat(s);}catch(e){}}return s;}
+async function coPeerOpts(){return {config:{iceServers:await coIce(),sdpSemantics:'unified-plan'},debug:1};}
+function coCleanCode(v){return (v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5);}
+function coStatus(t,err){const e=document.getElementById('costat');if(e){e.textContent=t;e.style.color=err?'#ff8aa0':'#7affd6';}CO.statusLog=(CO.statusLog||[]).concat(t);}
+function coRx(){CO.lastRx=Date.now();}
+function coStartHB(){clearInterval(CO.hbI);CO.lastRx=Date.now();CO.hbI=setInterval(()=>{if(!CO.conn)return;coSend({t:'hb',p:(typeof ui!=='undefined'&&ui.scr==='pause')?1:0});if(CO.linked&&Date.now()-CO.lastRx>CO_TIMEOUT)coLost('timeout');},CO_HB);}
+function coWatchICE(c,onFail){let tries=0;const w=setInterval(()=>{const pc=c.peerConnection;if(!pc){if(++tries>200)clearInterval(w);return;}clearInterval(w);
+ const f=()=>{const s=pc.iceConnectionState;CO.ice=s;if(CO.role==='guest'&&!CO.linked){if(pc.remoteDescription&&s==='new')coStatus('Room found · connecting…');if(s==='checking')coStatus('Room found · connecting…');}if(s==='failed')onFail('ice-failed');else if(s==='closed'&&CO.linked)coLost('closed');};
+ pc.addEventListener('iceconnectionstatechange',f);pc.addEventListener('signalingstatechange',()=>{if(CO.role==='guest'&&!CO.linked&&pc.signalingState==='stable'&&pc.remoteDescription)coStatus('Room found · connecting…');});f();},50);CO.watch=w;}
+function coBindConn(c,onMsg){c.on('data',m=>{coRx();if(m&&m.t==='hb'){if(CO.role==='guest')coHostPaused(!!m.p);return;}if(m&&m.t==='bye'){coLost('left');return;}onMsg(m);});
+ c.on('close',()=>{if(CO.conn===c)coLost('closed');});c.on('error',e=>{if(CO.conn===c)coLost('error');});}
+async function coHost(){try{coUI('<div class="ttl" style="font-size:26px">Creating room…</div><div class="st" id="costat"></div>');coStatus('Loading co-op…');await coLoadPeer();}catch(e){return coLobby(e.message);}
+ coReset(true);CO.role='host';CO.code=coCode();CO.nick2='';CO.ps2=null;coStatus('Registering room '+CO.code+'…');const peer=new Peer(COOP_PFX+CO.code,await coPeerOpts());CO.peer=peer;
+ peer.on('open',()=>{if(CO.peer===peer)coHostRoom();});
+ peer.on('disconnected',()=>{if(CO.peer===peer&&!peer.destroyed)try{peer.reconnect();}catch(e){}}); // broker socket dropped: keep the room reachable
+ peer.on('error',e=>{if(CO.peer!==peer)return;if(e.type==='unavailable-id'){coReset();coHost();}else if(CO.on){/* in game: link loss handled by heartbeat */}else if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'||e.type==='socket-closed'){coStatusHost('Lost the co-op server · reconnecting…');}else{coReset();coLobby('Room error: '+e.type);}});
+ peer.on('connection',c=>{if(CO.conn&&CO.conn.open&&CO.linked){c.on('open',()=>{c.send({t:'full'});setTimeout(()=>c.close(),300);});return;}
+  try{CO.conn&&CO.conn.close();}catch(e){}CO.conn=c;CO.linked=false;coStatusHost('A player is connecting…');coBindConn(c,coHostMsg);coWatchICE(c,()=>{if(CO.conn===c&&!CO.linked){coStatusHost('A player tried to join but the direct connection failed (network blocks peer-to-peer).',1);try{c.close();}catch(e){}CO.conn=null;}});
+  c.on('open',()=>{if(CO.conn!==c)return;CO.linked=true;coRx();coStartHB();coStatusHost('Connected · waiting for their bot…');});});}
+function coStatusHost(t,err){const e=document.getElementById('coguest');if(e&&!CO.nick2){e.textContent=t;e.style.color=err?'#ff8aa0':'';}}
+async function coJoin(code,attempt){code=coCleanCode(code);attempt=attempt||1;if(code.length!==5)return coLobby('Room codes are 5 letters/numbers.');
+ coUI(`<div class="ttl" style="font-size:26px">JOIN ROOM ${code}</div><div class="st" id="costat"></div><div class="st" style="opacity:.7">Attempt ${attempt} of 2</div><span class="btn gh sm" id="coback">◀ CANCEL</span>`);$('coback').onclick=()=>{coReset();coLobby();};
+ try{coStatus('Loading co-op…');await coLoadPeer();}catch(e){return coLobby(e.message);}
+ coReset(true);CO.role='guest';CO.code=code;coStatus('Contacting the co-op server…');const peer=new Peer(await coPeerOpts());CO.peer=peer;
+ const fail=(why)=>{if(CO.peer!==peer||CO.linked)return;clearTimeout(CO.joinTO);coReset();if(attempt<2&&why!=='peer-unavailable'&&why!=='full'){coJoin(code,attempt+1);return;}
+  coLobby({'peer-unavailable':'No room with code '+code+'. Check the code, or the host closed the room.','ice-failed':'Room found, but the direct connection failed. One of your networks blocks peer-to-peer (common on mobile data). Try Wi-Fi on both phones.','timeout':'Timed out connecting to room '+code+'.','server':'Can\'t reach the co-op server. Check your internet connection.','full':'That room already has 2 players.'}[why]||('Connection error: '+why));};
+ CO.joinTO=setTimeout(()=>fail('timeout'),CO_JOIN_T);
+ peer.on('error',e=>{if(CO.linked){return;}fail(e.type==='peer-unavailable'?'peer-unavailable':(e.type==='network'||e.type==='server-error'||e.type==='socket-error'||e.type==='socket-closed')?'server':e.type);});
+ peer.on('open',()=>{if(CO.peer!==peer)return;coStatus('Looking for room '+code+'…');const c=peer.connect(COOP_PFX+code,{reliable:true,serialization:'json'});CO.conn=c;coBindConn(c,coGuestMsg);coWatchICE(c,fail);
+  c.on('open',()=>{if(CO.conn!==c)return;clearTimeout(CO.joinTO);CO.linked=true;coRx();coStartHB();coStatus('Connected ✓');const h=CO.myHero;newRun(h);const ps=pstats();c.send({t:'hello',nick:CO.nick,hero:h,eq:S.eq,look:S.look,ps});
+   coUI(`<div class="ttl" style="font-size:26px">Joined room ${code}</div><div class="st" id="costat" style="color:#7affd6">Connected ✓</div><div class="st">Waiting for the host to start…</div><span class="btn gh sm" id="coback">◀ LEAVE</span>`);$('coback').onclick=()=>{coBye();coReset();coLobby();};});});}
+function coBye(){try{if(CO.conn&&CO.conn.open)CO.conn.send({t:'bye'});}catch(e){}}
+// tear the room down completely (connection, peer, timers, overlays, state) so a new room can be hosted/joined without a reload
+function coReset(keepUI){clearInterval(CO.hbI);clearTimeout(CO.joinTO);clearInterval(CO.watch);CO.hbI=CO.joinTO=CO.watch=null;const c=CO.conn,p=CO.peer;CO.conn=null;CO.peer=null;
+ try{c&&c.close();}catch(e){}try{p&&p.destroy();}catch(e){}
+ Object.assign(CO,{on:false,role:null,linked:false,snap:null,nick2:'',hero2:null,eq2:null,look2:null,ps2:null,cash2:0,endShown:0,ended:false,lost:false,sw:false,cur:1,in2:{mx:0,my:0,ax:0,ay:0,amag:0}});
+ for(const id of['cosb','cowait','cohp'])(document.getElementById(id)||{remove(){}}).remove();const b=document.getElementById('coboard');if(b){clearInterval(b.tk);b.remove();}if(!keepUI)coUI(null);}
+function coLeave(){coBye();coReset();}
+function coLost(why){if(CO.lost||!CO.role)return;CO.lost=true;const role=CO.role,inGame=CO.on,n2=CO.nick2;
+ if(role==='host'){if(inGame&&G){G.p2=null;G.drops=G.drops.filter(d=>d.own!==2);const n=n2||'Partner';coReset();if(typeof toast==='function')toast(why==='timeout'?n+' lost connection · playing solo':n+' left · playing solo');coFlash('Partner left · playing solo');}
+  else{coReset();coLobby((n2||'The player')+' left the room.');}}
+ else{const st=CO.stats,n=n2||'Host',nm=CO.nick,mult=CO.mult,sh=CO.shared;coReset();if(inGame){if(G){G.state='colost';}showTitle();coUI(`<div class="ttl" style="font-size:32px">HOST LEFT</div><div class="st">${why==='timeout'?n+'\'s connection was lost.':n+' left the room.'} The co-op run has ended.</div>${st?coBoardHTML(st,n,nm,mult,sh):''}<span class="btn yl" id="cotitle">RETURN TO TITLE</span>`);$('cotitle').onclick=()=>{coUI(null);showTitle();};}
+  else coLobby(n+' closed the room.');}}
+function coFlash(t){const d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:70;background:rgba(5,4,14,.92);color:#ffd23f;padding:10px 18px;border-radius:10px;font-weight:900;pointer-events:none';d.className='coflash';document.body.appendChild(d);setTimeout(()=>d.remove(),3500);}
+function coHostPaused(on){let d=document.getElementById('cohp');if(!on){if(d)d.remove();return;}if(!d){d=document.createElement('div');d.id='cohp';d.style.cssText='position:fixed;left:50%;top:40%;transform:translateX(-50%);z-index:56;background:rgba(5,4,14,.9);color:#fff;padding:10px 16px;border-radius:10px;font-weight:800';d.textContent='Host paused the game';document.body.appendChild(d);}}
+window.addEventListener('pagehide',()=>{coBye();});window.addEventListener('beforeunload',()=>{coBye();});
 // ================= HOST =================
 function coHostMsg(m){if(m.t==='hello'){CO.nick2=m.nick;CO.hero2=m.hero;CO.eq2=m.eq;CO.look2=m.look;CO.ps2=m.ps;if(!CO.on)coHostRoom();}
  else if(m.t==='in'){Object.assign(CO.in2,m.i);if(m.i.dash)CO.in2.dashQ=1;if(m.i.melee)CO.in2.meleeQ=1;}
@@ -2539,11 +2580,12 @@ function coDraw(t){if(!CO.on||!G)return;const c=cx,me=G.p;let o=G.p2;if(!o)retur
   c.restore();}}
 // ================= scoreboard =================
 function coBtn(){let b=document.getElementById('cosb');if(!b){b=document.createElement('span');b.id='cosb';b.className='btn sm gh';b.textContent='📊 SCORES';b.style.cssText='position:fixed;top:calc(env(safe-area-inset-top) + 64px);left:50%;transform:translateX(-50%);z-index:50;font-size:12px;padding:4px 10px';b.onclick=()=>coBoard(!(document.getElementById('coboard')||{}).open);document.body.appendChild(b);}}
+function coBoardHTML(st,hn,gn,mult,shared){const R2=[['Kills','kills'],['Boss kills','boss'],['Damage dealt','dmg'],['Money earned','money'],['Downs','downs'],['Rounds survived','rounds']];return `<table style="margin:8px auto;border-collapse:collapse;font-size:14px"><tr><th></th><th style="color:#ffd23f;padding:0 10px">${hn||'Host'}</th><th style="color:#7affd6;padding:0 10px">${gn||'Guest'}</th></tr>${R2.map(([l,k])=>`<tr><td style="text-align:left;padding:3px 8px">${l}</td><td>${k==='money'?'$':''}${Math.round(st[1][k]||0)}</td><td>${k==='money'?'$':''}${Math.round(st[2][k]||0)}</td></tr>`).join('')}</table><div class="st">Enemies x${mult} · shared money ${shared?'ON':'OFF'}</div>`;}
 function coBoard(on,title,end){let d=document.getElementById('coboard');if(!on){if(d){d.style.display='none';d.open=false;}return;}if(!d){d=document.createElement('div');d.id='coboard';d.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:65;background:rgba(5,4,14,.96);color:#fff;padding:16px;border-radius:12px;border:2px solid #ff2e88;min-width:300px;text-align:center';document.body.appendChild(d);}
  d.open=true;d.style.display='block';const st=CO.stats||{1:coStats0(),2:coStats0()},hn=CO.role==='host'?CO.nick:CO.nick2,gn=CO.role==='host'?CO.nick2:CO.nick,R2=[['Kills','kills'],['Boss kills','boss'],['Damage dealt','dmg'],['Money earned','money'],['Downs','downs'],['Rounds survived','rounds']];
  d.innerHTML=`<div class="ttl" style="font-size:24px">${title||'SCOREBOARD'}</div><table style="width:100%;margin:8px 0;border-collapse:collapse;font-size:14px"><tr><th></th><th style="color:${CO.role==='host'?'#7affd6':'#ffd23f'}">${hn||'Host'}</th><th style="color:${CO.role==='host'?'#ffd23f':'#7affd6'}">${gn||'Guest'}</th></tr>${R2.map(([l,k])=>`<tr><td style="text-align:left;padding:3px 8px">${l}</td><td>${k==='money'?'$':''}${Math.round(st[1][k]||0)}</td><td>${k==='money'?'$':''}${Math.round(st[2][k]||0)}</td></tr>`).join('')}</table><div class="st">Enemies x${CO.mult} · shared money ${CO.shared?'ON':'OFF'}</div>${end?'<span class="btn yl" id="coend">TITLE</span>':'<span class="btn gh sm" id="coclose">CLOSE</span>'}`;
- if(end)$('coend').onclick=()=>{coLeave();coWait(false);update=_coUpd;showTitle();};else $('coclose').onclick=()=>coBoard(false);
+ if(end)$('coend').onclick=()=>{coLeave();showTitle();};else $('coclose').onclick=()=>coBoard(false);
  if(!end&&!d.tk){d.tk=setInterval(()=>{if(d.open&&d.style.display!=='none'&&!$('coend'))coBoard(true,title);},1000);}}
 // ================= title button =================
-var _coTitle=showTitle;showTitle=function(){const r=_coTitle.apply(this,arguments);try{if(CO.on&&CO.role==='guest'){}const tg=$('tg');if(tg&&!$('tco')){const b=document.createElement('span');b.className='btn pk';b.id='tco';b.style.cssText='font-size:22px;padding:10px 30px';b.textContent='CO-OP 👥';tg.insertAdjacentElement('afterend',b);b.onclick=()=>{auStart();sfx('click');coLobby();};}}catch(e){}return r;};
+var _coTitle=showTitle;showTitle=function(){if(CO.role){coBye();coReset();}const r=_coTitle.apply(this,arguments);try{if(CO.on&&CO.role==='guest'){}const tg=$('tg');if(tg&&!$('tco')){const b=document.createElement('span');b.className='btn pk';b.id='tco';b.style.cssText='font-size:22px;padding:10px 30px';b.textContent='CO-OP 👥';tg.insertAdjacentElement('afterend',b);b.onclick=()=>{auStart();sfx('click');coLobby();};}}catch(e){}return r;};
 </script></body></html>
