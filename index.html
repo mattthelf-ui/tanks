@@ -927,7 +927,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v80';
+const VER='haywire v81';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -2163,7 +2163,7 @@ var _b68=hitEnemy;hitEnemy=function(e,b){if(b&&b.melee&&!b.hwbl&&!b.w68&&e&&e.ty
 // chaining Aegis Domes; with the cap it runs dry mid-fight (sim: 0/8 Warden wins on hard). Fix: on hard, while the Warden is alive,
 // Bastion's dome isn't limited to 3 uses (meter still has to refill each time). Everything else keeps the 3-use cap.
 var HW_MAXU0=HW_MAXU;
-var _b69=hwSpecTick;hwSpecTick=function(dt){HW_MAXU=(S.hero==='heavy'&&S.diff==='hard'&&G&&G.boss&&!G.boss.dead)?99:HW_MAXU0;return _b69.apply(this,arguments);};
+var _b69=hwSpecTick;hwSpecTick=function(dt){HW_MAXU=(S.hero==='heavy'&&S.diff==='hard'&&G&&G.boss&&!G.boss.dead)?99:S.hero==='melee'?HW_MAXU0+2:HW_MAXU0; /* v81: Kagerou gets 5 Haywire uses per round (others 3) */return _b69.apply(this,arguments);};
 // ================= v70: landscape bot select fits without scrolling (phone landscape only; portrait untouched) =================
 (function(){const c=document.createElement('style');c.textContent=`
 @media (orientation:landscape) and (max-height:500px){
