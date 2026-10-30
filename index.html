@@ -230,7 +230,7 @@ function sfx(n,v){const c=AU.ctx;if(!c||AU.muted||!AU.sfxOn||c.state!=='running'
 
 document.addEventListener('visibilitychange',()=>{if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(!AU.muted)AU.ctx.resume();});
 // v82: boss music file (music/hw-boss.mp3, 180 BPM x 72 bars = 96.0s loop). Synth boss pattern is the fallback.
-AU.buf={};AU.fl=null;
+AU.buf={};AU.fl=null;var AU_MAP={main:'boss',boss:'boss'};
 const AU_FILES={boss:{url:'music/hw-boss.mp3',len:96}};
 function auLoadFile(n){const F=AU_FILES[n],c=AU.ctx;if(!F||!c||AU.buf[n]||F.p)return;
  F.p=fetch(F.url).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer();})
@@ -245,9 +245,9 @@ function auFileStart(n){const c=AU.ctx,B=AU.buf[n];const s=c.createBufferSource(
 function auFileStop(){const f=AU.fl;if(!f)return;AU.fl=null;const c=AU.ctx,t=c.currentTime;try{f.g.gain.cancelScheduledValues(t);f.g.gain.setValueAtTime(f.g.gain.value,t);f.g.gain.linearRampToValueAtTime(0.0001,t+.8);f.s.stop(t+.85);}catch(e){}}
 var _auSched82=auSched;auSched=function(){const c=AU.ctx;if(!c)return;
  if(!AU.pre){AU.pre=1;auLoadFile('boss');}
- if(c.state==='running'&&!AU.muted&&AU.musOn){const w=AU.want;
-   if(AU.fl&&AU.fl.n!==w){auFileStop();AU.cur=null;} // switching away -> fade out, synth restarts from step 0
-   if(!AU.fl&&AU.buf[w])auFileStart(w);
+ if(c.state==='running'&&!AU.muted&&AU.musOn){const w=AU.want,fk=AU_MAP[w]; // v83: in-round 'main' and 'boss' share the file (no restart between them)
+   if(AU.fl&&AU.fl.n!==fk){auFileStop();AU.cur=null;} // switching away (title/hub) -> fade out, synth restarts from step 0
+   if(!AU.fl&&fk&&AU.buf[fk])auFileStart(fk);
    if(AU.fl){AU.cur=w;AU.nt=c.currentTime+.05;return;}} // file playing: skip synth scheduling
  else if(AU.fl&&c.state==='running'&&(AU.muted||!AU.musOn))auFileStop();
  return _auSched82.apply(this,arguments);};
@@ -949,7 +949,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v82';
+const VER='haywire v83';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
