@@ -959,7 +959,7 @@ function bossBY(){return hudBot()+8;}
 function banY(){const b=hudBot();return (H>W&&W<600&&G&&G.boss&&G.boss.spawn<=0?bossBY()+32:b)+22;} // v54: HAYWIRE/ALERT panel removed; portrait stays below the HUD + boss bar
 function banW(){return W;} // v54: strip stops before the right-margin HAYWIRE meter
 function banOn(){return !!(G&&G.banner&&G.banner.t>0);}
-const VER='haywire v85';
+const VER='haywire v87-path';
 let VSB=1;
 // ---------- input, layout, screens, loop ----------
 const DLOG=[];function dlog(s){DLOG.push((performance.now()/1000).toFixed(2)+' '+s);if(DLOG.length>50)DLOG.shift();}
@@ -1400,7 +1400,7 @@ function hwHit(e,dmg,ux,uy,col,kb){if(e.dead||e.spawn>0||(G.sp.hit&&G.sp.hit.has
 function hwInSq(e,cx0,cy0,h){return Math.abs(e.x-cx0)<=h+e.r&&Math.abs(e.y-cy0)<=h+e.r;}
 function hwDir(){const p=G.p;if(IN.amag>.3)return Math.atan2(IN.ay,IN.ax);if(Math.hypot(IN.mx,IN.my)>.2)return Math.atan2(IN.my,IN.mx);let be=null,bd=600;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<bd){bd=d;be=e;}}return be?Math.atan2(be.y-p.y,be.x-p.x):p.ang;}
 var HW_MAXU=3; // v46: each special max 3 uses per round
-function hwFire(){const p=G.p;if(G.state!=='play'||(G.hw||0)<100||G.sp||(G.hwUses||0)>=HW_MAXU)return;G.hw=0;const a=hwDir(),h=S.hero;p.ang=p.face=a;
+function hwFire(){const p=G.p;if(!mP()||G.state!=='play'||(G.hw||0)<100||G.sp||(G.hwUses||0)>=HW_MAXU)return;G.hw=0;const a=hwDir(),h=mP();p.ang=p.face=a;
  const T=(h==='melee'?1.25:h==='heavy'?DOME_T:VOLT_T)+(typeof mSpecT==='function'?mSpecT(h):0);G.hwUses=(G.hwUses||0)+1;const lv=Math.min(3,G.hwUses);G.sp={k:h,t:0,T,a,x0:p.x,y0:p.y,hit:new Set(),n:0,lv};G.hwT=T;G.hwImm=T+.6;p.inv=Math.max(p.inv,h==='melee'?T*.6:.3);
  G.banner={t:1.2,txt:HWN[h]+(lv?' LV'+lv:'')+'!',sub:(h==='heavy'?'DOME':h==='melee'?'CYCLONE':'STORM')+[' LEVEL 1',' LEVEL 1',' LEVEL 2 · UPGRADED',' LEVEL 3 · MAX'][lv],pc:h==='heavy'?'#FF8A00':h==='melee'?'#c45cff':'#19e3ff'};addTxt(p.x,p.y-40,'LV'+lv+(lv===3?' MAX!':'!'),lv===3?'#fff':h==='heavy'?'#ffc46b':h==='melee'?'#e0a8ff':'#7fe8ff',18+4*lv,1);G.shake=Math.max(G.shake,10);G.hitstop=.05;sfx('roar');sfx(h==='melee'?'saber':h==='heavy'?'boom':'zap',1.3);
  part({k:'ring',x:p.x,y:p.y,life:.4,col:h==='agile'?'#19e3ff':h==='heavy'?'#ffb020':'#c45cff',sz:120});}
@@ -1873,26 +1873,26 @@ for(const s of MSK_MEL)s.h='melee';for(const s of MSK_HVY)s.h='heavy';MSK=MSK.co
 var MSKI={};for(const s of MSK)MSKI[s.id]=s;
 function mCost(n){return 50+25*n;}
 function mCum(n){let t=0;for(let i=1;i<=n;i++)t+=mCost(i);return t;}
-function mData(h){h=h||S.hero;if(!S.mast||typeof S.mast!=='object')S.mast={};let d=S.mast[h];if(!d||typeof d!=='object')d=S.mast[h]={xp:0,sk:{},rs:0};d.xp=Math.max(0,+d.xp||0);if(!d.sk||typeof d.sk!=='object')d.sk={};d.rs=d.rs|0;return d;}
-function mLvl(h){const x=mData(h).xp;let n=0;while(n<M_CAP&&x>=mCum(n+1))n++;return n;}
+function mData(h){h=h||mH();if(!S.mast||typeof S.mast!=='object')S.mast={};let d=S.mast[h];if(!d||typeof d!=='object')d=S.mast[h]={xp:0,sk:{},rs:0};d.xp=Math.max(0,+d.xp||0);if(!d.sk||typeof d.sk!=='object')d.sk={};d.rs=d.rs|0;return d;}
+function mLvl(h){const x=mXP();let n=0;while(n<M_CAP&&x>=mCum(n+1))n++;return n;}
 function mSpent(h,b){const d=mData(h);let t=0;for(const id in d.sk){const s=MSKI[id];if(s&&(b==null||s.b===b))t+=d.sk[id]|0;}return t;}
 function mFree(h){return mLvl(h)-mSpent(h);}
-function sk(id){const s=MSKI[id];if(!S||!s||S.hero!==s.h||!M_ON[s.h])return 0;const d=S.mast&&S.mast[s.h];return d&&d.sk?(d.sk[id]|0):0;}
+function sk(id){const s=MSKI[id];if(!S||!s||mH()!==s.h||!M_ON[s.h])return 0;const d=S.mast&&S.mast[s.h];return d&&d.sk?(d.sk[id]|0):0;}
 function mCan(id){const s=MSKI[id];if(!s)return false;const d=mData(s.h);return (d.sk[id]|0)<s.max&&mFree(s.h)>0&&mSpent(s.h,s.b)>=M_T[s.t];}
-function mGain(n,why){if(!G||!M_ON[S.hero])return;const v=Math.round(n*(S.diff==='hard'?1.5:1)),d=mData(),l0=mLvl();d.xp+=v;G.mx=G.mx||{xp:0,r:0,b:0,lv0:l0};G.mx.xp+=v;G.mx[why]+=v;const l1=mLvl();
+function mGain(n,why){if(!G||!M_ON[mH()])return;const v=Math.round(n*(S.diff==='hard'?1.5:1)),d=mData(),l0=mLvl();d.xp+=v;S.mXP=mXP()+v;G.mx=G.mx||{xp:0,r:0,b:0,lv0:l0};G.mx.xp+=v;G.mx[why]+=v;const l1=mLvl();
  if(l1>l0&&G.p){addTxt(G.p.x,G.p.y-60,'MASTERY LV'+l1+'! +1 SKILL POINT','#19e3ff',20,1.6);sfx('level');}saveGame();}
 // ---- stat hooks ----
-var _mPst=pstats;pstats=function(){const st=_mPst.apply(this,arguments);if(S.hero==='melee'||S.hero==='heavy')return mPst2(st);if(S.hero!=='agile')return st;
+var _mPst=pstats;pstats=function(){const st=_mPst.apply(this,arguments);if(mH()==='melee'||mH()==='heavy')return mPst2(st);if(mH()!=='agile')return st;
  const ab=sk('ocF')&&G&&G.abT>0,rm=1+.03*sk('oc1')+(ab?.25:0),sm=1+.03*sk('oc2')+(ab?.15:0);
  for(const a of[st.main,st.off])if(a)a.rate*=rm;st.rate*=rm;st.spd*=sm;st.hp=Math.round(st.hp*(1+.04*sk('cd1')));st.armor=Math.min(.7,st.armor+.02*sk('cd2'));return st;};
 function mskStorm(){return 1+.05*sk('st1');}
 var VSK={fk:0,R:1};
-var _mGain=hwGain;hwGain=function(b){const g=_mGain.apply(this,arguments);return S.hero==='agile'?g*(1+.05*sk('oc3')):g;};
-var _mAbs=shAbsorb;shAbsorb=function(d){if(S.hero==='agile'&&d>0)d*=1-.03*sk('cd3');return _mAbs.call(this,d);};
+var _mGain=hwGain;hwGain=function(b){const g=_mGain.apply(this,arguments);return mH()==='agile'?g*(1+.05*sk('oc3')):g;};
+var _mAbs=shAbsorb;shAbsorb=function(d){if(mH()==='agile'&&d>0)d*=1-.03*sk('cd3');return _mAbs.call(this,d);};
 var _mRev=hwRevive;hwRevive=function(src){if(_mRev.apply(this,arguments))return true;if(!sk('cdF')||!G||G.rodR===G.wave)return false;const p=G.p;G.rodR=G.wave;p.hp=1;p.inv=1.5;p.flash=.3;G.shake=Math.max(G.shake,12);G.hitstop=.1;
  sfx('zap',1.3);sfx('boom',1);burst(p.x,p.y,'#19e3ff',30,400,3);part({k:'ring',x:p.x,y:p.y,life:.6,col:'#7fe8ff',sz:160});try{for(let i=0;i<3;i++)voltPulse(p.x,p.y,1,hwBase(),1,{dm:new Map(),pk:1});}catch(e){}
  addTxt(p.x,p.y-30,'LIGHTNING ROD!','#7fe8ff',24,1.4);G.banner={t:1.2,txt:'LIGHTNING ROD',sub:'grounded at 1 HP · once per round',pc:'#19e3ff'};return true;};
-var _mHit=hitEnemy;hitEnemy=function(e,b){const r=_mHit.apply(this,arguments);if(S.hero==='agile'&&b&&!b.melee&&!b.hwbl&&!b.lw&&G&&G.state==='play'){const k=sk('st2');
+var _mHit=hitEnemy;hitEnemy=function(e,b){const r=_mHit.apply(this,arguments);if(mH()==='agile'&&b&&!b.melee&&!b.hwbl&&!b.lw&&G&&G.state==='play'){const k=sk('st2');
  if(k&&R()<.04*k){let nb=null,nd=160;for(const o of G.en){if(o===e||o.dead||o.spawn>0)continue;const d=Math.hypot(o.x-e.x,o.y-e.y);if(d<nd){nd=d;nb=o;}}
   if(nb){_mHit(nb,{dmg:(b.dmg||0)*.35,crit:0,vx:nb.x-e.x||1,vy:nb.y-e.y,x:nb.x,y:nb.y,col:'#19e3ff',hwbl:1,lw:1,kb:0});G.lwN=(G.lwN||0)+1;(G.hwVb=G.hwVb||[]).push({p:vJag(e.x,e.y,nb.x,nb.y,10),t0:0,t:0,w:1.1,life:.22,lv:1});}}}return r;};
 function mThunder(x,y,Rr,B){if(!sk('stF'))return;const d0=B*.6;G.thN=(G.thN||0)+1;part({k:'ring',x,y,life:.5,col:'#e8fdff',sz:Rr*2});G.shake=Math.max(G.shake,14);G.vFl=Math.max(G.vFl||0,.25);sfx('boom',1.2);
@@ -1907,14 +1907,14 @@ var _mSpT=hwSpecTick;hwSpecTick=function(dt){const was=!!(G.abT>0);if(sk('ocF')&
 var _mWc=waveCleared;waveCleared=function(){const st=G&&G.state;const r=_mWc.apply(this,arguments);if(st==='play'&&G.state==='loot')mGain(M_ROUND,'r');return r;};
 var _mKill=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_mKill.apply(this,arguments);if(e&&!was&&e.dead&&(e.type==='boss'||e.type==='mboss')&&G&&G.state!=='dead')mGain(M_BOSS,'b');return r;};
 // ---- results summary ----
-var _mRes=showResult;showResult=function(){const r=_mRes.apply(this,arguments);try{if(M_ON[S.hero]){const g=G.mx||{xp:0,r:0,b:0,lv0:mLvl()},L=mLvl(),x=mData().xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo);
- const d=document.createElement('div');d.className='pn mres';d.innerHTML=`<div class="st" style="color:#19e3ff;font-weight:900;font-style:italic">⚡ ${HEROES[S.hero].n} MASTERY</div><div class="st"><b style="color:#fff;font-size:20px">+${g.xp} XP</b> · rounds +${g.r} · bosses +${g.b}${S.diff==='hard'?' · Hard x1.5':''}</div>
+var _mRes=showResult;showResult=function(){const r=_mRes.apply(this,arguments);try{if(M_ON[mH()]){const g=G.mx||{xp:0,r:0,b:0,lv0:mLvl()},L=mLvl(),x=mData().xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo);
+ const d=document.createElement('div');d.className='pn mres';d.innerHTML=`<div class="st" style="color:#19e3ff;font-weight:900;font-style:italic">⚡ ${mP()?HWN[mP()]:HEROES.agile.n} MASTERY</div><div class="st"><b style="color:#fff;font-size:20px">+${g.xp} XP</b> · rounds +${g.r} · bosses +${g.b}${S.diff==='hard'?' · Hard x1.5':''}</div>
  <div class="st">LV ${g.lv0}${L>g.lv0?' → <b style="color:#ffd23f">LV '+L+'</b> · +'+(L-g.lv0)+' skill point'+(L-g.lv0>1?'s':''):''}${mFree()>0?' · <b style="color:#ffd23f">'+mFree()+' unspent</b>':''}</div><div class="mxb"><i style="width:${Math.round(100*f)}%"></i><span>${L>=M_CAP?'MAX':(x-lo)+' / '+(hi-lo)+' XP'}</span></div>`;
  const pn=$('result').querySelector('.pn');if(pn)pn.after(d);else $('result').appendChild(d);}}catch(e){dlog('mres '+e.message);}return r;};
 // ---- tree screen ----
 var MT={sel:null,from:'select'};
-function mRespecCost(){return G&&RUN?price(M_RESPEC*(1+mData(MT.h||S.hero).rs)):0;}
-function showTree(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.hero||'agile',MBR=MBRH[h],d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
+function mRespecCost(){return G&&RUN?price(M_RESPEC*(1+mData(MT.h||mH()).rs)):0;}
+function showTree(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||mH()||'agile',MBR=MBRH[h],d=mData(h),L=mLvl(h),x=mXP(),lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
  const node=s=>{const r=d.sk[s.id]|0,lock=mSpent(h,s.b)<M_T[s.t],c=MBR[s.b].c;return `<div class="mn${s.fin?' fin':''}${lock?' lk':''}${r>=s.max?' mx':''}${MT.sel===s.id?' on':''}" data-sk="${s.id}" style="--bc:${c}"><div class="mi">${lock?'🔒':s.ic}</div><div class="mr">${r}/${s.max}</div></div>`;};
  const col=b=>{const B=MBR[b],sp=mSpent(h,b);return `<div class="mc" style="--bc:${B.c}"><div class="mh">${B.n}<i>${sp} pts</i></div>${[0,1,2].map(t=>`<div class="mt"><span class="ml">${t?'TIER '+(t+1)+' · '+M_T[t]+' pts':'TIER 1'}</span><div class="mrow">${MSK.filter(s=>s.h===h&&s.b===b&&s.t===t).map(node).join('')}</div></div>`).join('')}</div>`;};
  const S1=MSKI[MT.sel]&&MSKI[MT.sel].h===h?MSKI[MT.sel]:null;let det='<div class="mdn">Tap a skill to see what it does.</div>';
@@ -1931,30 +1931,30 @@ var _mShow=show;show=function(id){const r=_mShow.apply(this,arguments);const t=$
 
 // ================= v49 KAGEROU + BASTION hooks =================
 function mDmgMul(st,k){for(const a of[st.main,st.off])if(a)a.dmg*=k;st.dmg*=k;}
-function mPst2(st){if(S.hero==='melee'){const ai=sk('kgF')&&G&&G.aiT>0;mDmgMul(st,1+.04*sk('kb1')+(ai?.25:0));st.spd*=1+.03*sk('kg1')+(ai?.15:0);st.dash=Math.min(.7,st.dash+.05*sk('kg2'));st.hp=Math.round(st.hp*(1+.03*sk('kl2')));st.regen=(st.regen||0)+.3*sk('kl3');}
+function mPst2(st){if(mH()==='melee'){const ai=sk('kgF')&&G&&G.aiT>0;mDmgMul(st,1+.04*sk('kb1')+(ai?.25:0));st.spd*=1+.03*sk('kg1')+(ai?.15:0);st.dash=Math.min(.7,st.dash+.05*sk('kg2'));st.hp=Math.round(st.hp*(1+.03*sk('kl2')));st.regen=(st.regen||0)+.3*sk('kl3');}
  else{mDmgMul(st,1+.04*sk('bs1'));for(const a of[st.main,st.off])if(a)a.rate*=1+.03*sk('bs2');st.rate*=1+.03*sk('bs2');st.crit+=.02*sk('bs3');st.hp=Math.round(st.hp*(1+.04*sk('bf1')));st.armor=Math.min(.7,st.armor+.02*sk('bf2'));}return st;}
 function mLS(){return .003*sk('kl1');}
 function mSpecT(h){return h==='melee'?.15*sk('kb3'):h==='heavy'?.4*sk('ba3'):0;}
 function mDomeR(){return 1+.05*sk('ba2');}
-var _mBase=hwBase;hwBase=function(){const b=_mBase.apply(this,arguments);if(G&&G.sp){if(S.hero==='melee'&&G.sp.k==='melee')return b*(1+.06*sk('kb2'));if(S.hero==='heavy'&&G.sp.k==='heavy')return b*(1+.05*sk('ba1'));}return b;};
-function mLow(){return S.hero==='heavy'&&sk('bfF')&&G&&G.p&&G.ps&&G.p.hp<G.ps.hp*.3;}
-var _mAbs2=shAbsorb;shAbsorb=function(d){if(d>0&&G&&G.state==='play'){if(S.hero==='melee'&&sk('kg3')&&R()<.03*sk('kg3')){G.dodN=(G.dodN||0)+1;if(sk('kgF'))mAI();if(G.p)addTxt(G.p.x,G.p.y-30,'DODGE','#7affd6',16,.6);return 0;}
- if(S.hero==='heavy'){d*=1-.03*sk('bf3');if(mLow())d*=.75;}}return _mAbs2.call(this,d);};
+var _mBase=hwBase;hwBase=function(){const b=_mBase.apply(this,arguments);if(G&&G.sp){if(mH()==='melee'&&G.sp.k==='melee')return b*(1+.06*sk('kb2'));if(mH()==='heavy'&&G.sp.k==='heavy')return b*(1+.05*sk('ba1'));}return b;};
+function mLow(){return mH()==='heavy'&&sk('bfF')&&G&&G.p&&G.ps&&G.p.hp<G.ps.hp*.3;}
+var _mAbs2=shAbsorb;shAbsorb=function(d){if(d>0&&G&&G.state==='play'){if(mH()==='melee'&&sk('kg3')&&R()<.03*sk('kg3')){G.dodN=(G.dodN||0)+1;if(sk('kgF'))mAI();if(G.p)addTxt(G.p.x,G.p.y-30,'DODGE','#7affd6',16,.6);return 0;}
+ if(mH()==='heavy'){d*=1-.03*sk('bf3');if(mLow())d*=.75;}}return _mAbs2.call(this,d);};
 function mAI(){const was=G.aiT>0;G.aiT=1.5;if(!was)mRefresh();}
-var _mHit2=hitEnemy;hitEnemy=function(e,b){if(S.hero==='heavy'&&b&&G&&G.state==='play'&&!b.mx){if(sk('bf3')&&b.kb)b.kb*=1+.1*sk('bf3');if(mLow()&&!b.lsB){b.dmg*=1.2;b.lsB=1;G.lsN=(G.lsN||0)+1;}}return _mHit2.apply(this,arguments);};
-var _mSw=swing;swing=function(dir,o){const r=_mSw.apply(this,arguments);if(S.hero==='melee'&&sk('kbF')&&G&&G.state==='play'&&!G.sp){G.swN=(G.swN||0)+1;if(G.swN%4===0){const p=G.p,cols=typeof hwBladeCols==='function'?hwBladeCols():['#c45cff','#ff2e88'],dm=new Map();G.peN=(G.peN||0)+1;
+var _mHit2=hitEnemy;hitEnemy=function(e,b){if(mH()==='heavy'&&b&&G&&G.state==='play'&&!b.mx){if(sk('bf3')&&b.kb)b.kb*=1+.1*sk('bf3');if(mLow()&&!b.lsB){b.dmg*=1.2;b.lsB=1;G.lsN=(G.lsN||0)+1;}}return _mHit2.apply(this,arguments);};
+var _mSw=swing;swing=function(dir,o){const r=_mSw.apply(this,arguments);if(mH()==='melee'&&sk('kbF')&&G&&G.state==='play'&&!G.sp){G.swN=(G.swN||0)+1;if(G.swN%4===0){const p=G.p,cols=typeof hwBladeCols==='function'?hwBladeCols():['#c45cff','#ff2e88'],dm=new Map();G.peN=(G.peN||0)+1;
  for(let w=0;w<2;w++)(G.hwBl=G.hwBl||[]).push({cx:p.x,cy:p.y,th:dir+(w?.35:-.35),r:26,t:0,L:.55,col:cols[w],tr:[],hit:new Set(),dmg:(o.dmg||0)*.5,cap:(o.dmg||0)*.5,dm:new Map(),dir:1});sfx('saber',.8);}}return r;};
 var _mKill2=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_mKill2.apply(this,arguments);if(!e||was||!e.dead||!G||G.state!=='play')return r;
- if(S.hero==='melee'&&sk('klF')&&G.t-(G.bpT||-9)>=.5){G.bpT=G.t;G.p.hp=Math.min(G.ps.hp,G.p.hp+G.ps.hp*.02);G.bpN=(G.bpN||0)+1;}
- if(S.hero==='heavy'&&sk('bsF')&&!e.cdx&&!G.cdx){G.cdx=1;try{const d0=_mBase()*.25;G.cdN=(G.cdN||0)+1;part({k:'ring',x:e.x,y:e.y,life:.35,col:'#ff8a1f',sz:180});burst(e.x,e.y,'#ffb020',14,320,3);
+ if(mH()==='melee'&&sk('klF')&&G.t-(G.bpT||-9)>=.5){G.bpT=G.t;G.p.hp=Math.min(G.ps.hp,G.p.hp+G.ps.hp*.02);G.bpN=(G.bpN||0)+1;}
+ if(mH()==='heavy'&&sk('bsF')&&!e.cdx&&!G.cdx){G.cdx=1;try{const d0=_mBase()*.25;G.cdN=(G.cdN||0)+1;part({k:'ring',x:e.x,y:e.y,life:.35,col:'#ff8a1f',sz:180});burst(e.x,e.y,'#ffb020',14,320,3);
   for(const o of G.en){if(o.dead||o.spawn>0||o===e||Math.hypot(o.x-e.x,o.y-e.y)>90+o.r)continue;const boss=o.type==='boss'||o.type==='mboss';o.cdx=1;_mHit2(o,{dmg:boss?d0*.35:d0,crit:0,vx:o.x-e.x||1,vy:o.y-e.y,x:o.x,y:o.y,col:'#ff8a1f',hwbl:1,mx:1,kb:boss?0:80});o.cdx=0;}}finally{G.cdx=0;}}return r;};
-function mReflect(bl){if(S.hero!=='heavy'||!sk('baF')||!G)return;const p=G.p;let nb=null,nd=420;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<nd){nd=d;nb=e;}}if(!nb)return;
+function mReflect(bl){if(mH()!=='heavy'||!sk('baF')||!G)return;const p=G.p;let nb=null,nd=420;for(const e of G.en){if(e.dead||e.spawn>0)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<nd){nd=d;nb=e;}}if(!nb)return;
  const boss=nb.type==='boss'||nb.type==='mboss',dd=(bl.dmg||5)*3*(boss?.35:1);G.rfN=(G.rfN||0)+1;(G.hwVb=G.hwVb||[]).push({p:vJag(bl.x,bl.y,nb.x,nb.y,8),t0:0,t:0,w:1,life:.2,lv:1});_mHit2(nb,{dmg:dd,crit:0,vx:nb.x-bl.x||1,vy:nb.y-bl.y,x:nb.x,y:nb.y,col:'#FF8A00',hwbl:1,mx:1,kb:0});}
-var _mSpT2=hwSpecTick;hwSpecTick=function(dt){if(S.hero==='melee'&&G&&G.p){const d=G.p.dashT>0;if(d&&!G.wasDash&&sk('kgF'))mAI();G.wasDash=d;if(G.aiT>0){G.aiT-=dt;if(G.aiT<=0)mRefresh();}}return _mSpT2.apply(this,arguments);};
+var _mSpT2=hwSpecTick;hwSpecTick=function(dt){if(mH()==='melee'&&G&&G.p){const d=G.p.dashT>0;if(d&&!G.wasDash&&sk('kgF'))mAI();G.wasDash=d;if(G.aiT>0){G.aiT-=dt;if(G.aiT<=0)mRefresh();}}return _mSpT2.apply(this,arguments);};
 
 var MIC={agile:'⚡',melee:'🗡',heavy:'🛡'};
 var _mSel=showSelect;showSelect=function(){const r=_mSel.apply(this,arguments);try{for(const h of['agile','melee','heavy']){if(!M_ON[h])continue;const c=document.querySelector('#select .hc[data-hero="'+h+'"] .hpw');if(!c)continue;const L=mLvl(h),fr=mFree(h),b=document.createElement('span');b.className='mskb';b.style.setProperty('--mc',HEROES[h].col);b.innerHTML=`${MIC[h]} MASTERY LV${L} · SKILLS${fr?' <b>'+fr+'</b>':''}`;b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select',h);};c.appendChild(b);}}catch(e){dlog('msel '+e.message);}return r;};
-var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{const h=S.hero;if(M_ON[h]){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree(h),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML=MIC[h]+' SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop',h);};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};
+var _mShop=showShop;showShop=function(){const r=_mShop.apply(this,arguments);try{const h=mH();if(M_ON[h]){const f=$('shop').querySelector('.foot');if(f&&!$('mskS')){const fr=mFree(h),b=document.createElement('span');b.className='btn';b.id='mskS';b.innerHTML=MIC[h]+' SKILLS'+(fr?' ('+fr+')':'');b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop',h);};f.insertBefore(b,f.firstChild.nextSibling);}}}catch(e){dlog('mshop '+e.message);}return r;};
 // v52: Android back button (called by the WebView wrapper). Returns 'exit' only on the title screen.
 window.hwBack=function(){try{const det=document.querySelector('.det.on');if(det&&ui.scr!=='play'){const x=det.querySelector('.gh,#dbgx');if(x){x.click();return 'ok';}}
  if(ui.scr==='title')return 'exit';
@@ -1974,7 +1974,7 @@ var SPD={agile:'Overload Storm: for 5 seconds lightning branches out from you an
 function rarLine(){return RAR.map((r,i)=>`<b style="color:${i===6?'#ffe9a8':r.c}">${r.n}</b>`).join(' → ');}
 var INFO={
  bot:h=>{const H=HEROES[h];return [H.n,`<p>${hwEsc(H.desc)}</p><p>Starts with <b>${WEAP[H.wpn].n}${H.twin?' x2':''}</b>${H.shield?' + <b>'+WEAP[H.shield].n+'</b>':''}.</p><p><b>Special · ${SPD[h]}</b></p><p>The <b>SKILLS</b> button on the card opens this bot's own skill tree.</p>`];},
- special:()=>['Specials',`<p>Your <b>HAYWIRE meter</b> (top right, under the map) fills when you hit enemies and when you take damage. Kagerou fills it fastest with sword hits; Iron Bastion fills it well with rocket hits.</p><p>At 100% tap the special button to fire it. You can use it <b>up to 3 times per round</b>, and each use in the same round is stronger: <b>LV1 → LV2 → LV3 (max)</b>. It resets to LV1 next round.</p><ul>${['agile','melee','heavy'].map(h=>`<li>${SPD[h]}</li>`).join('')}</ul>`],
+ special:()=>['Specials',`<p>Your <b>HAYWIRE meter</b> (top right, under the map) fills when you hit enemies and when you take damage.</p><p>At 100% tap the special button to fire it. You can use it <b>up to 3 times per round</b>, and each use in the same round is stronger: <b>LV1 → LV2 → LV3 (max)</b>. It resets to LV1 next round.</p><ul>${['agile','melee','heavy'].map(h=>`<li>${SPD[h]}</li>`).join('')}</ul>`],
  shop:()=>['Shop',`<p>Between rounds, spend cash (<b style="color:#ffd23f">$</b>) on weapons, gear and implants. Tap a card to see its stats, then buy it.</p><p>Cash comes from enemy drops and the round-clear bonus. Gear with <b>+% Cash</b> raises both.</p><p>Prices rise by 18% of the base price each round. <b>REROLL</b> swaps the offers for new ones; each reroll in the same shop costs more ($25, then +$15 each time, scaled by the round).</p>`],
  bm:()=>['Black Market',`<p>Opens from <b>round ${BM_R}</b>. It sells <b>Vault</b> gear: always the best rarity unlocked so far (Epic from round 7, Ultra from 20, Ultimate from 30, Legendary from 40; a SOLAR item is a 1-in-5000 surprise).</p><p>Vault items are <b>2 item levels higher</b> than the normal shop and have <b>one extra bonus stat</b>. They cost a lot more; it's where saved-up cash goes.</p>`],
  gear:()=>['Gear stats',`<ul><li><b>HP</b>: how much damage you can take.</li><li><b>Shield</b>: your Neural Link absorbs this much damage first, then recharges after the shown seconds.</li><li><b>Armor</b>: cuts the damage you take by that %.</li><li><b>Crit</b>: chance for a hit to deal extra damage.</li><li><b>Speed</b>: how fast you move.</li><li><b>Main / Off</b>: damage per hit of the weapon in each arm.</li><li><b>Cash +%</b>: more cash from drops and round bonuses.</li><li><b>GS</b> (gear score): overall power of what you have equipped.</li></ul><p>Rarity, worst to best: ${rarLine()}. Higher rarity means bigger stats and more bonus stats.</p>`],
@@ -2044,13 +2044,13 @@ function hwBar(c,L,T,t){if(!G||!G.p)return;const f=Math.min(1,(G.hw||0)/100),on=
 var _u55Lay=layout;layout=function(){_u55Lay.apply(this,arguments);try{const x=W-SAFE.r-6-22,y=SAFE.t+6+22;ui.btns=[{id:'pause',x,y,r:22},{id:'mute',x:x-50,y,r:22}];}catch(e){}};
 layout();
 
-function hwBarFlash(c,L,T){if(!G||!G.hwbFull)return;const hc=S.hero==='heavy'?'#FF8A00':S.hero==='melee'?'#c45cff':'#19e3ff',full=1;c.save();
+function hwBarFlash(c,L,T){if(!G||!G.hwbFull)return;const hc=mH()==='heavy'?'#FF8A00':mH()==='melee'?'#c45cff':'#19e3ff',full=1;c.save();
  // brief flash tucked under the panel (over the ROUND rows)
  const ft=G.t-(G.hwbAt||0);if(full&&ft<1.6){const al=Math.min(1,(1.6-ft)*2.5),blink=HWB_RM||Math.floor(ft*8)%2===0;
   if(blink){c.globalAlpha=al;c.fillStyle='rgba(5,6,10,.85)';c.fillRect(L-2,T+52,190,30);c.font='italic 900 18px system-ui';c.textAlign='left';c.fillStyle=hc;c.fillText('HAYWIRE',L+4,T+67);c.fillStyle='#fff';c.fillText('READY!',L+4+c.measureText('HAYWIRE ').width,T+67);c.globalAlpha=1;}}
  c.restore();}
 // ================= v57: HW special button shows its charge as an energy fill; moved above the aim stick (mirrors Dash) =================
-function hwBtnFill(c,b,f,t){const hc=S.hero==='heavy'?'#FF8A00':S.hero==='melee'?'#c45cff':'#19e3ff',r=b.r-2,top=b.y+r-2*r*f;c.save();c.beginPath();c.arc(b.x,b.y,r,0,6.283);c.clip();
+function hwBtnFill(c,b,f,t){const hc=mH()==='heavy'?'#FF8A00':mH()==='melee'?'#c45cff':'#19e3ff',r=b.r-2,top=b.y+r-2*r*f;c.save();c.beginPath();c.arc(b.x,b.y,r,0,6.283);c.clip();
  // v58: solid dim base in the bot colour so the button never looks empty
  c.fillStyle=hc;c.fillRect(b.x-r,b.y-r,2*r,2*r);c.fillStyle='rgba(5,6,10,.5)';c.fillRect(b.x-r,b.y-r,2*r,2*r);if(f<=0){c.restore();return;}
  const g=c.createLinearGradient(0,b.y+r,0,top);g.addColorStop(0,hc);g.addColorStop(1,'rgba(255,255,255,.9)');c.globalAlpha=.6+.4*f;c.fillStyle=g;c.beginPath();c.moveTo(b.x-r,b.y+r);
@@ -2120,13 +2120,13 @@ var MSK_HW=[
  {id:'hw3',b:3,t:1,ic:'⏱',n:'Sustain',max:5,f:r=>'+'+Math.round(6*r)+'% HAYWIRE special duration'},
  {id:'hwF',b:3,t:2,ic:'♾',n:'FEEDBACK LOOP',max:1,fin:1,f:r=>'Kills during your special feed it back: each kill refunds 4% HAYWIRE meter (up to 40% per activation), so specials can chain back-to-back.'}];
 for(const s of MSK_HW){s.h='*';MSK.push(s);MSKI[s.id]=s;}
-var _v65sk=sk;sk=function(id){const s=MSKI[id];if(s&&s.h==='*'){if(!S||!M_ON[S.hero])return 0;const d=S.mast&&S.mast[S.hero];return d&&d.sk?(d.sk[id]|0):0;}return _v65sk(id);};
-function mHome(s,h){return s.h==='*'?(h||MT.h||S.hero):s.h;}
+var _v65sk=sk;sk=function(id){const s=MSKI[id];if(s&&s.h==='*'){if(!S||!M_ON[mH()])return 0;const d=S.mast&&S.mast[mH()];return d&&d.sk?(d.sk[id]|0):0;}return _v65sk(id);};
+function mHome(s,h){return s.h==='*'?(h||MT.h||mH()):s.h;}
 mCan=function(id){const s=MSKI[id];if(!s)return false;const h=mHome(s),d=mData(h);return (d.sk[id]|0)<s.max&&mFree(h)>0&&mSpent(h,s.b)>=M_T[s.t];};
 // skill points = mastery levels (cap 15, unchanged) + boss bonus points (uncapped; the tree's node maxes are the only limit)
 function mBonus(h){const d=mData(h);d.bp=Math.max(0,d.bp|0);return d.bp;}
-mFree=function(h){h=h||S.hero;return mLvl(h)+mBonus(h)-mSpent(h);};
-var _v65k=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_v65k.apply(this,arguments);try{if(e&&!was&&e.dead&&(e.type==='boss'||e.type==='mboss')&&G&&G.state!=='dead'&&M_ON[S.hero]){const d=mData();d.bp=mBonus(S.hero)+M_BOSS_PTS;G.bpts=(G.bpts||0)+M_BOSS_PTS;if(G.p)addTxt(G.p.x,G.p.y-80,'+'+M_BOSS_PTS+' SKILL POINTS','#ffd23f',20,1.6);saveGame();}}catch(err){}return r;};
+mFree=function(h){h=h||mH();return mLvl(h)+mBonus(h)-mSpent(h);};
+var _v65k=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_v65k.apply(this,arguments);try{if(e&&!was&&e.dead&&(e.type==='boss'||e.type==='mboss')&&G&&G.state!=='dead'&&M_ON[mH()]){const d=mData();d.bp=mBonus(mH())+M_BOSS_PTS;if(!S.spPath)S.bpPre=(S.bpPre|0)+M_BOSS_PTS;G.bpts=(G.bpts||0)+M_BOSS_PTS;if(G.p)addTxt(G.p.x,G.p.y-80,'+'+M_BOSS_PTS+' SKILL POINTS','#ffd23f',20,1.6);saveGame();}}catch(err){}return r;};
 // effects
 var _v65g=hwGain;hwGain=function(b){return _v65g.apply(this,arguments)*(1+.04*sk('hw1'));};
 var _v65b=hwBase;hwBase=function(){return _v65b.apply(this,arguments)*(1+.05*sk('hw2'));};
@@ -2134,7 +2134,7 @@ var _v65f=hwFire;hwFire=function(){const s0=G.sp;const r=_v65f.apply(this,argume
 var _v65k2=killEnemy;killEnemy=function(e){const was=e&&e.dead;const r=_v65k2.apply(this,arguments);if(e&&!was&&e.dead&&G&&G.state==='play'&&G.sp&&sk('hwF')&&(G.sp.fb||0)<40){const a=Math.min(4,40-(G.sp.fb||0));G.sp.fb=(G.sp.fb||0)+a;G.hw=Math.min(100,(G.hw||0)+a);G.fbN=(G.fbN||0)+1;}return r;};
 // respec refunds everything (bonus points are part of the pool, so resetting sk returns them)
 // ---- tree screen (redesign) ----
-showTree=function(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||S.hero||'agile',BR=MBRH[h],d=mData(h),L=mLvl(h),x=d.xp,lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),bp=mBonus(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
+showTree=function(from,hh){if(from)MT.from=from;if(hh)MT.h=hh;const h=MT.h||mH()||'agile',BR=MBRH[h],d=mData(h),L=mLvl(h),x=mXP(),lo=mCum(L),hi=L>=M_CAP?lo:mCum(L+1),f=L>=M_CAP?1:(x-lo)/(hi-lo),fr=mFree(h),bp=mBonus(h),inShop=MT.from==='shop'&&G&&G.state==='loot';
  const mine=s=>s.h===h||s.h==='*';
  const st=s=>{const r=d.sk[s.id]|0;return mSpent(h,s.b)<M_T[s.t]?'lk':r>=s.max?'own':r>0?'part':fr>0?'av':'na';};
  const node=s=>{const r=d.sk[s.id]|0,k=st(s);return `<button class="tn ${k}${s.fin?' fin':''}${MT.sel===s.id?' sel':''}" data-sk="${s.id}"><span class="ti">${k==='lk'?'🔒':s.ic}</span><span class="tnm">${s.n}</span><span class="tr">${r}/${s.max}</span></button>`;};
@@ -2810,4 +2810,51 @@ function hlDraw(c,vx,vy,t){if(!G||!G.D||!S)return;const on=!!S.hween&&!window.__
 setTimeout(()=>{try{if(S&&S.hween)spImg('hl',spSc());}catch(e){}},80);
 // when the toggle is flipped on, start loading the atlas (hlDraw builds the layer on the next frame it is ready)
 var _hl80pre=spPreload;spPreload=function(){const r=_hl80pre.apply(this,arguments);try{if(S&&S.hween)spImg('hl',spSc());}catch(e){}return r;};
+// ================= v86: one starting bot (Volt Runner); pick ONE special + its skill tree at the first mastery level-up =================
+// S.spPath = 'agile'|'melee'|'heavy'|null (the chosen special/tree). S.mXP = shared mastery XP (old per-bot xp kept, dormant).
+// S.bpPre = boss skill points earned before choosing (moved to the chosen tree).
+function mP(){return S&&HWN[S.spPath]?S.spPath:null;}
+function mH(){return mP()||S.hero||'agile';}
+function mXP(){if(!S)return 0;if(typeof S.mXP!=='number'||!isFinite(S.mXP)){let m=0;const M=S.mast||{};for(const h in M){const x=M[h]&&+M[h].xp;if(x>m)m=x;}S.mXP=m;}return Math.max(0,S.mXP);}
+function mPathMig(){if(!S)return;S.hero='agile';if(!HWN[S.spPath])S.spPath=null;S.bpPre=Math.max(0,S.bpPre|0);mXP();}
+var _v86sv=saveGame;saveGame=function(){const r=_v86sv.apply(this,arguments);try{const o=JSON.parse(localStorage.getItem(TKEY))||{};o.spPath=mP();o.mXP=mXP();o.bpPre=S.bpPre|0;localStorage.setItem(TKEY,JSON.stringify(o));}catch(e){}return r;};
+var _v86ld=loadGame;loadGame=function(){const r=_v86ld.apply(this,arguments);try{const o=JSON.parse(localStorage.getItem(TKEY))||{};S.spPath=o.spPath;S.mXP=o.mXP;S.bpPre=o.bpPre;}catch(e){}mPathMig();return r;};
+(function(){try{const o=JSON.parse(localStorage.getItem(TKEY))||{};S.spPath=o.spPath;S.mXP=o.mXP;S.bpPre=o.bpPre;}catch(e){}mPathMig();})();
+// no tree effects until a special is chosen
+var _v86sk=sk;sk=function(id){return mP()?_v86sk(id):0;};
+// starting a game is always Volt Runner
+var _v86st=startGame;startGame=function(hero,o){return _v86st.call(this,'agile',o);};
+function mChoose(h){if(!HWN[h]||mP()||mLvl()<1)return false;S.spPath=h;const b=S.bpPre|0;if(b&&h!=='agile'){const d=mData(h);d.bp=mBonus(h)+b;const a=mData('agile');a.bp=Math.max(0,mBonus('agile')-b);}S.bpPre=0;saveGame();try{mRefresh();}catch(e){}return true;}
+function mCanChoose(){return !mP()&&mLvl()>=1;}
+var MPTH={};
+function mPathPop(from){const o=$('mpth');if(o)o.remove();const can=mCanChoose(),L=mLvl(),need=mCum(1);
+ const card=h=>{const H=HEROES[h],B=MBRH[h]||[];return `<div class="pn" style="border:2px solid ${H.col};border-radius:10px;padding:8px;margin:6px 0;text-align:left"><b style="color:${H.col}">${MIC[h]} ${HWN[h]}</b><div class="st" style="font-size:13px">${hwEsc(SPD[h])}</div><div class="st" style="font-size:12px;color:#9aa6c0">Skill tree: ${B.map(b=>b.n).join(' · ')}</div>${can?`<span class="btn sm" data-path="${h}" style="margin-top:4px;border-color:${H.col}">CHOOSE ${HWN[h]}</span>`:''}</div>`;};
+ const d=document.createElement('div');d.id='mpth';d.className='det on hwi';
+ d.innerHTML=`<div class="pn dbox"><div class="hwih">${can?'MASTERY LV'+L+' · CHOOSE YOUR SPECIAL':'SPECIALS'}</div><div class="hwib"><p>${can?'Pick <b>one</b> special. It sets your HAYWIRE special and your skill tree.':'Your special unlocks at <b>Mastery LV1</b> ('+Math.min(mXP(),need)+' / '+need+' XP). Until then the HAYWIRE special is offline.'}</p>${['agile','melee','heavy'].map(card).join('')}</div><div class="row"><span class="btn gh" id="mpthx">${can?'DECIDE LATER':'GOT IT'}</span></div></div>`;
+ document.body.appendChild(d);MPTH.on=1;const x=()=>{d.remove();MPTH.on=0;};$('mpthx').onclick=()=>{sfx('click');x();};
+ d.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{if(!mChoose(b.dataset.path))return;sfx('level');x();toast(HWN[b.dataset.path]+' unlocked');if(from)showTree(from,mP());});}
+function mMaybeOffer(){try{if(mCanChoose()&&!MPTH.on&&!(G&&G.state==='play'))mPathPop();}catch(e){}}
+var _v86g=mGain;mGain=function(){const r=_v86g.apply(this,arguments);mMaybeOffer();return r;};
+var _v86tr=showTree;showTree=function(from,hh){if(!mP()){mPathPop(from);return;}const r=_v86tr.call(this,from,mP());try{const tt=document.querySelector('#tree .thd .ttl');if(tt)tt.textContent=HWN[mP()]+' · SKILLS';const row=document.querySelector('#tree .mft'),inShop=MT.from==='shop'&&G&&G.state==='loot';
+ if(row&&!$('mpchg')){const c=mRespecCost(),ok=inShop&&RUN.cash>=c;row.insertAdjacentHTML('beforeend',`<span class="btn sm${ok?'':' dis'}" id="mpchg">${inShop?'CHANGE SPECIAL $'+c:'CHANGE SPECIAL · in shop'}</span>`);
+  $('mpchg').onclick=()=>{if(!inShop){toast('Change special in the shop between rounds');return;}const c2=mRespecCost();if(RUN.cash<c2)return;if(!confirm('Change special? Your current tree is kept and comes back if you pick it again.'))return;RUN.cash-=c2;mData().rs++;S.spPath=null;saveGame();try{mRefresh();}catch(e){}sfx('item');mPathPop('shop');};}}catch(e){}return r;};
+var _v86sel=showSelect;showSelect=function(){const r=_v86sel.apply(this,arguments);try{document.querySelectorAll('#select [data-hero]').forEach(c=>{if(c.dataset.hero!=='agile')c.remove();});const t=document.querySelector('#select .ttl');if(t&&t.firstChild&&t.firstChild.nodeType===3)t.firstChild.textContent='YOUR BOT ';
+ const v=document.querySelector('#select [data-hero="agile"]');if(v&&!v.querySelector('.mpsel')){const P=mP();v.insertAdjacentHTML('beforeend',`<div class="ds mpsel" style="margin-top:4px">Special: <b>${P?HWN[P]:mCanChoose()?'choose now':'unlocks at Mastery LV1'}</b></div>`);}
+ const b=v&&v.querySelector('.mskb');if(b){if(!mP())b.innerHTML='⚡ MASTERY LV'+mLvl()+' · SPECIAL';b.onclick=ev=>{ev.stopPropagation();sfx('click');MT.sel=null;showTree('select');};}}catch(e){dlog('v86sel '+e.message);}mMaybeOffer();return r;};
+var _v86sh=showShop;showShop=function(){const r=_v86sh.apply(this,arguments);try{const b=$('mskS');if(b){if(!mP())b.innerHTML='⚡ SPECIAL';b.onclick=()=>{sfx('click');MT.sel=null;showTree('shop');};}}catch(e){}mMaybeOffer();return r;};
+var _v86ti=showTitle;showTitle=function(){const r=_v86ti.apply(this,arguments);mMaybeOffer();return r;};
+// ================= v87: Kagerou tree on Volt Runner (no sword): sword-only skills adapted to guns =================
+// Keen Edge already scales all weapon damage. Siphon -> lifesteal on gun hits. Phantom Edge -> every 4th gun hit flings the 2 crescents.
+function mGunHit(b){return b&&!b.melee&&!b.hwbl&&!b.lw&&!b.mx&&!b.pe&&G&&G.state==='play'&&mP()==='melee'&&S.hero!=='melee';}
+var _v87h=hitEnemy;hitEnemy=function(e,b){const gun=mGunHit(b)&&e&&!e.dead&&!(e.spawn>0),dmg=gun?(+b.dmg||0):0;const r=_v87h.apply(this,arguments);
+ if(gun&&G.p&&G.ps){const ls=mLS();if(ls>0){G.p.hp=Math.min(G.ps.hp,G.p.hp+dmg*ls);G.slN=(G.slN||0)+1;}
+  if(sk('kbF')&&!G.sp){G.peG=(G.peG||0)+1;if(G.peG%4===0){const p=G.p,dir=Math.atan2(e.y-p.y,e.x-p.x),cols=typeof hwBladeCols==='function'?hwBladeCols():['#c45cff','#ff2e88'];G.peN=(G.peN||0)+1;
+   for(let w=0;w<2;w++)(G.hwBl=G.hwBl||[]).push({cx:p.x,cy:p.y,th:dir+(w?.35:-.35),r:26,t:0,L:.55,col:cols[w],tr:[],hit:new Set(),dmg:dmg*.5,cap:dmg*.5,dm:new Map(),dir:1});try{sfx('saber',.6);}catch(_){}}}}return r;};
+(function(){const set=(id,f)=>{if(MSKI[id])MSKI[id].f=f;};
+ set('kb1',r=>'+'+Math.round(4*r)+'% weapon damage');
+ set('kl1',r=>'Heal '+(0.3*r).toFixed(1)+'% of the damage your gun hits deal');
+ set('kbF',r=>'Every 4th gun hit also flings 2 laser crescents that spiral outward for 50% of that hit\'s damage each.');
+ if(MBRH.melee&&MBRH.melee[0])MBRH.melee[0].d='Weapon damage, Cyclone Blade';
+ const t0=INFO.tree;INFO.tree=()=>['Skill tree',`<p>You earn <b>mastery XP</b>: ${M_ROUND} per round survived and ${M_BOSS} per boss or mini-boss kill (x1.5 on Hard). You keep it even when you die.</p><p>At <b>Mastery LV1</b> you choose <b>one special</b>: Overload Storm, Cyclone Blade or Aegis Dome. It sets your HAYWIRE special and your skill tree. Every level (max ${M_CAP}) gives <b>1 skill point</b>. Each tree has 3 branches plus HAYWIRE; deeper tiers unlock after you spend ${M_T[1]} and then ${M_T[2]} points in that branch.</p><p>Tap a skill to read it, then <b>+ LEARN</b>. <b>RESPEC</b> refunds all points and <b>CHANGE SPECIAL</b> lets you pick again; both only work in the shop during a run and cost more each time.</p>`];})();
+mMaybeOffer(); // v86: offer on launch if an existing save is already eligible
 </script></body></html>
